@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cavin.culture.dao.UserDao">
+    <resultMap id="user" type="com.cavin.culture.model.User">
+        <id property="id" column="id" jdbcType="VARCHAR"/>
+        <result property="userName" column="user_name" jdbcType="NUMERIC"/>
+        <result property="userPassword" column="user_password" jdbcType="VARCHAR"/>
+        <result property="email" column="email" jdbcType="VARCHAR"/>
+        <result property="registerDate" column="register_date" jdbcType="VARCHAR"/>
+        <result property="level" column="level" jdbcType="VARCHAR"/>
+        <result property="isDel" column="isdel" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="columns">
+        id,user_name,user_password,email,register_date,level,isdel
+    </sql>
+
+    <sql id="dynamicWhere">
+        <where>
+            isdel ='0'
+            <if test="@Ognl@isNotEmpty(userName)">AND user_name=#{userName}</if>
+            <if test="@Ognl@isNotEmpty(userPassword)">AND user_password=#{userPassword}</if>
+            <if test="@Ognl@isNotEmpty(email)">AND email=#{email}</if>
+            <if test="@Ognl@isNotEmpty(registerDate)">AND register_date=#{registerDate}</if>
+            <if test="@Ognl@isNotEmpty(level)">AND level=#{level}</if>
+        </where>
+    </sql>
+
+    <select id="getUserByName" parameterType="java.lang.String" resultMap="user">
+        select <include refid="columns"/> from user where user_name=#{userName}
+    </select>
+
+    <select id="getPasswordByName" parameterType="java.lang.String" resultType="java.lang.String">
+        select user_password from user where user_name=#{userName}
+    </select>
+
+    <insert id="insertUser" parameterType="com.cavin.culture.model.User">
+        insert into user(user_name,user_password,email,register_date,level,isdel)
+        values
+        (#{userName,jdbcType=VARCHAR},#{userPassword,jdbcType=VARCHAR},#{email,jdbcType=VARCHAR},
+        #{registerDate,jdbcType=TIMESTAMP},#{level,jdbcType=VARCHAR},#{isDel,jdbcType=VARCHAR})
+    </insert>
+
+    <select id="getAll" resultMap="user">
+        select <include refid="columns"/> from user
+        <include refid="dynamicWhere"/>
+    </select>
+
+    <select id="getUserById" parameterType="java.lang.Long" resultMap="user">
+        select <include refid="columns"/> from user where id=#{id}
+    </select>
+
+    <update id="updateUserById" parameterType="com.cavin.culture.model.User">
+        update user
+        <set>
+            <if test="@Ognl@isNotEmpty(userName)">
+                user_name=#{userName,jdbcType=VARCHAR},
+            </if>
+            <if test="@Ognl@isNotEmpty(userPassword)">
+                user_password=#{userPassword,jdbcType=VARCHAR},
+            </if>
+            <if test="@Ognl@isNotEmpty(email)">
+                email=#{email,jdbcType=VARCHAR},
+            </if>
+            <if test="@Ognl@isNotEmpty(registerDate)">
+                register_date=#{registerDate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="@Ognl@isNotEmpty(level)">
+                level=#{level,jdbcType=VARCHAR},
+            </if>
+            <if test="@Ognl@isNotEmpty(isdel)">
+                isdel=#{isdel,jdbcType=VARCHAR},
+            </if>
+        </set>
+    </update>
+
+    <delete id="delUserById" parameterType="java.lang.Long">
+        delete from user where id=#{id}
+    </delete>
+</mapper>
