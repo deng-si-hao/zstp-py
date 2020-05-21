@@ -2,8 +2,8 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.cavin.culture.dao.UserDao">
     <resultMap id="user" type="com.cavin.culture.model.User">
-        <id property="id" column="id" jdbcType="VARCHAR"/>
-        <result property="userName" column="user_name" jdbcType="NUMERIC"/>
+        <id property="id" column="id" jdbcType="NUMERIC"/>
+        <result property="userName" column="user_name" jdbcType="VARCHAR"/>
         <result property="userPassword" column="user_password" jdbcType="VARCHAR"/>
         <result property="email" column="email" jdbcType="VARCHAR"/>
         <result property="registerDate" column="register_date" jdbcType="VARCHAR"/>
@@ -18,11 +18,11 @@
     <sql id="dynamicWhere">
         <where>
             isdel ='0'
-            <if test="@Ognl@isNotEmpty(userName)">AND user_name=#{userName}</if>
-            <if test="@Ognl@isNotEmpty(userPassword)">AND user_password=#{userPassword}</if>
-            <if test="@Ognl@isNotEmpty(email)">AND email=#{email}</if>
-            <if test="@Ognl@isNotEmpty(registerDate)">AND register_date=#{registerDate}</if>
-            <if test="@Ognl@isNotEmpty(level)">AND level=#{level}</if>
+            <if test="userName != null">AND user_name=#{userName}</if>
+            <if test="userPassword != null">AND user_password=#{userPassword}</if>
+            <if test="email != null">AND email=#{email}</if>
+            <if test="registerDate != null">AND register_date=#{registerDate}</if>
+            <if test="level != null">AND level=#{level}</if>
         </where>
     </sql>
 
@@ -53,25 +53,26 @@
     <update id="updateUserById" parameterType="com.cavin.culture.model.User">
         update user
         <set>
-            <if test="@Ognl@isNotEmpty(userName)">
+            <if test="userName != null">
                 user_name=#{userName,jdbcType=VARCHAR},
             </if>
-            <if test="@Ognl@isNotEmpty(userPassword)">
+            <if test="userPassword != null">
                 user_password=#{userPassword,jdbcType=VARCHAR},
             </if>
-            <if test="@Ognl@isNotEmpty(email)">
+            <if test="email != null">
                 email=#{email,jdbcType=VARCHAR},
             </if>
-            <if test="@Ognl@isNotEmpty(registerDate)">
+            <if test="registerDate != null">
                 register_date=#{registerDate,jdbcType=TIMESTAMP},
             </if>
-            <if test="@Ognl@isNotEmpty(level)">
+            <if test="level != null">
                 level=#{level,jdbcType=VARCHAR},
             </if>
-            <if test="@Ognl@isNotEmpty(isdel)">
-                isdel=#{isdel,jdbcType=VARCHAR},
+            <if test="isDel != null">
+                isdel=#{isDel,jdbcType=VARCHAR},
             </if>
         </set>
+        where id=#{id}
     </update>
 
     <delete id="delUserById" parameterType="java.lang.Long">
