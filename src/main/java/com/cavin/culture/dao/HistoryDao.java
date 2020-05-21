@@ -1,6 +1,7 @@
 package com.cavin.culture.dao;
 
 import com.cavin.culture.model.History;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -8,11 +9,13 @@ import java.util.List;
 @Repository
 public interface HistoryDao {
 
-    List<History> getHistoriesByNameAndType(String userName, String historyScope);
+    List<History> getHistoriesByNameAndType(@Param("userName")String userName, @Param("historyType") String historyType);
 
     Integer insertHistory(History history);
 
-    Integer deleteHistoryById(Integer historyId);
+    Integer deleteHistoryById(long historyId);
+
+    List<History> getInputSuggestion(String userName);
 
 
 }

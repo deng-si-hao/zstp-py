@@ -1,6 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.cavin.culture.dao.HistoryDao">
-
+    <resultMap id="history" type="com.cavin.culture.model.History">
+        <id property="historyId" column="history_id" jdbcType="INTEGER"/>
+        <result property="historySubject" column="history_subject" jdbcType="VARCHAR"/>
+        <result property="historyPredicate" column="history_predicate" jdbcType="VARCHAR"/>
+        <result property="historyObject" column="history_object" jdbcType="VARCHAR"/>
+        <result property="historyScope" column="history_scope" jdbcType="VARCHAR"/>
+        <result property="historyType" column="history_type" jdbcType="VARCHAR"/>
+        <result property="createDate" column="create_date" jdbcType="TIMESTAMP"/>
+        <result property="userId" column="user_id" jdbcType="INTEGER"/>
+        <result property="userName" column="user_name" jdbcType="VARCHAR"/>
+    </resultMap>
+    <select id="getHistoriesByNameAndType" resultMap="history">
+        select * from history where user_name=#{userName} and history_type=#{historyType} order by history_id desc
+    </select>
+    <insert id="insertHistory" parameterType="com.cavin.culture.model.History">
+        insert into history (history_subject, history_predicate, history_object, history_scope, history_type, create_date, user_name,user_id)
+            values (#{historySubject}, #{historyPredicate}, #{historyObject}, #{historyScope}, #{historyType}, #{createDate}, #{userName}, #{userId})
+    </insert>
+    <delete id="deleteHistoryById" parameterType="java.lang.Long">
+       delete from history where history_id=#{historyId}
+    </delete>
+    <select id="getInputSuggestion" resultMap="history">
+        select * from history where user_name=#{userName} order by history_id desc
+    </select>
 
 </mapper>

@@ -5,6 +5,7 @@ import com.cavin.culture.model.History;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 @Service
 public class HistoryService {
@@ -12,7 +13,8 @@ public class HistoryService {
     private HistoryDao historyDao;
 
     public List<History> getHistoriesByNameAndType(String userName, String historyType) {
-        return historyDao.getHistoriesByNameAndType(userName, historyType);
+        List<History> histories = historyDao.getHistoriesByNameAndType(userName, historyType);
+        return histories;
     }
 
 
@@ -21,7 +23,16 @@ public class HistoryService {
     }
 
 
-    public Integer deleteHistoryById(Integer historyId) {
+    public Integer deleteHistoryById(long historyId) {
         return historyDao.deleteHistoryById(historyId);
+    }
+
+    public List<String> getInputSuggestion(String queryString,String userName) {
+        List<String> list = new ArrayList<>();
+        List<History> histories = historyDao.getInputSuggestion(userName);
+        for (History h : histories) {
+           list.add(h.getHistorySubject());
+        }
+        return list;
     }
 }

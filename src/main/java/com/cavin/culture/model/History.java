@@ -1,22 +1,25 @@
 package com.cavin.culture.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.util.Date;
 
 public class History {
 
-    private Integer historyId;
+    private long historyId;
     private String historySubject;
     private String historyPredicate;
     private String historyObject;
     private String historyScope;
     private String historyType;
     private Date createDate;
+    private long userId;
     private String userName;
 
     public History() {
     }
 
-    public History(Integer historyId, String historySubject, String historyPredicate, String historyObject, String historyScope, String historyType, Date createDate, String userName) {
+    public History(long historyId, String historySubject, String historyPredicate, String historyObject, String historyScope, String historyType, Date createDate,long userId, String userName) {
         this.historyId = historyId;
         this.historySubject = historySubject;
         this.historyPredicate = historyPredicate;
@@ -24,14 +27,15 @@ public class History {
         this.historyScope = historyScope;
         this.historyType = historyType;
         this.createDate = createDate;
+        this.userId = userId;
         this.userName = userName;
     }
 
-    public Integer getHistoryId() {
+    public long getHistoryId() {
         return historyId;
     }
 
-    public void setHistoryId(Integer historyId) {
+    public void setHistoryId(long historyId) {
         this.historyId = historyId;
     }
 
@@ -83,9 +87,21 @@ public class History {
         this.createDate = createDate;
     }
 
-    public String getUserName() { return userName; }
+    public long getUserId() {
+        return userId;
+    }
 
-    public void setUserName(String userName) { this.userName = userName; }
+    public void setUserId(long userId) {
+        this.userId = userId;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
 
     @Override
     public String toString() {
@@ -97,6 +113,7 @@ public class History {
                 ", historyScope='" + historyScope + '\'' +
                 ", historyType='" + historyType + '\'' +
                 ", createDate=" + createDate +
+                ", userId=" + userId +
                 ", userName='" + userName + '\'' +
                 '}';
     }
