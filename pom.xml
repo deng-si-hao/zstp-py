@@ -107,6 +107,12 @@
             <artifactId>jython</artifactId>
             <version>2.7.0</version>
         </dependency>
+        <!--json依赖-->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>1.2.3</version>
+        </dependency>
     </dependencies>
 
     <build>

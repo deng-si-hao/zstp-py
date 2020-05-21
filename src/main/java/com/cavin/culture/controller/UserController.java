@@ -1,17 +1,18 @@
 package com.cavin.culture.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.cavin.culture.model.JsonMessage;
 import com.cavin.culture.model.User;
 import com.cavin.culture.service.UserService;
 import com.cavin.culture.util.JWTUtil;
 import com.cavin.culture.util.SHAUtil;
-
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.PrintWriter;
 import java.util.List;
 
 @RestController
@@ -50,7 +51,6 @@ public class UserController {
 * 注册
 * */
     @RequestMapping(value = "/admin/register", method = RequestMethod.POST)
-    @ResponseBody
     public JsonMessage login(@RequestBody User user) {
         User checkUser = userService.getUserByName(user.getUserName());
         if (checkUser == null) {
@@ -65,7 +65,7 @@ public class UserController {
 * 登录
 * */
     @RequestMapping(value = "/admin/login")
-    public JsonMessage login(HttpServletResponse response, @RequestBody User user) {
+    public JsonMessage login(@RequestBody User user, HttpServletResponse response) {
         String username = user.getUserName();
         String password = user.getUserPassword();
         User checkUser = userService.getUserByName(username);
@@ -83,7 +83,6 @@ public class UserController {
                     cookie.setMaxAge(3*24*60*60);
                     response.addCookie(cookie);
                     return JsonMessage.adminLogin(checkUser.getLevel());
-
             }else {
                     return JsonMessage.error(400, "密码错误！");
                 }
@@ -119,29 +118,77 @@ public class UserController {
     /**
     * 查询所有用户信息
     * */
-    @RequestMapping(value = "/admin/getAllUserInfo",method = RequestMethod.POST)
+/*    @RequestMapping(value = "/admin/getAllUser",method = RequestMethod.POST)
     @ResponseBody
     public JsonMessage getAllUserInfo(@RequestBody User user, HttpServletResponse response){
         List<User> info= userService.getAll();
         return JsonMessage.success().addData("userInfo",info);
+    }*/
+
+    @RequestMapping(value="/queryAllUser")
+    public void query(HttpServletResponse resp) {
+        try {
+            /*list集合中存放的是好多student对象*/
+            List<User> users = userService.getAll();
+            /*将list集合装换成json对象*/
+            String json = JSON.toJSONString(users);
+            //接下来发送数据
+            /*设置编码，防止出现乱码问题*/
+            resp.setCharacterEncoding("utf-8");
+            /*得到输出流*/
+            PrintWriter respWritter = resp.getWriter();
+            /*将JSON格式的对象toString()后发送*/
+            respWritter.append(json.toString());
+            System.out.println(json.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
     /**
     * 修改用户信息
     * */
     @RequestMapping(value = "/admin/updateUserInfo",method = RequestMethod.POST)
     @ResponseBody
-    public JsonMessage updateUserInfo(@RequestBody User user, HttpServletResponse response){
-        userService.updateUser(user);
-        return JsonMessage.success();
+    public JsonMessage updateUserInfo(HttpServletRequest request, HttpServletResponse response){
+        String level=null;
+            Cookie[] cookies=request.getCookies();
+            for(Cookie cookie:cookies){
+                if (cookie.getName().equals("access_token")){
+                    level=cookie.getValue();
+                }
+            }
+        System.out.println(level);
+            User user=new User();
+            user.setId(Long.valueOf(request.getParameter("id")));
+            user.setUserName(request.getParameter("userName"));
+            user.setUserPassword(request.getParameter("userPassword"));
+            user.setEmail(request.getParameter("email"));
+            user.setLevel(request.getParameter("level"));
+            userService.updateUser(user);
+            return JsonMessage.adminLogin(user.getLevel());
     }
     /**
     * 查询单个用户信息
     * */
     @RequestMapping(value = "/admin/queryById",method = RequestMethod.POST)
     @ResponseBody
-    public JsonMessage queryById(Long id){
-        User user= userService.getUserById(id);
-        return JsonMessage.success().addData("user",user);
+    public JsonMessage queryById(Long id, HttpServletResponse response){
+//        Long id=request.get
+//        try {
+            User user= userService.getUserById(id);
+           /* String json = JSON.toJSONString(user);
+            //接下来发送数据
+            *//*设置编码，防止出现乱码问题*//*
+            response.setCharacterEncoding("utf-8");
+            *//*得到输出流*//*
+            PrintWriter respWritter = response.getWriter();
+            *//*将JSON格式的对象toString()后发送*//*
+            respWritter.append(json.toString());
+            System.out.println(json.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }*/
+        return JsonMessage.adminLogin(user.getLevel()).addData("user",user);
     }
     /**
     * 删除用户信息id
@@ -149,7 +196,12 @@ public class UserController {
     @RequestMapping(value = "/admin/delUser",method = RequestMethod.POST)
     @ResponseBody
     public JsonMessage delUser(Long id){
-        userService.delUserById(id);
-        return JsonMessage.success();
+        try {
+            userService.delUserById(id);
+            return JsonMessage.success();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return JsonMessage.error(400,"删除失败！");
+        }
     }
 }
