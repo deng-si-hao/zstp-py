@@ -14,6 +14,9 @@ public class User {
     private String level;//默认为0，管理员为1，无需添加
     private String isDel;//默认为0，删除为1，无需添加
 
+    private int start;
+    private int limit;
+
     public User() {
     }
 
@@ -25,6 +28,22 @@ public class User {
         this.registerDate = registerDate;
         this.level=level;
         this.isDel=isDel;
+    }
+
+    public int getStart() {
+        return start;
+    }
+
+    public void setStart(int start) {
+        this.start = start;
+    }
+
+    public int getLimit() {
+        return limit;
+    }
+
+    public void setLimit(int limit) {
+        this.limit = limit;
     }
 
     public long getId() {

@@ -7,6 +7,7 @@ import com.cavin.culture.util.SHAUtil;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -33,15 +34,20 @@ public class UserService {
         String sha256Password = SHAUtil.getSHA256(password);
         user.setUserPassword(sha256Password);
         user.setIsDel(del);
-        user.setLevel(rank);
+        if(user.getLevel()==null){
+            user.setLevel(rank);
+        }
+        if(user.getRegisterDate()==null){
+            user.setRegisterDate(new Date());
+        }
         Integer insertNum = userDao.insertUser(user);
 //        String id= UniqueIdUtil
         return insertNum;
     }
 
 
-    public List<User> getAll() {
-        return userDao.getAll();
+    public List<User> getAll(User user) {
+        return userDao.getAll(user);
     }
 
 

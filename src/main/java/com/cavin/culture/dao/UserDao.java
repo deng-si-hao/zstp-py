@@ -16,7 +16,7 @@ public interface UserDao {
     Integer insertUser(User user);
 
     //查询所有人员信息
-    List<User> getAll();
+    List<User> getAll(User user);
 
     //查询单个人员信息
     User getUserById(Long id);
