@@ -11,6 +11,8 @@ import javax.annotation.Resource;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.Enumeration;
 import java.util.List;
 
 @RestController
@@ -97,7 +99,7 @@ public class UserController {
 * */
     @RequestMapping(value = "/admin/logout", method = RequestMethod.POST)
     @ResponseBody
-    public JsonMessage logout(HttpServletRequest request, HttpServletResponse response) {
+    public JsonMessage logout(HttpServletRequest request, HttpServletResponse response) throws IOException {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
@@ -118,9 +120,24 @@ public class UserController {
     * */
     @RequestMapping(value = "/admin/getAllUser",method = RequestMethod.POST)
     @ResponseBody
-    public JsonMessage getAllUserInfo(@RequestBody User user, HttpServletResponse response){
-        List<User> info= userService.getAll(user);
-        return JsonMessage.success().addData("userInfo",info);
+    public JsonMessage getAllUserInfo(int currPage, HttpServletResponse response){
+/*        Enumeration<String> parameterNames = request.getParameterNames();
+        while (parameterNames.hasMoreElements()) {
+            String s = parameterNames.nextElement();
+            System.out.println("getParameterNames:" + s);
+            String paraA = request.getParameter(s);
+            System.out.println("getParameter:" + paraA);
+        }*/
+        int currPageInt=0;
+        int pageSizeInt=8;
+        if(currPage==0){
+            currPageInt=1;
+        }else {
+            currPageInt=currPage;
+        }
+        List<User> info= userService.getAll(currPageInt,pageSizeInt);
+        int total=userService.getUserCount();
+        return JsonMessage.success().addData("userInfo",info).addData("total",total);
     }
 
 /*    @RequestMapping(value="/queryAllUser")

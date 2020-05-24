@@ -8,7 +8,9 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class UserService {
@@ -46,8 +48,11 @@ public class UserService {
     }
 
 
-    public List<User> getAll(User user) {
-        return userDao.getAll(user);
+    public List<User> getAll(Integer currPage,Integer pageSize) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("currIndex", (currPage-1)*pageSize);
+        data.put("pageSize", pageSize);
+        return userDao.getAll(data);
     }
 
 
@@ -66,6 +71,10 @@ public class UserService {
 
     public void delUserById(Long id) {
         userDao.delUserById(id);
+    }
+
+    public int getUserCount(){
+        return userDao.getUserCount();
     }
 
 /*

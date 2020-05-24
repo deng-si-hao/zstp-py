@@ -41,12 +41,11 @@
         #{registerDate,jdbcType=TIMESTAMP},#{level,jdbcType=VARCHAR},#{isDel,jdbcType=VARCHAR})
     </insert>
 
-    <select id="getAll" resultMap="user">
+    <select id="getAll" parameterType="java.util.Map" resultMap="user">
         select <include refid="columns"/> from user
         <include refid="dynamicWhere"/>
-        <if test="start !=0 or limit!=0">
-            limit #{start},#{limit}
-        </if>
+            limit #{currIndex},#{pageSize}
+
     </select>
 
     <select id="getUserById" parameterType="java.lang.Long" resultMap="user">
@@ -81,4 +80,7 @@
     <delete id="delUserById" parameterType="java.lang.Long">
         delete from user where id=#{id}
     </delete>
+    <select id="getUserCount" resultType="java.lang.Integer">
+        select count(*) from user where isdel='0'
+    </select>
 </mapper>

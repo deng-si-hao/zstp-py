@@ -11,14 +11,14 @@ import java.util.List;
 
 public class PythonUtil {
 
-    public static List<String> noParam(PythonModel pythonModel) throws IOException{
+    public static String noParam(PythonModel pythonModel) throws IOException{
         String[] strArray = new String[3];
         strArray[0]="python";
         strArray[1]=pythonModel.getPath();
         strArray[2]=pythonModel.getMethod();
         return getInfo(strArray);
     }
-    public static List<String> oneParam(PythonModel pythonModel) throws IOException{
+    public static String oneParam(PythonModel pythonModel) throws IOException{
         String[] strArray= new String[4];
         strArray[0]="python";
         strArray[1]=pythonModel.getPath();
@@ -26,7 +26,7 @@ public class PythonUtil {
         strArray[3]=pythonModel.getParam1();
         return getInfo(strArray);
     }
-    public static List<String> twoParam(PythonModel pythonModel) throws IOException {
+    public static String twoParam(PythonModel pythonModel) throws IOException {
         String[] strArray= new String[5];
         strArray[0]="python";
         strArray[1]=pythonModel.getPath();
@@ -36,7 +36,7 @@ public class PythonUtil {
         return getInfo(strArray);
     }
 
-    public static List<String> getInfo(String[] strArray) throws IOException{
+    public static String getInfo(String[] strArray) throws IOException{
           // --cons
             // 创建库
             //String[] args1 = new String[] { "python", "C:\\Users\\86173\\Documents\\WeChat Files\\d15095827251\\FileStorage\\File\\2020-05\\neo4j2json_cons.py","--cons"};
@@ -79,8 +79,8 @@ public class PythonUtil {
             str.add(line);
         }
         for(int i=1;i<str.size();i++){
-            strBuffer.add(str.get(i));
+            result += str.get(i);
         }
-            return strBuffer;
+            return result;
     }
 }

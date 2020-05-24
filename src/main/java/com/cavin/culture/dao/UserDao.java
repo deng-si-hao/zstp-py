@@ -5,6 +5,7 @@ import com.cavin.culture.model.User;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
 
 @Repository
 public interface UserDao {
@@ -16,7 +17,7 @@ public interface UserDao {
     Integer insertUser(User user);
 
     //查询所有人员信息
-    List<User> getAll(User user);
+    List<User> getAll(Map<String,Object> data);
 
     //查询单个人员信息
     User getUserById(Long id);
@@ -26,6 +27,9 @@ public interface UserDao {
 
     //删除人员信息
     void delUserById(Long id);
+
+    //查询用户总数
+    Integer getUserCount();
 
 
 
