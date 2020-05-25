@@ -1,10 +1,8 @@
 package com.cavin.culture.controller;
 
-import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.cavin.culture.model.PythonModel;
 import com.cavin.culture.util.PythonUtil;
-import org.apache.ibatis.javassist.ClassPath;
-import org.apache.jena.atlas.json.JsonArray;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -12,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
-import java.util.List;
 
 @RestController
 @RequestMapping(value = "/MapDisplay")
@@ -36,7 +33,7 @@ public class MapDisplayController {
         String method="--getlabel";
         PythonModel pythonModel = new PythonModel(String.valueOf(resource.getFile()),method);
         String result=PythonUtil.noParam(pythonModel);
-        return JSONArray.toJSONString(result);
+        return JSONObject.toJSONString(result);
     }
 
     //获取标签下所有实体
@@ -44,19 +41,22 @@ public class MapDisplayController {
     public String getEntityByLabel(String label) throws IOException{
         String method="--getentitybylabel";
         PythonModel pythonModel = new PythonModel(String.valueOf(resource.getFile()),method,label);
+       /* String result=PythonUtil.oneParam(pythonModel);
+        result = new String(result.getBytes("UTF-8"), "UTF-8");*/
         return PythonUtil.oneParam(pythonModel);
     }
 
     //获取一度关系
     @RequestMapping(value = "/getkgR1")
-    public String getKgR1(String label) throws IOException{
+    public String getKgR1(String node) throws IOException{
         String method="--getkgR1";
-        PythonModel pythonModel = new PythonModel(String.valueOf(resource.getFile()),method,label);
+        PythonModel pythonModel = new PythonModel(String.valueOf(resource.getFile()),method,node);
+        String result= PythonUtil.oneParam(pythonModel);
         return PythonUtil.oneParam(pythonModel);
     }
     //获取最短路径
     @RequestMapping(value = "/getKgShortestPath")
-    public String getKgShortestPath(String param1,String param2) throws IOException{
+    public String getKgShortestPath(String param1, String param2) throws IOException{
         String method="--getkgShortestPath";
         PythonModel pythonModel = new PythonModel(String.valueOf(resource.getFile()),method,param1,param2);
         return PythonUtil.oneParam(pythonModel);

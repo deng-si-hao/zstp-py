@@ -80,7 +80,10 @@ public class PythonUtil {
         }
         for(int i=1;i<str.size();i++){
             result += str.get(i);
+//            strBuffer.add(str.get(i));
         }
             return result;
+//        return strBuffer;
     }
+
 }

@@ -227,8 +227,6 @@ class KG_constructor:
     # 3 按照标签查节点列表 ------------------------------------------
     def kgNodesByLabel(self, label):
         finded = self.Nodematcher.match(label)
-        for r in finded:
-            print(r)
         return self.node2list(finded)
 
 
@@ -369,7 +367,7 @@ if __name__ == '__main__':
     # 对应：http://localhost:8000/kgByLable?label=e1
     elif funcname == '--getentitybylabel':
         # 'e2'
-        print(cons.kgNodesByLabel(sys.argv[2]))
+        print(json.dumps(cons.kgNodesByLabel(sys.argv[2])))
 
 
     # 4-- 获取一度关系

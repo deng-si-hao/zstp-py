@@ -1,14 +1,19 @@
 package com.cavin.culture;
 
+import com.cavin.culture.controller.MapDisplayController;
 import com.cavin.culture.model.PythonModel;
 import com.cavin.culture.model.User;
 import com.cavin.culture.service.UserService;
 import com.cavin.culture.util.PythonUtil;
+import org.apache.jena.atlas.json.JSON;
+import org.apache.jena.atlas.json.JsonArray;
+import com.alibaba.fastjson.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.python.core.*;
 import org.python.util.PythonInterpreter;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.annotation.Resource;
@@ -27,7 +32,7 @@ class CultureApplicationTests {
 
     }
 
-    //æµ‹è¯•é€»è¾‘åˆ é™¤ç”¨æˆ· ä¿¡æ¯
+    //²âÊÔÂß¼­É¾³ıÓÃ»§ ĞÅÏ¢
   /*  @Test
     public void delUser(){
         Long i=1L;
@@ -35,7 +40,7 @@ class CultureApplicationTests {
         User user=userService.getUserById(i);
         System.out.println(user);
     }*/
-    //æµ‹è¯•ä¿®æ”¹ç”¨æˆ·ä¿¡æ¯
+    //²âÊÔĞŞ¸ÄÓÃ»§ĞÅÏ¢
   /*  @Test
     public void updateUser(){
         Long id=1L;
@@ -51,17 +56,17 @@ class CultureApplicationTests {
         userService.updateUser(user);
         System.out.println(userService.getUserById(id));
     }*/
-    @Test
+/*    @Test
     public void testId(){
 //        Long id= UniquelUtil.genId();
 //        long randomNum = System.currentTimeMillis();
 //        String idd=UUID.randomUUID().toString();
 //        System.out.println(idd);
-        List<User> users= userService.getAll();
+        List<User> users= userService.getAll(pageSize);
 //        User name=userService.getUserByName("test02");
         System.out.println(users.toString());
 
-    }
+    }*/
 
     @Test
     public void testpython(){
@@ -75,17 +80,17 @@ class CultureApplicationTests {
         PythonInterpreter.initialize(preprops, props, new String[0]);
         PythonInterpreter interp = new PythonInterpreter();
         interp.exec("import sys");
-//        interp.exec("sys.path.append('D:/Program Files (x86)/jython2.7.0/Lib')");//jythonè‡ªå·±çš„
-//        interp.exec("sys.path.append('E:\\\\Tupu\\\\NOW\\\\tornado_kg copy\\\\venv')");//jythonè‡ªå·±çš„
-        interp.exec("sys.path.append('E:\\\\Tupu\\\\NOW\\\\tornado_kg copy\\\\venv\\\\lib\\\\site-packages')");//æˆ‘ä»¬è‡ªå·±å†™çš„
+//        interp.exec("sys.path.append('D:/Program Files (x86)/jython2.7.0/Lib')");//jython×Ô¼ºµÄ
+//        interp.exec("sys.path.append('E:\\\\Tupu\\\\NOW\\\\tornado_kg copy\\\\venv')");//jython×Ô¼ºµÄ
+        interp.exec("sys.path.append('E:\\\\Tupu\\\\NOW\\\\tornado_kg copy\\\\venv\\\\lib\\\\site-packages')");//ÎÒÃÇ×Ô¼ºĞ´µÄ
         interp.exec("sys.path.append('E:\\\\Tupu\\\\NOW\\\\tornado_kg copy\\\\venv\\\\lib\\\\site-packages\\\\py2neo')");
         PythonInterpreter interpreter = new PythonInterpreter();
         //interpreter.execfile("D:\\neo2json.py");
         interpreter.execfile("E:\\testByTupu\\tornado_kg copy\\neo4j2json.py");
-        // ç¬¬ä¸€ä¸ªå‚æ•°ä¸ºæœŸæœ›è·å¾—çš„å‡½æ•°ï¼ˆå˜é‡ï¼‰çš„åå­—ï¼Œç¬¬äºŒä¸ªå‚æ•°ä¸ºæœŸæœ›è¿”å›çš„å¯¹è±¡ç±»å‹
+        // µÚÒ»¸ö²ÎÊıÎªÆÚÍû»ñµÃµÄº¯Êı£¨±äÁ¿£©µÄÃû×Ö£¬µÚ¶ş¸ö²ÎÊıÎªÆÚÍû·µ»ØµÄ¶ÔÏóÀàĞÍ
         PyFunction pyFunction = interpreter.get("kg_constructor", PyFunction.class);
         //int a = 5, b = 10;
-        //è°ƒç”¨å‡½æ•°ï¼Œå¦‚æœå‡½æ•°éœ€è¦å‚æ•°ï¼Œåœ¨Javaä¸­å¿…é¡»å…ˆå°†å‚æ•°è½¬åŒ–ä¸ºå¯¹åº”çš„â€œPythonç±»å‹â€
+        //µ÷ÓÃº¯Êı£¬Èç¹ûº¯ÊıĞèÒª²ÎÊı£¬ÔÚJavaÖĞ±ØĞëÏÈ½«²ÎÊı×ª»¯Îª¶ÔÓ¦µÄ¡°PythonÀàĞÍ¡±
         PyObject pyobj = pyFunction.__call__();//#(new PyInteger(a), new PyInteger(b));
         System.out.println("the anwser is: " + pyobj);
     }
@@ -128,35 +133,35 @@ class CultureApplicationTests {
         properties.put("python.console.encoding","UTF-8");
         System.setProperty("python.home","D:\\jython2.7.0");
 
-        // 1. Pythoné¢å‘å‡½æ•°å¼ç¼–ç¨‹: åœ¨Javaä¸­è°ƒç”¨Pythonå‡½æ•°
+        // 1. PythonÃæÏòº¯ÊıÊ½±à³Ì: ÔÚJavaÖĞµ÷ÓÃPythonº¯Êı
         /*String pythonFunc = "E:\\testByTupu\\tornado_kg copy\\neo4j2json.py";
 
         PythonInterpreter interp = new PythonInterpreter();
         interp.exec("import sys");
         interp.exec("sys.path.append('E:\\Tupu\\NOW\\tornado_kg copy\\venv\\lib\\site-packages')");
-        // åŠ è½½pythonç¨‹åº
+        // ¼ÓÔØpython³ÌĞò
         interp.execfile(pythonFunc);
-        // è°ƒç”¨Pythonç¨‹åºä¸­çš„å‡½æ•°
+        // µ÷ÓÃPython³ÌĞòÖĞµÄº¯Êı
         PyFunction pyf = interp.get("main", PyFunction.class);
         PyObject dddRes = pyf.__call__();
         System.out.println(dddRes);
         interp.cleanup();
         interp.close();*/
 
-        // 2. é¢å‘å¯¹è±¡å¼ç¼–ç¨‹: åœ¨Javaä¸­è°ƒç”¨Pythonå¯¹è±¡å®ä¾‹çš„æ–¹æ³•
+        // 2. ÃæÏò¶ÔÏóÊ½±à³Ì: ÔÚJavaÖĞµ÷ÓÃPython¶ÔÏóÊµÀıµÄ·½·¨
         String pythonClass = "E:\\testByTupu\\tornado_kg copy\\neo4j2json.py";
-        // pythonå¯¹è±¡å
+        // python¶ÔÏóÃû
         String pythonObjName = "cons";
-        // pythonç±»å
+        // pythonÀàÃû
         String pythonClazzName = "kg_constructor";
         PythonInterpreter pi2 = new PythonInterpreter();
-        // åŠ è½½pythonç¨‹åº
+        // ¼ÓÔØpython³ÌĞò
         pi2.execfile(pythonClass);
-        // å®ä¾‹åŒ–pythonå¯¹è±¡
+        // ÊµÀı»¯python¶ÔÏó
         pi2.exec(pythonObjName + "=" + pythonClazzName + "()");
-        // è·å–å®ä¾‹åŒ–çš„pythonå¯¹è±¡
+        // »ñÈ¡ÊµÀı»¯µÄpython¶ÔÏó
         PyObject pyObj = pi2.get(pythonObjName);
-        // è°ƒç”¨pythonå¯¹è±¡æ–¹æ³•,ä¼ é€’å‚æ•°å¹¶æ¥æ”¶è¿”å›å€¼
+        // µ÷ÓÃpython¶ÔÏó·½·¨,´«µİ²ÎÊı²¢½ÓÊÕ·µ»ØÖµ
         PyObject result = pyObj.invoke("constructor", new PyObject[] {Py.newInteger(2), Py.newInteger(3)});
         double power = Py.py2double(result);
         System.out.println(power);
@@ -177,47 +182,61 @@ class CultureApplicationTests {
 
         try
         {   // --cons
-            // åˆ›å»ºåº“
-            //String[] args1 = new String[] { "python", "C:\\Users\\86173\\Documents\\WeChat Files\\d15095827251\\FileStorage\\File\\2020-05\\neo4j2json_cons.py","--cons"};
-            // è·å–å…¨éƒ¨å®ä½“æ ‡ç­¾
-//            String[] args1 = new String[] { "python", "C:\\Users\\86173\\Documents\\WeChat Files\\d15095827251\\FileStorage\\File\\2020-05\\neo4j2json_cons.py","--getlabel"};
-            // æœ‰é—®é¢˜
-            //è·å–æ ‡ç­¾ä¸‹æ‰€æœ‰å®ä½“
-            String[] args1 = new String[] { "python", "C:\\Users\\86173\\Documents\\WeChat Files\\d15095827251\\FileStorage\\File\\2020-05\\neo4j2json_cons.py","--getentitybylabel","e3"};
-            //è·å–ä¸€åº¦å…³ç³»
-            //String[] args1 = new String[] { "python", "C:\\Users\\86173\\Documents\\WeChat Files\\d15095827251\\FileStorage\\File\\2020-05\\neo4j2json_cons.py","--getkgR1","é£è¡Œå™¨ææ–™æŸä¼¤ä¼ æ„Ÿä¿¡å·çš„ç‰¹å¾åˆ†æå’ŒæŸä¼¤æ¨¡å¼è¯†åˆ«"};
-            // è·å–æœ€çŸ­è·¯å¾„
-//            String[] args1 = new String[] { "python", "C:\\Users\\86173\\Documents\\WeChat Files\\d15095827251\\FileStorage\\File\\2020-05\\neo4j2json_cons.py","--getkgShortestPath","åŠ å¯†","ä¸‰ç»´çƒ­ä¼ å¯¼"};
-            // è·å–å…¨å›¾
+            // ´´½¨¿â
+//            String[] args1 = new String[] { "python", "C:\\Users\\86173\\Documents\\WeChat Files\\d15095827251\\FileStorage\\File\\2020-05\\neo4j2json_cons.py","--cons"};
+            // »ñÈ¡È«²¿ÊµÌå±êÇ©
+            String[] args1 = new String[] { "python", "F:\\zhishitupu\\zstp\\src\\main\\resources\\static\\py\\neo4j2json_cons.py","--getlabel"};
+            // ÓĞÎÊÌâ
+            //»ñÈ¡±êÇ©ÏÂËùÓĞÊµÌå
+//            String[] args1 = new String[] { "python", "C:\\Users\\86173\\Documents\\WeChat Files\\d15095827251\\FileStorage\\File\\2020-05\\neo4j2json_cons.py","--getentitybylabel","e3"};
+            //»ñÈ¡Ò»¶È¹ØÏµ
+       //     String[] args1 = new String[] { "python", "C:\\Users\\86173\\Documents\\WeChat Files\\d15095827251\\FileStorage\\File\\2020-05\\neo4j2json_cons.py","--getkgR1","·ÉĞĞÆ÷²ÄÁÏËğÉË´«¸ĞĞÅºÅµÄÌØÕ÷·ÖÎöºÍËğÉËÄ£Ê½Ê¶±ğ"};
+            // »ñÈ¡×î¶ÌÂ·¾¶
+//            String[] args1 = new String[] { "python", "C:\\Users\\86173\\Documents\\WeChat Files\\d15095827251\\FileStorage\\File\\2020-05\\neo4j2json_cons.py","--getkgShortestPath","¼ÓÃÜ","ÈıÎ¬ÈÈ´«µ¼"};
+            // »ñÈ¡È«Í¼
             //String[] args1 = new String[] { "python", "C:\\Users\\86173\\Documents\\WeChat Files\\d15095827251\\FileStorage\\File\\2020-05\\neo4j2json_cons.py","--getalldata"};
-            //æŸ¥è¯¢å­å›¾
-            //String[] args1 = new String[] { "python", "C:\\Users\\86173\\Documents\\WeChat Files\\d15095827251\\FileStorage\\File\\2020-05\\neo4j2json_cons.py","--searchsubkg", "é£è¡Œå™¨ææ–™æŸä¼¤ä¼ æ„Ÿä¿¡å·çš„ç‰¹å¾åˆ†æå’ŒæŸä¼¤æ¨¡å¼è¯†åˆ«å’Œä¸‰ç»´çƒ­ä¼ å¯¼çš„å…³ç³»æ˜¯ä»€ä¹ˆ"};
+            //²éÑ¯×ÓÍ¼
+            //String[] args1 = new String[] { "python", "C:\\Users\\86173\\Documents\\WeChat Files\\d15095827251\\FileStorage\\File\\2020-05\\neo4j2json_cons.py","--searchsubkg", "·ÉĞĞÆ÷²ÄÁÏËğÉË´«¸ĞĞÅºÅµÄÌØÕ÷·ÖÎöºÍËğÉËÄ£Ê½Ê¶±ğºÍÈıÎ¬ÈÈ´«µ¼µÄ¹ØÏµÊÇÊ²Ã´"};
             //Process proc = Runtime.getRuntime().exec("python3 /Users/gunanxi/Downloads/md/project/2020-03_304/tornado_kg/kg_304/kg/neo4j2json.py");
             Process p;
             p = Runtime.getRuntime().exec(args1);
-            //å–å¾—å‘½ä»¤ç»“æœçš„è¾“å‡ºæµ
+            //È¡µÃÃüÁî½á¹ûµÄÊä³öÁ÷
             InputStream fis=p.getInputStream();
-            //ç”¨ä¸€ä¸ªè¯»è¾“å‡ºæµç±»å»è¯»
+            //ÓÃÒ»¸ö¶ÁÊä³öÁ÷ÀàÈ¥¶Á
             InputStreamReader isr=new InputStreamReader(fis);
-            //ç”¨ç¼“å†²å™¨è¯»è¡Œ
+            //ÓÃ»º³åÆ÷¶ÁĞĞ
             BufferedReader br=new BufferedReader(isr);
             String line=null;
             String result="";
-            //ç›´åˆ°è¯»å®Œä¸ºæ­¢
+            //Ö±µ½¶ÁÍêÎªÖ¹
            /* while((line=br.readLine())!=null)
             {
                 result+=line;
             }*/
+
             ArrayList<String> strBuffer = new ArrayList<String>();
             ArrayList<String> str = new ArrayList<String>();
             while((line=br.readLine())!=null)
             {
+
                 str.add(line);
+//                result+=line;
             }
             for(int i=1;i<str.size();i++){
-                strBuffer.add(str.get(i));
+/*                strBuffer.add(str.get(i));
+                System.out.println(strBuffer);*/
+                result += str.get(i);
+/*                strBuffer.add(str.get(i));
+                System.out.println("***********************");
+                System.out.println(strBuffer);*/
+//                result = new String(result.getBytes("GBK"), "UTF-8");
+                System.out.println(result);
             }
-            System.out.println(strBuffer);
+
+/*            System.out.println(result);
+            JSONObject jsonObject = JSONObject.parseObject(result);
+            System.out.println(jsonObject);*/
+
         }
         catch(IOException e)
         {
@@ -226,7 +245,11 @@ class CultureApplicationTests {
     }
     @Test
     public void PyhtonUtilTest() throws IOException{
-        PythonModel pythonModel = new PythonModel("C:\\Users\\86173\\Documents\\WeChat Files\\d15095827251\\FileStorage\\File\\2020-05\\neo4j2json_cons.py","--getentitybylabel","e3");
-        System.out.println(PythonUtil.oneParam(pythonModel));
+    /*    org.springframework.core.io.Resource resource= new ClassPathResource("static/py/neo4j2json_cons.py");
+        System.out.println(resource.getFile());*/
+        MapDisplayController mapDisplayController= new MapDisplayController();
+        mapDisplayController.getAllLabel();
+        System.out.println(mapDisplayController.getAllLabel());
     }
+
 }
