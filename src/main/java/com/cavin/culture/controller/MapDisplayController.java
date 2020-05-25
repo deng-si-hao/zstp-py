@@ -56,9 +56,9 @@ public class MapDisplayController {
     }
     //获取最短路径
     @RequestMapping(value = "/getKgShortestPath")
-    public String getKgShortestPath(String param1, String param2) throws IOException{
+    public String getKgShortestPath(String node1Name, String node2Name) throws IOException{
         String method="--getkgShortestPath";
-        PythonModel pythonModel = new PythonModel(String.valueOf(resource.getFile()),method,param1,param2);
+        PythonModel pythonModel = new PythonModel(String.valueOf(resource.getFile()),method,node1Name,node2Name);
         return PythonUtil.oneParam(pythonModel);
     }
     //获取全图
