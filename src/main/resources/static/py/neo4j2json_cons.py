@@ -375,7 +375,6 @@ if __name__ == '__main__':
     elif funcname == '--getkgR1':
         #"'飞行器材料损伤传感信号的特征分析和损伤模式识别'"
         print(cons.kgR1(sys.argv[2]))
-
     # 5---------------------------------------------
     # 对应：http://localhost:8000/kgR1?node=飞行器材料损伤传感信号的特征分析和损伤模式识别
     elif funcname == '--getkgShortestPath':
@@ -393,7 +392,7 @@ if __name__ == '__main__':
     # 对应：http://localhost:8000/search_main
     elif funcname == '--searchsubkg':
         search_text = "飞行器材料损伤传感信号的特征分析和损伤模式识别和三维热传导的关系是什么"
-        print(cons.search_main(sys.argv[2]))
+        print(json.dumps(cons.search_main(sys.argv[2])))
 
 
 

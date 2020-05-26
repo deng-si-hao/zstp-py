@@ -17,7 +17,7 @@
     </select>
     <insert id="insertHistory" parameterType="com.cavin.culture.model.History">
         insert into history (history_subject, history_predicate, history_object, history_scope, history_type, create_date, user_name,user_id)
-            values (#{historySubject}, #{historyPredicate}, #{historyObject}, #{historyScope}, #{historyType}, #{createDate}, #{userName}, #{userId})
+            values (#{historySubject,jdbcType=VARCHAR}, #{historyPredicate}, #{historyObject}, #{historyScope}, #{historyType}, #{createDate}, #{userName}, #{userId})
     </insert>
     <delete id="deleteHistoryById" parameterType="java.lang.Long">
        delete from history where history_id=#{historyId}
