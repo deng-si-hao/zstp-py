@@ -11,6 +11,7 @@
         <result property="isDel" column="isdel" jdbcType="VARCHAR"/>
     </resultMap>
 
+
     <sql id="columns">
         id,user_name,user_password,email,register_date,level,isdel
     </sql>
