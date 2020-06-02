@@ -345,7 +345,7 @@ class KG_constructor:
             res['path'].append(p)
         res['graph'] = self.subgraph_return_for_main(nodes,relations)
         res['path'] = str(res['path'])
-        return res
+        return json.dumps(res)
         
         
         

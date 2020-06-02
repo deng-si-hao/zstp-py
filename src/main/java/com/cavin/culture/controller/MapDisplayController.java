@@ -110,12 +110,13 @@ public class MapDisplayController {
 
     //获取一度关系
     @RequestMapping(value = "/getkgR1")
-    public Map<String,Object> getKgR1(String node,String label){
-/*        String method="--getkgR1";
+    public String getKgR1(String node,String label) throws IOException {
+        String method="--getkgR1";
         PythonModel pythonModel = new PythonModel(String.valueOf(resource.getFile()),method,node);
         String result= PythonUtil.oneParam(pythonModel);
-        return PythonUtil.oneParam(pythonModel);*/
-//        List<Map<String,Object>> result=new ArrayList<>();
+        System.out.println(">>>>>>"+result);
+        return PythonUtil.oneParam(pythonModel);
+/*//        List<Map<String,Object>> result=new ArrayList<>();
         Map<String,Object> map=new HashMap<>();
 //        List<String> res=new ArrayList<>();
         switch (label){
@@ -137,14 +138,16 @@ public class MapDisplayController {
             default:
                 map.put("value","");
         }
-        return map;
+        return map;*/
     }
     //获取最短路径
     @RequestMapping(value = "/getKgShortestPath")
     public String getKgShortestPath(String node1Name, String node2Name) throws IOException{
         String method="--getkgShortestPath";
         PythonModel pythonModel = new PythonModel(String.valueOf(resource.getFile()),method,node1Name,node2Name);
-        return PythonUtil.oneParam(pythonModel);
+        String res=PythonUtil.twoParam(pythonModel);
+        System.out.println(">>>>>>"+res);
+        return res;
     }
     //获取全图
     @RequestMapping(value = "/getalldata")
