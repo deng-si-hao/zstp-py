@@ -1,13 +1,10 @@
 package com.cavin.culture.controller;
 
-import com.alibaba.fastjson.JSONObject;
 import com.cavin.culture.controller.InitializeData.InitializeNeoData;
-import com.cavin.culture.model.PythonModel;
 import com.cavin.culture.neo4jdao.E1Dao;
 import com.cavin.culture.neo4jdao.E2Dao;
 import com.cavin.culture.neo4jdao.E3Dao;
 import com.cavin.culture.neo4jdao.E4Dao;
-import com.cavin.culture.neo4jmodel.e1;
 import com.cavin.culture.util.PythonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
@@ -48,10 +45,10 @@ public class MapDisplayController {
     @RequestMapping(value = "/createDb")
     public String createDb(){
         String method="--cons";
-        PythonModel pythonModel = null;
+//        PythonModel pythonModel = null;
         try {
-            pythonModel = new PythonModel(String.valueOf(resource.getFile()),method);
-            return PythonUtil.noParam(pythonModel);
+//            pythonModel = new PythonModel(String.valueOf(resource.getFile()),method);
+            return PythonUtil.noParam(String.valueOf(resource.getFile()),method);
         } catch (IOException e) {
             e.printStackTrace();
             return "error";
@@ -110,13 +107,15 @@ public class MapDisplayController {
 
     //获取一度关系
     @RequestMapping(value = "/getkgR1")
-    public String getKgR1(String node,String label) throws IOException {
+    public String getKgR1(String node, String label) throws IOException {
+
         String method="--getkgR1";
-        PythonModel pythonModel = new PythonModel(String.valueOf(resource.getFile()),method,node);
-        String result= PythonUtil.oneParam(pythonModel);
-        System.out.println(">>>>>>"+result);
-        return PythonUtil.oneParam(pythonModel);
-/*//        List<Map<String,Object>> result=new ArrayList<>();
+//        PythonModel pythonModel = new PythonModel(String.valueOf(resource.getFile()),method,node);
+        String result= PythonUtil.oneParam(String.valueOf(resource.getFile()),method,node);
+
+//        System.out.println(">>>>>>"+result);
+        return result;
+/*        List<Map<String,Object>> result=new ArrayList<>();
         Map<String,Object> map=new HashMap<>();
 //        List<String> res=new ArrayList<>();
         switch (label){
@@ -144,23 +143,23 @@ public class MapDisplayController {
     @RequestMapping(value = "/getKgShortestPath")
     public String getKgShortestPath(String node1Name, String node2Name) throws IOException{
         String method="--getkgShortestPath";
-        PythonModel pythonModel = new PythonModel(String.valueOf(resource.getFile()),method,node1Name,node2Name);
-        String res=PythonUtil.twoParam(pythonModel);
-        System.out.println(">>>>>>"+res);
+//        PythonModel pythonModel = new PythonModel(String.valueOf(resource.getFile()),method,node1Name,node2Name);
+        String res=PythonUtil.twoParam(String.valueOf(resource.getFile()),method,node1Name,node2Name);
+//        System.out.println(">>>>>>"+res);
         return res;
     }
     //获取全图
     @RequestMapping(value = "/getalldata")
     public String getAllData() throws IOException{
         String method="--getalldata";
-        PythonModel pythonModel = new PythonModel(String.valueOf(resource.getFile()),method);
-        return PythonUtil.oneParam(pythonModel);
+//        PythonModel pythonModel = new PythonModel(String.valueOf(resource.getFile()),method);
+        return PythonUtil.noParam(String.valueOf(resource.getFile()),method);
     }
     //查询子图
     @RequestMapping(value = "/searchSubKg")
     public String searchSubKg(String param) throws IOException{
         String method="--searchsubkg";
-        PythonModel pythonModel = new PythonModel(String.valueOf(resource.getFile()),method,param);
-        return PythonUtil.oneParam(pythonModel);
+//        PythonModel pythonModel = new PythonModel(String.valueOf(resource.getFile()),method,param);
+        return PythonUtil.oneParam(String.valueOf(resource.getFile()),method,param);
     }
 }

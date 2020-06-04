@@ -1,14 +1,15 @@
 package com.cavin.culture.neo4jmodel;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.cavin.culture.neo4jRelationship.*;
 import org.neo4j.ogm.annotation.GraphId;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
 
+
 import java.util.List;
 
 @NodeEntity
-public class e2{
+public class e2 extends BaseNode{
 
     @GraphId
     private Long id;
@@ -23,33 +24,22 @@ public class e2{
 
     private String person;
 
-    @Relationship(type = "apply")
-    @JsonProperty("apply")
-    private List<e1> apply;
-
-    @Relationship(type = "need")
-    @JsonProperty("need")
-    private List<e1> need;
-
-    @Relationship(type = "has")
-    @JsonProperty("has")
-    private List<e2> has;
-
-    @Relationship(type = "coop")
-    @JsonProperty("coop")
-    private List<e2> coop;
+    @Relationship
+    private List<ContainsARelationship> has;
+    @Relationship
+    private List<ReportingRelationship> apply;
+    @Relationship
+    private List<CooperationRelationship> coop;
+    @Relationship
+    private List<ResearchRelationship> research;
+    @Relationship
+    private List<DemandBRelationship> need;
 
 /*
     @Relationship(type = "need")
     @JsonProperty("need")
-    private List<e3> e3s;
+    private List<e1> need;
 */
-
-
-    @Relationship(type = "research")
-    @JsonProperty("research")
-    private List<e4> e4s;
-
 
 
     public Long getId() {
@@ -61,22 +51,22 @@ public class e2{
         this.id = id;
     }
 
-
+    @Override
     public String getName() {
         return name;
     }
 
-
+    @Override
     public void setName(String name) {
         this.name = name;
     }
 
-
+    @Override
     public String getLabel() {
         return label;
     }
 
-
+    @Override
     public void setLabel(String label) {
         this.label = label;
     }
@@ -105,4 +95,14 @@ public class e2{
         this.person = person;
     }
     public e2(){}
+
+    public e2(Long id, String name, String label, String flag, String coll, String person, List<ContainsARelationship> has) {
+        this.id = id;
+        this.name = name;
+        this.label = label;
+        this.flag = flag;
+        this.coll = coll;
+        this.person = person;
+//        this.has = has;
+    }
 }

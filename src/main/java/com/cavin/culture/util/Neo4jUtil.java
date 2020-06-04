@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.apache.jena.atlas.json.JSON;
 import org.omg.CORBA.MARSHAL;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,10 +13,26 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Neo4jUtil {
+
+
+    //Object转Map，用于处理数据
+    public static Map<String, Object> objectToMap(Object obj) throws IllegalAccessException {
+        Map<String, Object> map = new HashMap<>();
+        Class<?> clazz = obj.getClass();
+        for (Field field : clazz.getDeclaredFields()) {
+            field.setAccessible(true);
+            String fieldName = field.getName();
+            Object value = field.get(obj);
+            map.put(fieldName, value);
+        }
+        return map;
+    }
+
+
     /*
     * 子图翻译
     * */
-    public List<Map<String,Object>> SubGraph(List<Map<String,Object>> nodes, List<Map<String,Object>> link){
+    public List<Map<String,Object>> SubGraph(List<Map<String,Object>> nodes, List<Map<String,Object>> link) throws IllegalAccessException {
         //定义一个数组用于存储结果集
         List<Map<String,Object>> result=new ArrayList<>();
         int i=0;//用于子图的index序号
@@ -64,8 +81,8 @@ public class Neo4jUtil {
             }
             String type=res1.get(0);
             //用于取出存在node_dict中的map的数据
-            Map<String,Object> map1= (Map)node_dict.get(entity1);
-            Map<String,Object> map2= (Map)node_dict.get(entity2);
+            Map<String,Object> map1= objectToMap(node_dict.get(entity1));
+            Map<String,Object> map2= objectToMap(node_dict.get(entity2));
             new_dict.put("source",map1.get("index"));
             new_dict.put("target",map2.get("index"));
             new_dict.put("source_name",entity1);
@@ -77,4 +94,8 @@ public class Neo4jUtil {
         result.add(transition);
         return result;
     }
+    /*
+    * 最短路径查询
+    *
+    * */
 }

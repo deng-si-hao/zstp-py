@@ -9,7 +9,7 @@ import org.neo4j.ogm.annotation.StartNode;
 /*
 * 需求关系
 * */
-@RelationshipEntity(type = "need")
+
 public class DemandBRelationship {
     @GraphId
     private Long id;
@@ -23,4 +23,46 @@ public class DemandBRelationship {
     //关系另一端节点
     @EndNode
     private e3 end;
+
+    public DemandBRelationship() {
+    }
+
+    public DemandBRelationship(Long id, String name, e1 start, e3 end) {
+        this.id = id;
+        this.name = name;
+        this.start = start;
+        this.end = end;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public e1 getStart() {
+        return start;
+    }
+
+    public void setStart(e1 start) {
+        this.start = start;
+    }
+
+    public e3 getEnd() {
+        return end;
+    }
+
+    public void setEnd(e3 end) {
+        this.end = end;
+    }
 }

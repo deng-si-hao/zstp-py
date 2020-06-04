@@ -21,4 +21,5 @@ public class CultureApplication {
         SpringApplication.run(CultureApplication.class, args);
     }
 
+
 }

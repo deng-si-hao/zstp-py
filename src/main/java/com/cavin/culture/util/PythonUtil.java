@@ -1,7 +1,5 @@
 package com.cavin.culture.util;
 
-import com.cavin.culture.model.PythonModel;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,52 +9,36 @@ import java.util.List;
 
 public class PythonUtil {
 
-    public static String noParam(PythonModel pythonModel) throws IOException{
+    public static String noParam(String path,String method) throws IOException{
         String[] strArray = new String[3];
         strArray[0]="python";
-        strArray[1]=pythonModel.getPath();
-        strArray[2]=pythonModel.getMethod();
+        strArray[1]=path;
+        strArray[2]=method;
         return getInfo(strArray);
     }
-    public static String oneParam(PythonModel pythonModel) throws IOException{
+    public static String oneParam(String path, String method, String param) throws IOException{
         String[] strArray= new String[4];
         strArray[0]="python";
-        strArray[1]=pythonModel.getPath();
-        strArray[2]=pythonModel.getMethod();
-        strArray[3]=pythonModel.getParam1();
+        strArray[1]=path;
+        strArray[2]=method;
+        strArray[3]=param;
         return getInfo(strArray);
     }
-    public static String twoParam(PythonModel pythonModel) throws IOException {
+    public static String twoParam(String path,String method,String param1,String param2) throws IOException {
         String[] strArray= new String[5];
         strArray[0]="python";
-        strArray[1]=pythonModel.getPath();
-        strArray[2]=pythonModel.getMethod();
-        strArray[3]=pythonModel.getParam1();
-        strArray[4]=pythonModel.getParam2();
+        strArray[1]=path;
+        strArray[2]=method;
+        strArray[3]=param1;
+        strArray[4]=param2;
         return getInfo(strArray);
     }
 
     public static String getInfo(String[] strArray) throws IOException{
-          // --cons
-            // 创建库
-            //String[] args1 = new String[] { "python", "C:\\Users\\86173\\Documents\\WeChat Files\\d15095827251\\FileStorage\\File\\2020-05\\neo4j2json_cons.py","--cons"};
-            // 获取全部实体标签
-            //String[] args1 = new String[] { "python", "C:\\Users\\86173\\Documents\\WeChat Files\\d15095827251\\FileStorage\\File\\2020-05\\neo4j2json_cons.py","--getlabel"};
-            // 有问题
-            //获取标签下所有实体
-//            String[] args1 = new String[] { "python", "C:\\Users\\86173\\Documents\\WeChat Files\\d15095827251\\FileStorage\\File\\2020-05\\neo4j2json_cons.py","--getentitybylabel","e3"};
-            //获取一度关系
-            //String[] args1 = new String[] { "python", "C:\\Users\\86173\\Documents\\WeChat Files\\d15095827251\\FileStorage\\File\\2020-05\\neo4j2json_cons.py","--getkgR1","飞行器材料损伤传感信号的特征分析和损伤模式识别"};
-            // 获取最短路径
-//            String[] args1 = new String[] { "python",pythonModel.getPath(),pythonModel.getMethod(),pythonModel.getParam1(),pythonModel.getParam2()};
-            // 获取全图
-            //String[] args1 = new String[] { "python", "C:\\Users\\86173\\Documents\\WeChat Files\\d15095827251\\FileStorage\\File\\2020-05\\neo4j2json_cons.py","--getalldata"};
-            //查询子图
-            //String[] args1 = new String[] { "python", "C:\\Users\\86173\\Documents\\WeChat Files\\d15095827251\\FileStorage\\File\\2020-05\\neo4j2json_cons.py","--searchsubkg", "飞行器材料损伤传感信号的特征分析和损伤模式识别和三维热传导的关系是什么"};
-            //Process proc = Runtime.getRuntime().exec("python3 /Users/gunanxi/Downloads/md/project/2020-03_304/tornado_kg/kg_304/kg/neo4j2json.py");
-
+        Long startTime = System.currentTimeMillis();
             Process p;
             p = Runtime.getRuntime().exec(strArray);
+
             //取得命令结果的输出流
             InputStream fis=p.getInputStream();
             //用一个读输出流类去读
@@ -65,25 +47,32 @@ public class PythonUtil {
             BufferedReader br=new BufferedReader(isr);
             String line=null;
             String result="";
-            //直到读完为止
-            /*while((line=br.readLine())!=null)
-            {
-                result+=line;
-            }*/
         //用于接收全部数据
-        ArrayList<String> str = new ArrayList<String>();
+        List<String> str = new ArrayList<String>();
         //用于去掉第一行无用数
-        ArrayList<String> strBuffer = new ArrayList<String>();
+//        ArrayList<String> strBuffer = new ArrayList<String>();
+//        byte[] rss=new byte[1024];
+
         while((line=br.readLine())!=null)
         {
             str.add(line);
         }
+        fis.close();
+        isr.close();
+        br.close();
         for(int i=1;i<str.size();i++){
             result += str.get(i);
-//            strBuffer.add(str.get(i));
         }
+        Long endTime = System.currentTimeMillis();
+        // 计算并打印耗时
+        Long tempTime = (endTime - startTime);
+        System.out.println("消耗时间：>>>>>>>>>>>>>>"+
+                (((tempTime/86400000)>0)?((tempTime/86400000)+"d"):"")+
+                ((((tempTime/86400000)>0)||((tempTime%86400000/3600000)>0))?((tempTime%86400000/3600000)+"h"):(""))+
+                ((((tempTime/3600000)>0)||((tempTime%3600000/60000)>0))?((tempTime%3600000/60000)+"m"):(""))+
+                ((((tempTime/60000)>0)||((tempTime%60000/1000)>0))?((tempTime%60000/1000)+"s"):(""))+
+                ((tempTime%1000)+"ms"));
             return result;
-//        return strBuffer;
     }
 
 }

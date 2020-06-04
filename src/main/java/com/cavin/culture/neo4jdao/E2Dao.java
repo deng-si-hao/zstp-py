@@ -17,4 +17,8 @@ public interface E2Dao extends Neo4jRepository<e2,Long> {
     @Query("MATCH (n:e2) RETURN n.name;")
     List<String> findBodesByLabel();
 
+    Iterable<e2> findAll();
+
+/*    @Query("match p = (n)-[r:has]-(b) return p")
+    List<Map<String,Object>> getrelation();*/
 }

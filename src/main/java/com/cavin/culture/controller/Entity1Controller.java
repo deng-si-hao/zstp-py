@@ -1,12 +1,10 @@
 package com.cavin.culture.controller;
 
 import com.cavin.culture.controller.InitializeData.InitializeNeoData;
-import com.cavin.culture.neo4jdao.E1Dao;
-import com.cavin.culture.neo4jdao.E2Dao;
-import com.cavin.culture.neo4jdao.E3Dao;
-import com.cavin.culture.neo4jdao.E4Dao;
+import com.cavin.culture.neo4jRelationship.ContainsARelationship;
+import com.cavin.culture.neo4jdao.*;
 import com.cavin.culture.neo4jmodel.e1;
-import org.apache.ibatis.annotations.Param;
+import com.cavin.culture.neo4jmodel.e2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,14 +25,24 @@ public class Entity1Controller {
     @Autowired
     E4Dao e4Dao;
 
+    @Autowired
+    ContainsARelationshipDao containsARelationshipDao;
+/*
+    @Autowired
+    ContainsBRelationship containsBRelationship;*/
+
 
     @RequestMapping("/get")
     public e1 GetE1ByName(String name){
         return e1Dao.findByName(name);
     }
-    @RequestMapping("/all")
+    @RequestMapping("/gete1all")
+    public Iterable<e1> findAll(){
+        return e1Dao.findAll();
+    }
+   /* @RequestMapping("/all")
     public List<Map<String, Object>> GetAll() throws IllegalAccessException {
-      /*  result=baseDao.findAllNodes();
+      *//*  result=baseDao.findAllNodes();
         for(Map<String,Object> map:result){
             System.out.println("keyset****="+map.keySet());
             for(String res:map.keySet()){
@@ -51,9 +59,9 @@ public class Entity1Controller {
                 System.out.println(model.get("label"));
             }
             System.out.println("label:::"+map.get("label"));
-        }*/
+        }*//*
         return InitializeNeoData.Neo4jData;
-    }
+    }*/
 
 /*    @RequestMapping("getNameByLabel")
     public List<String> getNameByLabel(){
@@ -96,9 +104,27 @@ public class Entity1Controller {
         return res;
     }
 
+    @RequestMapping("/ContainsARelationship")
+    public Iterable<ContainsARelationship> findByName(String name){
+        return containsARelationshipDao.findAll();
+    }
 
+    @RequestMapping("/findrelationAll")
+    public e2 findReslation(String name){
+        e2 res=e2Dao.findByName(name);
+        return res;
+    }
 
+    @RequestMapping("/findgetContainsARelationship")
+    public Iterable<ContainsARelationship> findgetContainsARelationship(String name){
+        return containsARelationshipDao.findByname(name);
+    }
 
+    //测试关系接口
+/*    @RequestMapping("/ralationB")
+    public Iterable<ContainsBRelationship> getByName(String name){
+        return containsBRelationship.findByName(name);
+    }*/
 
 
 }

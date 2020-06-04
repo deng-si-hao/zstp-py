@@ -1,6 +1,7 @@
 package com.cavin.culture.controller.InitializeData;
 
 import com.cavin.culture.neo4jdao.E1Dao;
+import com.cavin.culture.util.Neo4jUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -16,25 +17,14 @@ import java.util.*;
 public class InitializeNeoData {
 
     //所有数据
-    public static List<Map<String,Object>> Neo4jData=new ArrayList<>();
+    public List<Map<String,Object>> Neo4jData=new ArrayList<>();
     //所有实体类标签
     public static List<Object> label=new ArrayList<>();
 
     @Autowired
     private E1Dao e1Dao;
 
-    //Object转Map，用于处理数据
-    public static Map<String, Object> objectToMap(Object obj) throws IllegalAccessException {
-        Map<String, Object> map = new HashMap<>();
-        Class<?> clazz = obj.getClass();
-        for (Field field : clazz.getDeclaredFields()) {
-            field.setAccessible(true);
-            String fieldName = field.getName();
-            Object value = field.get(obj);
-            map.put(fieldName, value);
-        }
-        return map;
-    }
+
 
     @PostConstruct
     public void init() throws IllegalAccessException {
@@ -43,7 +33,7 @@ public class InitializeNeoData {
         List<Map<String,Object>> result=e1Dao.findAllNodes();
         for(Map<String,Object> map:result){
             for(String str:map.keySet()){
-                Neo4jData.add(objectToMap(map.get(str)));
+                Neo4jData.add(Neo4jUtil.objectToMap(map.get(str)));
             }
         }
         //对实体标签去重

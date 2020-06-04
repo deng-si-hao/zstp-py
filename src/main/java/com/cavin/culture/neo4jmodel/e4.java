@@ -1,12 +1,14 @@
 package com.cavin.culture.neo4jmodel;
 
+import com.cavin.culture.neo4jRelationship.ResearchRelationship;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.neo4j.ogm.annotation.GraphId;
+import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
 
 import java.util.List;
-
-public class e4{
+@NodeEntity
+public class e4 extends BaseNode{
 
     @GraphId
     private Long id;
@@ -15,9 +17,8 @@ public class e4{
 
     private String label;
 
-    @Relationship(type = "research")
-    @JsonProperty("research")
-    public List<e2> research;
+    @Relationship
+    public List<ResearchRelationship> research;
 
 
     public Long getId() {
@@ -29,22 +30,22 @@ public class e4{
         this.id = id;
     }
 
-
+    @Override
     public String getName() {
         return name;
     }
 
-
+    @Override
     public void setName(String name) {
         this.name = name;
     }
 
-
+    @Override
     public String getLabel() {
         return label;
     }
 
-
+    @Override
     public void setLabel(String label) {
         this.label = label;
     }
