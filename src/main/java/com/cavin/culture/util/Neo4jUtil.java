@@ -2,18 +2,23 @@ package com.cavin.culture.util;
 
 import com.alibaba.fastjson.JSONObject;
 import org.apache.jena.atlas.json.JSON;
+import org.neo4j.driver.internal.InternalNode;
+import org.neo4j.driver.internal.InternalRelationship;
+import org.neo4j.driver.v1.*;
+import org.neo4j.driver.v1.types.Node;
+import org.neo4j.driver.v1.types.Path;
+import org.neo4j.driver.v1.types.Relationship;
 import org.omg.CORBA.MARSHAL;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Neo4jUtil {
 
+    static Driver driver = GraphDatabase.driver("bolt://localhost:7687", AuthTokens.basic("neo4j", "12345678!a"));
+    private static Session session = driver.session();
 
     //Object转Map，用于处理数据
     public static Map<String, Object> objectToMap(Object obj) throws IllegalAccessException {
@@ -94,8 +99,49 @@ public class Neo4jUtil {
         result.add(transition);
         return result;
     }
-    /*
-    * 最短路径查询
-    *
-    * */
+
+    /**
+     * cql 路径查询 返回节点和关系
+     * @param cql 查询语句
+     * @param nodeList 节点
+     * @param edgeList 关系
+     * @return List<Map<String,Object>>
+     */
+    public static <T> void getPathList(String cql, Set<T> nodeList, Set<T> edgeList) {
+        try {
+            StatementResult result = session.run(cql);
+            List<Record> list = result.list();
+            for (Record r : list) {
+                for (String index : r.keys()) {
+                    Path path = r.get(index).asPath();
+                    //节点
+                    Iterable<Node> nodes = path.nodes();
+                    for (Iterator iter = nodes.iterator(); iter.hasNext(); ) {
+                        InternalNode nodeInter = (InternalNode) iter.next();
+                        Map<String, Object> map = new HashMap<>();
+                        //节点上设置的属性
+                        map.putAll(nodeInter.asMap());
+                        //外加一个固定属性
+                        map.put("nodeId", nodeInter.id());
+                        nodeList.add((T) map);
+                    }
+                    //关系
+                    Iterable<Relationship> edges = path.relationships();
+                    for (Iterator iter = edges.iterator(); iter.hasNext(); ) {
+                        InternalRelationship relationInter = (InternalRelationship) iter.next();
+                        Map<String, Object> map = new HashMap<>();
+                        map.putAll(relationInter.asMap());
+                        //关系上设置的属性
+                        map.put("id", relationInter.id());
+                        map.put("from", relationInter.startNodeId());
+                        map.put("to", relationInter.endNodeId());
+                        map.put("type",relationInter.type());
+                        edgeList.add((T) map);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

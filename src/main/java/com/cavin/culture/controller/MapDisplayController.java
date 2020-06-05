@@ -5,6 +5,7 @@ import com.cavin.culture.neo4jdao.E1Dao;
 import com.cavin.culture.neo4jdao.E2Dao;
 import com.cavin.culture.neo4jdao.E3Dao;
 import com.cavin.culture.neo4jdao.E4Dao;
+import com.cavin.culture.util.Neo4jUtil;
 import com.cavin.culture.util.PythonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
@@ -14,10 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 @RestController
@@ -148,6 +146,24 @@ public class MapDisplayController {
 //        System.out.println(">>>>>>"+res);
         return res;
     }
+
+    /**
+    * 获取最短路径（java实现）
+    * */
+    @RequestMapping("/getShortestPath")
+    public Map<String, Object> getShortPath(String node1Name,String node2Name){
+        Map<String, Object> retMap = new HashMap<>();
+        //cql语句
+        String cql = "match l=shortestPath(({name:'"+node1Name+"'})-[*]-({name:'"+node2Name+"'})) return l";
+        //待返回的值，与cql return后的值顺序对应
+        Set<Map<String ,Object>> nodeList = new HashSet<>();
+        Set<Map<String ,Object>> edgeList = new HashSet<>();
+        Neo4jUtil.getPathList(cql,nodeList,edgeList);
+        retMap.put("nodes",nodeList);
+        retMap.put("links",edgeList);
+        return retMap;
+    }
+
     //获取全图
     @RequestMapping(value = "/getalldata")
     public String getAllData() throws IOException{

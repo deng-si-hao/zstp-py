@@ -5,12 +5,18 @@ import com.cavin.culture.neo4jRelationship.ContainsARelationship;
 import com.cavin.culture.neo4jdao.*;
 import com.cavin.culture.neo4jmodel.e1;
 import com.cavin.culture.neo4jmodel.e2;
+import com.cavin.culture.util.Neo4jUtil;
+import org.neo4j.driver.internal.InternalNode;
+import org.neo4j.driver.internal.InternalRelationship;
+import org.neo4j.driver.v1.*;
+import org.neo4j.driver.v1.types.Node;
+import org.neo4j.driver.v1.types.Path;
+import org.neo4j.driver.v1.types.Relationship;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping("/test/neo4j")
@@ -125,6 +131,22 @@ public class Entity1Controller {
     public Iterable<ContainsBRelationship> getByName(String name){
         return containsBRelationship.findByName(name);
     }*/
+    @RequestMapping("/shortestPath")
+    public Map<String, Object> getShortPath(String param1,String param2){
+        Map<String, Object> retMap = new HashMap<>();
+        //cql语句
+        String cql = "match l=shortestPath(({name:'"+param1+"'})-[*]-({name:'"+param2+"'})) return l";
+        //待返回的值，与cql return后的值顺序对应
+        Set<Map<String ,Object>> nodeList = new HashSet<>();
+        Set<Map<String ,Object>> edgeList = new HashSet<>();
+        Neo4jUtil.getPathList(cql,nodeList,edgeList);
+        retMap.put("nodeList",nodeList);
+        retMap.put("edgeList",edgeList);
+        return retMap;
+    }
+
+
+
 
 
 }

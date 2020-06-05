@@ -6,6 +6,10 @@ import com.cavin.culture.model.User;
 import com.cavin.culture.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
+import org.neo4j.driver.v1.*;
+import org.neo4j.driver.v1.types.Node;
+import org.neo4j.driver.v1.types.Path;
+import org.neo4j.driver.v1.types.Relationship;
 import org.python.core.*;
 import org.python.util.PythonInterpreter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,10 +19,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import javax.annotation.Resource;
 import javax.sql.DataSource;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -280,4 +281,59 @@ class CultureApplicationTests {
 
 
     }
+
+    Driver driver = GraphDatabase.driver("bolt://localhost:7687", AuthTokens.basic("neo4j", "12345678!a"));
+    private Session session = driver.session();
+
+
+    @Test
+    public void shortEstPath() throws Exception {
+        String name1="加密";
+        String name2="三维热传导";
+        try {
+            String cql1="MATCH (n) where n.name='"+name1+"' return n.label";
+            StatementResult res1 = session.run(cql1);
+            String cql2="MATCH (n) where n.name='"+name2+"' return n.label";
+            StatementResult res2 = session.run(cql2);
+            String cmdSql = "MATCH n=shortestPath((a:"+cql1+"{name:'"+name1+"'})-[*]-"
+                    + "(b:"+cql2+"{name:'"+name2+"'})) return n";
+            StatementResult result = session.run(cmdSql);
+            while (result.hasNext()) {
+                Record record = result.next();
+                List<Value> values = record.values();
+                Map<Long, Node> nodesMap = new HashMap<>();
+                for (Value value : values) {
+                    if (value.type().name().equals("PATH")) {
+                        Path p = value.asPath();
+                        System.out.println("最短路径长度为：" + p.length());
+                        System.out.println("====================================");
+                        Iterable<Node> nodes = p.nodes();
+                        for (Node node : nodes) {
+                            nodesMap.put(node.id(), node);
+                        }
+
+                        /**
+                         * 打印最短路径里面的关系 == 关系包括起始节点的ID和末尾节点的ID，以及关系的type类型
+                         */
+                        Iterable<Relationship> relationships = p.relationships();
+                        for (Relationship relationship : relationships) {
+                            Long startID = relationship.startNodeId();
+                            Long endID = relationship.endNodeId();
+                            String rType = relationship.type();
+                            /**
+                             * asMap 相当于 节点的properties属性信息
+                             */
+                            System.out.println(
+                                    nodesMap.get(startID).asMap() + "-" + rType + "-"
+                                            + nodesMap.get(endID).asMap());
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.err.println(e.getClass() + "," + e.getMessage());
+        }
+    }
+
+
 }
