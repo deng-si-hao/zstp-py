@@ -158,7 +158,7 @@ public class MapDisplayController {
         //待返回的值，与cql return后的值顺序对应
         Set<Map<String ,Object>> nodeList = new HashSet<>();
         Set<Map<String ,Object>> edgeList = new HashSet<>();
-        Neo4jUtil.RunCypher(cql,nodeList,edgeList);
+//        Neo4jUtil.RunCypher(cql,nodeList,edgeList);
         retMap.put("nodes",nodeList);
         retMap.put("links",edgeList);
         return retMap;
@@ -175,7 +175,7 @@ public class MapDisplayController {
         //待返回的值，与cql return后的值顺序对应
         Set<Map<String ,Object>> nodeList = new HashSet<>();
         Set<Map<String ,Object>> edgeList = new HashSet<>();
-        Neo4jUtil.RunCypher(cql,nodeList,edgeList);
+        Neo4jUtil.RunCypher(nodeName,cql,nodeList,edgeList);
         retMap.put("nodes",nodeList);
         retMap.put("links",edgeList);
         return retMap;

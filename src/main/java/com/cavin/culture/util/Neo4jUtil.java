@@ -108,17 +108,17 @@ public class Neo4jUtil {
      * @param edgeList 关系
      * @return List<Map<String,Object>>
      */
-    public static <T> void RunCypher(String cql, Set<Map<String,Object>> nodeList, Set<Map<String,Object>> edgeList) {
+    public static <T> void RunCypher(String nodeName,String cql, Set<Map<String,Object>> nodeList, Set<Map<String,Object>> edgeList) {
         try {
+            int i=0;
             StatementResult result = session.run(cql);
             List<Record> list = result.list();
             for (Record r : list) {
                 for (String index : r.keys()) {
-                    int i=0;
                     Path path = r.get(index).asPath();
                     //节点
                     Iterable<Node> nodes = path.nodes();
-                    for (Iterator iter = nodes.iterator(); iter.hasNext(); ) {
+                    for (Iterator iter = nodes.iterator(); iter.hasNext(); i++) {
                         InternalNode nodeInter = (InternalNode) iter.next();
                         Map<String, Object> map = new HashMap<>();
                         //节点上设置的属性
@@ -127,7 +127,7 @@ public class Neo4jUtil {
                         map.put("id", nodeInter.id());
                         map.put("index",i);
                         nodeList.add(map);
-                        i++;
+                        System.out.println(i+"<<<<<<<<<<<<<<<<");
                     }
                     //关系
                     Iterable<Relationship> edges = path.relationships();
@@ -137,27 +137,25 @@ public class Neo4jUtil {
                         map.putAll(relationInter.asMap());
                         //关系上设置的属性
                         map.put("id", relationInter.id());
-                    /*    for (Iterator iterator = nodes.iterator(); iterator.hasNext(); ) {
-                            InternalNode nodeInter = (InternalNode) iterator.next();
-                           if(relationInter.startNodeId()==nodeInter.id()){
-                               map.put("source_name",nodeInter.get("name").toString().split("\"")[1]);
-                           }
-                           if(relationInter.endNodeId()==nodeInter.id()){
-                               map.put("target_name",nodeInter.get("name").toString().split("\"")[1]);
-                           }
-                        }*/
                         for(Map<String,Object> t:nodeList){
-                              if(t.get("id").equals(relationInter.startNodeId())){
-                                  map.put("source",t.get("index"));
-                                  map.put("source_name",t.get("name"));
-                              }
-                              if(t.get("id").equals(relationInter.endNodeId())){
-                                  map.put("target",t.get("index"));
-                                  map.put("target_name",t.get("name"));
-                              }
+                            if(t.get("id").equals(relationInter.startNodeId())){
+                                map.put("source",t.get("index"));
+                                map.put("source_name",t.get("name"));
+                            }
+                            if(t.get("id").equals(relationInter.endNodeId())){
+                                map.put("target",t.get("index"));
+                                map.put("target_name",t.get("name"));
+                            }
+                            map.put("type",relationInter.type());
+
                         }
-                        map.put("type",relationInter.type());
-                        edgeList.add( map);
+//                        map.put("type",relationInter.type());
+                        if(map.get("source_name")!=null&&!map.get("source_name").equals(nodeName)){
+                            map.clear();
+                        }else {
+                            edgeList.add(map);
+                        }
+
                     }
                 }
             }
