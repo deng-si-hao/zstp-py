@@ -1,6 +1,7 @@
 package com.cavin.culture.util;
 
 import com.alibaba.fastjson.JSONObject;
+import com.github.jsonldjava.utils.Obj;
 import org.apache.jena.atlas.json.JSON;
 import org.neo4j.driver.internal.InternalNode;
 import org.neo4j.driver.internal.InternalRelationship;
@@ -107,12 +108,13 @@ public class Neo4jUtil {
      * @param edgeList 关系
      * @return List<Map<String,Object>>
      */
-    public static <T> void getPathList(String cql, Set<T> nodeList, Set<T> edgeList) {
+    public static <T> void RunCypher(String cql, Set<Map<String,Object>> nodeList, Set<Map<String,Object>> edgeList) {
         try {
             StatementResult result = session.run(cql);
             List<Record> list = result.list();
             for (Record r : list) {
                 for (String index : r.keys()) {
+                    int i=0;
                     Path path = r.get(index).asPath();
                     //节点
                     Iterable<Node> nodes = path.nodes();
@@ -122,8 +124,10 @@ public class Neo4jUtil {
                         //节点上设置的属性
                         map.putAll(nodeInter.asMap());
                         //外加一个固定属性
-                        map.put("nodeId", nodeInter.id());
-                        nodeList.add((T) map);
+                        map.put("id", nodeInter.id());
+                        map.put("index",i);
+                        nodeList.add(map);
+                        i++;
                     }
                     //关系
                     Iterable<Relationship> edges = path.relationships();
@@ -133,10 +137,27 @@ public class Neo4jUtil {
                         map.putAll(relationInter.asMap());
                         //关系上设置的属性
                         map.put("id", relationInter.id());
-                        map.put("from", relationInter.startNodeId());
-                        map.put("to", relationInter.endNodeId());
+                    /*    for (Iterator iterator = nodes.iterator(); iterator.hasNext(); ) {
+                            InternalNode nodeInter = (InternalNode) iterator.next();
+                           if(relationInter.startNodeId()==nodeInter.id()){
+                               map.put("source_name",nodeInter.get("name").toString().split("\"")[1]);
+                           }
+                           if(relationInter.endNodeId()==nodeInter.id()){
+                               map.put("target_name",nodeInter.get("name").toString().split("\"")[1]);
+                           }
+                        }*/
+                        for(Map<String,Object> t:nodeList){
+                              if(t.get("id").equals(relationInter.startNodeId())){
+                                  map.put("source",t.get("index"));
+                                  map.put("source_name",t.get("name"));
+                              }
+                              if(t.get("id").equals(relationInter.endNodeId())){
+                                  map.put("target",t.get("index"));
+                                  map.put("target_name",t.get("name"));
+                              }
+                        }
                         map.put("type",relationInter.type());
-                        edgeList.add((T) map);
+                        edgeList.add( map);
                     }
                 }
             }

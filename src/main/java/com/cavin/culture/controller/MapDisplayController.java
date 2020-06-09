@@ -158,12 +158,28 @@ public class MapDisplayController {
         //待返回的值，与cql return后的值顺序对应
         Set<Map<String ,Object>> nodeList = new HashSet<>();
         Set<Map<String ,Object>> edgeList = new HashSet<>();
-        Neo4jUtil.getPathList(cql,nodeList,edgeList);
+        Neo4jUtil.RunCypher(cql,nodeList,edgeList);
         retMap.put("nodes",nodeList);
         retMap.put("links",edgeList);
         return retMap;
     }
 
+    /**
+    * 子图查询（java）
+    * */
+    @RequestMapping("/subGraph")
+    public Map<String, Object> getSubGraph(String nodeName){
+        Map<String, Object> retMap = new HashMap<>();
+        //cql语句
+        String cql = "match l = (n)-[]-(m) where n.name='"+nodeName+"' return l;";
+        //待返回的值，与cql return后的值顺序对应
+        Set<Map<String ,Object>> nodeList = new HashSet<>();
+        Set<Map<String ,Object>> edgeList = new HashSet<>();
+        Neo4jUtil.RunCypher(cql,nodeList,edgeList);
+        retMap.put("nodes",nodeList);
+        retMap.put("links",edgeList);
+        return retMap;
+    }
     //获取全图
     @RequestMapping(value = "/getalldata")
     public String getAllData() throws IOException{

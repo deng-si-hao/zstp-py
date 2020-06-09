@@ -139,7 +139,7 @@ public class Entity1Controller {
         //待返回的值，与cql return后的值顺序对应
         Set<Map<String ,Object>> nodeList = new HashSet<>();
         Set<Map<String ,Object>> edgeList = new HashSet<>();
-        Neo4jUtil.getPathList(cql,nodeList,edgeList);
+        Neo4jUtil.RunCypher(cql,nodeList,edgeList);
         retMap.put("nodeList",nodeList);
         retMap.put("edgeList",edgeList);
         return retMap;
