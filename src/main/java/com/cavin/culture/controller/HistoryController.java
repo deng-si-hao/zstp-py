@@ -91,7 +91,7 @@ public class HistoryController {
                                          @RequestParam(value = "scope")String scope) {
 //        List<Map<String, String>> nodes = ontInstanceService.getResourceObjectWithCate(individualName);
 //        List<Map<String, String>> queryResults = ontInstanceService.queryForKnowledge(individualName, scope);
-        //TODO:测试数据
+        //TODO:测试数据11
         List<Map<String, String>> nodes = new ArrayList<Map<String,String>>();
         Map map = new HashMap();
         map.put("name",individualName);
