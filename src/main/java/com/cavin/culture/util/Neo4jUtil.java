@@ -108,7 +108,7 @@ public class Neo4jUtil {
      * @param edgeList 关系
      * @return List<Map<String,Object>>
      */
-    public static <T> void RunCypher(String nodeName,String cql, Set<Map<String,Object>> nodeList, Set<Map<String,Object>> edgeList) {
+    public static <T> void RunCypher(String nodeName,String cql, List<Map<String,Object>> nodeList, Set<Map<String,Object>> edgeList) {
         try {
             int i=0;
             StatementResult result = session.run(cql);
@@ -118,7 +118,7 @@ public class Neo4jUtil {
                     Path path = r.get(index).asPath();
                     //节点
                     Iterable<Node> nodes = path.nodes();
-                    for (Iterator iter = nodes.iterator(); iter.hasNext(); i++) {
+                    for (Iterator iter = nodes.iterator(); iter.hasNext();) {
                         InternalNode nodeInter = (InternalNode) iter.next();
                         Map<String, Object> map = new HashMap<>();
                         //节点上设置的属性
@@ -126,9 +126,22 @@ public class Neo4jUtil {
                         //外加一个固定属性
                         map.put("id", nodeInter.id());
                         map.put("index",i);
-                        nodeList.add(map);
+                        //node去重
+                        for(Map<String,Object> node:nodeList){
+                            if(node.get("id")!=null && node.get("id").equals(map.get("id"))){
+                                map.clear();
+                               break;
+                            }
+                        }
+                        if(!map.isEmpty()){
+                            nodeList.add(map);
+                            i++;
+                        }
+
                         System.out.println(i+"<<<<<<<<<<<<<<<<");
                     }
+//                    Set<Map<String,Object>> sortSet = new TreeSet<Map<String,Object>>((o1, o2) -> o2.compute("index",o1));
+//                    sortSet.addAll(nodeList);
                     //关系
                     Iterable<Relationship> edges = path.relationships();
                     for (Iterator iter = edges.iterator(); iter.hasNext(); ) {
@@ -150,12 +163,15 @@ public class Neo4jUtil {
 
                         }
 //                        map.put("type",relationInter.type());
-                        if(map.get("source_name")!=null&&!map.get("source_name").equals(nodeName)){
-                            map.clear();
-                        }else {
+                        if(nodeName==null){
                             edgeList.add(map);
+                        }else {
+                            if(map.get("source_name")!=null&&!map.get("source_name").equals(nodeName)){
+                                map.clear();
+                            }else {
+                                edgeList.add(map);
+                            }
                         }
-
                     }
                 }
             }
@@ -163,4 +179,6 @@ public class Neo4jUtil {
             e.printStackTrace();
         }
     }
+
+
 }
