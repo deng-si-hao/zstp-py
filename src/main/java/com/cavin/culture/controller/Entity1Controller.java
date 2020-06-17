@@ -145,6 +145,26 @@ public class Entity1Controller {
         return retMap;
     }
 
+    @RequestMapping("/insertNeo4j")
+    public void insertNeo4j(){
+        //productionRelation
+        String clearcql="";
+        String cql="load csv from \"file:///csvf/conpents.csv\" as line  create (:components{type:line[1],label:\"components\", name:line[2],specification:line[3],batch:line[4],count:line[5],level:line[6],package:line[7],cost:line[8],classification:line[9]})";
+        String cql1="load csv from \"file:///csvf/manufacturer.csv\" as line  create (:manufacturer{name:line[1],label:\"manufacturer\", type:line[2]})";
+        String cql2="load csv from \"file:///csvf/unit.csv\" as line  create (:unit{name:line[1],label:\"unit\"})";
+        String cqlRelationPro="Load csv FROM \"file:///csvf/productionRelation.csv\" as line  match (from:components{name:toString(line[1])}),(to:manufacturer{name:toString(line[2])})  merge (from)-[r:production{name:toString(line[2]),name:toString(line[1])}]->(to)";
+        String cqlRelationScreen="Load csv FROM \"file:///csvf/screen.csv\" as line  match (from:unit{name:toString(line[1])}),(to:components{name:toString(line[2])})  merge (from)-[r:screen{name:toString(line[2]),name:toString(line[1])}]->(to)";
+        List<String> cqlList=new ArrayList<>();
+        cqlList.add(cql);
+        cqlList.add(cql1);
+        cqlList.add(cql2);
+        cqlList.add(cqlRelationPro);
+        cqlList.add(cqlRelationScreen);
+        for(String s:cqlList){
+            Neo4jUtil.importNeo4j(s);
+        }
+
+    }
 
 
 

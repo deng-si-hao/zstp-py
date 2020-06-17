@@ -4,6 +4,9 @@ import com.cavin.culture.controller.MapDisplayController;
 import com.cavin.culture.dao.UserDao;
 import com.cavin.culture.model.User;
 import com.cavin.culture.service.UserService;
+import com.cavin.culture.util.Neo4jUtil;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.neo4j.driver.v1.*;
@@ -335,5 +338,38 @@ class CultureApplicationTests {
         }
     }
 
+    @Test
+    public void importNeo4j(){
+//        List<String> csvfile=new ArrayList<>();
+        String cql="load csv from \\\"file:///csvf/test.csv\\\" as line \\n create (:test{name:line[1],label:\\\"test\\\"})";
+        Neo4jUtil.importNeo4j(cql);
+    }
+
+    @Test
+    public void neo4jTest() throws IOException {
+        String inPath = "F:\\0工作\\1知识图谱\\元器件知识图谱\\元器件筛选、DPA数据.xlsx";
+        XSSFWorkbook xwb = new XSSFWorkbook(new FileInputStream(inPath));
+
+        XSSFSheet xSheet = xwb.getSheetAt(0);
+        for (int i = 2; i <= 50; i++) {
+            if (xSheet.getRow(i) == null) {
+                continue;
+            }
+
+            String source = (xSheet.getRow(i)).getCell(6).toString();
+            String target = (xSheet.getRow(i)).getCell(2).toString();
+            String relation = "委托单位";
+
+            String recql = "create (from:co{name:\"" + source + "\"})-[:" + relation + "]->(to:co{name:\"" + target + "\"})";
+            String lacql1 = "create (:co{name:\"" + source + "\",label:\"co\"})";
+//            session.run(lacql1);
+//
+//            String lacql2 = "create (:coe{name:\""+target+"\",label:\"coe\"})";
+//            session.run(lacql2);
+
+            session.run(recql);
+
+        }
+    }
 
 }

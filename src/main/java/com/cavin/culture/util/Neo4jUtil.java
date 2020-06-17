@@ -102,7 +102,8 @@ public class Neo4jUtil {
     }
 
     /**
-     * cql 路径查询 返回节点和关系
+     * cql 查询 返回节点和关系
+     * @param nodeName 节点名称
      * @param cql 查询语句
      * @param nodeList 节点
      * @param edgeList 关系
@@ -137,11 +138,7 @@ public class Neo4jUtil {
                             nodeList.add(map);
                             i++;
                         }
-
-                        System.out.println(i+"<<<<<<<<<<<<<<<<");
                     }
-//                    Set<Map<String,Object>> sortSet = new TreeSet<Map<String,Object>>((o1, o2) -> o2.compute("index",o1));
-//                    sortSet.addAll(nodeList);
                     //关系
                     Iterable<Relationship> edges = path.relationships();
                     for (Iterator iter = edges.iterator(); iter.hasNext(); ) {
@@ -163,6 +160,7 @@ public class Neo4jUtil {
 
                         }
 //                        map.put("type",relationInter.type());
+                        //判断一度关系查询和路径查询
                         if(nodeName==null){
                             edgeList.add(map);
                         }else {
@@ -180,5 +178,17 @@ public class Neo4jUtil {
         }
     }
 
+    /**
+    * neo4j导入数据
+    * */
+    public static void importNeo4j(String cql){
+        try {
+            session.run(cql);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("导入信息错误！");
+        }
+
+    }
 
 }
