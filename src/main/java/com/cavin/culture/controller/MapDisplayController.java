@@ -31,7 +31,7 @@ import java.util.*;
 public class MapDisplayController {
 
 //    private static final String path="F:\\zhishitupu\\zstp\\src\\main\\resources\\static\\py\\neo4j2json_cons.py";
-    static Resource resource= new ClassPathResource("static/py/neo4j2json_cons.py");
+    static Resource resource= new ClassPathResource("static/excl/元器件筛选、DPA数据.xlsx");
 
     //初始化连接
     static Driver driver = GraphDatabase.driver("bolt://localhost:7687", AuthTokens.basic("neo4j", "12345678!a"));
@@ -225,16 +225,23 @@ public class MapDisplayController {
     * @path 文件路径
     *
     * */
+    @RequestMapping("/insertData")
     public void neo4jTest() throws IOException {
-        String path = "F:\\0工作\\1知识图谱\\元器件知识图谱\\元器件筛选、DPA数据.xlsx";
+        String path = String.valueOf(resource.getFile());
         //创建实体的cql语句
         List<String> labelCql= new ArrayList<>();
         //创建关系的cql语句
         List<String> relationCql= new ArrayList<>();
+        //创建用于去重得list
+        List<String> weituoCql= new ArrayList<>();
+        List<String> shiyanCql= new ArrayList<>();
+        List<String> guanxiCql= new ArrayList<>();
+        //装所有cql语句的list
+        List<List<String>> allcql=new ArrayList<>();
         //读取excl文件
         XSSFWorkbook xwb = new XSSFWorkbook(new FileInputStream(path));
         XSSFSheet xSheet = xwb.getSheetAt(0);
-        for (int i = 2; i <=xSheet.getLastRowNum(); i++) {
+        for (int i = 2; i <=10; i++) {
             if (xSheet.getRow(i) == null) {
                 continue;
             }
@@ -248,7 +255,7 @@ public class MapDisplayController {
             String xinghaoguige =  (xSheet.getRow(i)).getCell(8).toString();
             String fengzhuangcailiao =  (xSheet.getRow(i)).getCell(9).toString();
             String fengzhuangfangshi =  (xSheet.getRow(i)).getCell(10).toString();
-            String fengzhuangguige =  (xSheet.getRow(i)).getCell(111).toString();
+            String fengzhuangguige =  (xSheet.getRow(i)).getCell(11).toString();
             String kekaoxingyuji =  (xSheet.getRow(i)).getCell(12).toString();
             String shengchanbaozheng =  (xSheet.getRow(i)).getCell(13).toString();
             String shengchanpici =  (xSheet.getRow(i)).getCell(14).toString();
@@ -265,20 +272,56 @@ public class MapDisplayController {
             String caigoubianhao = (xSheet.getRow(i)).getCell(36).toString();
 
             //创建实体
-            String lacql = "create (:co{name:\"" + yuanqijianmingcheng + "\",label:\"co\"})";
-            //创建关系
-            String recql = "create (from:co{name:\"" + yuanqijianmingcheng + "\"})-[:" + weituodanwei + "]->(to:co{name:\"" + weituodanwei + "\"})";
+            //元器件
+            String yqjcql = "create (:co{name:\"" + yuanqijianmingcheng + "\",label:\"co\",type:\""+yuanqijianleixing+"\",specification:\""+xinghaoguige+"\"," +
+                    "batch:\""+shengchanpici+"\",manufacturer:\""+shengchancangjia+"\",rank:\""+zhiliangdengji+"\",encapsulation:\""+fengzhuangxingshi+"\",fenlei:\""+yijifenlei+"\"" +
+                    ",caigoubianhao:\""+caigoubianhao+"\"})";
+            //委托单位
+            String wtdwcql="create (:entrust{name:\""+weituodanwei+"\",label:\"entrust\"})";
+            //试验单位
+            String sydw="create (:unit{name:\""+shiyandanwei+"\",label:\"unit\"})";
+            //委托关系
+//            String recql = "create (from:co{name:\"" + yuanqijianmingcheng + "\"})-[r:entrust{name:\"" + weituodanwei + "\"}]->(to:entrust{name:\"" + weituodanwei + "\"})";
+            String recql="match (from:entrust{name:\"" + weituodanwei + "\"}),(to:co{name:\""+yuanqijianmingcheng+"\"})  merge (from)-[r:entrust{name:\""+weituodanwei+"\",name:\""+yuanqijianmingcheng+"\"}]->(to)";
+            String recql1="match (from:co{name:\"" + yuanqijianmingcheng + "\"}),(to:entrust{name:\""+weituodanwei+"\"})  merge (from)-[r:entrust{name:\""+yuanqijianmingcheng+"\",name:\""+weituodanwei+"\"}]->(to)";
 
-            labelCql.add(lacql);
+            //实验关系
+//            String syrecql="create (from:co{name:\"" + yuanqijianmingcheng + "\"})-[r:test{name:\"" + shiyandanwei + "\"}]->(to:unit{name:\"" + shiyandanwei + "\"})";
+            String syrecql="match (from:unit{name:\"" + shiyandanwei + "\"}),(to:co{name:\""+yuanqijianmingcheng+"\"})  merge (from)-[r:test{name:\""+shiyandanwei+"\",name:\""+yuanqijianmingcheng+"\"}]->(to)";
+            String syrecql1="match (from:co{name:\"" + yuanqijianmingcheng + "\"}),(to:unit{name:\""+shiyandanwei+"\"})  merge (from)-[r:test{name:\""+yuanqijianmingcheng+"\",name:\""+shiyandanwei+"\"}]->(to)";
+
+            //数据去重
+            weituoCql.add(wtdwcql);
+            shiyanCql.add(sydw);
+            guanxiCql.add(syrecql);
+            labelCql.add(yqjcql);
             relationCql.add(recql);
+            relationCql.add(recql1);
+            guanxiCql.add(syrecql1);
         }
-        //执行添加实体
-        for(String s:labelCql){
-            session.run(s);
+        allcql.add(delRepeat(weituoCql));
+        allcql.add(delRepeat(shiyanCql));
+        allcql.add(delRepeat(labelCql));
+        allcql.add(delRepeat(guanxiCql));
+        allcql.add(delRepeat(relationCql));
+        //执行cql
+        for(List<String> l:allcql){
+            for(String s:l){
+                session.run(s);
+            }
         }
-        //执行添加关系
-        for(String s:relationCql){
-            session.run(s);
-        }
+
     }
+    // 遍历后判断赋给另一个list集合，保持原来顺序
+    public static List<String> delRepeat(List<String> list) {
+        List<String> listNew = new ArrayList<String>();
+        for (String str : list) {
+            if (!listNew.contains(str)) {
+                listNew.add(str);
+            }
+        }
+        return listNew ;
+    }
+
+
 }
