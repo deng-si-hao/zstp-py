@@ -1,4 +1,4 @@
-package com.cavin.culture.controller.webFilter;
+package com.cavin.culture.webFilter;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

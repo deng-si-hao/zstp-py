@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cavin.culture.dao.ImageDao">
+    <resultMap id="image" type="com.cavin.culture.model.Image">
+        <id property="picId" column="pic_id" jdbcType="INTEGER"/>
+        <result property="userId" column="user_id" jdbcType="INTEGER"/>
+        <result property="picName" column="pic_name" jdbcType="VARCHAR"/>
+        <result property="picUrl" column="pic_url" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <insert id="addImage" parameterType="com.cavin.culture.model.Image">
+        insert into image (pic_id, user_id, pic_name, pic_url)
+            values (#{picId,jdbcType=VARCHAR}, #{userId}, #{picName}, #{picUrl})
+    </insert>
+
+</mapper>

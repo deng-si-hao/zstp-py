@@ -310,7 +310,6 @@ public class MapDisplayController {
                 session.run(s);
             }
         }
-
     }
     // 遍历后判断赋给另一个list集合，保持原来顺序
     public static List<String> delRepeat(List<String> list) {
