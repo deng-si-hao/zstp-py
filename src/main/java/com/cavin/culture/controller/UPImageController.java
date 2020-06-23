@@ -38,22 +38,29 @@ public class UPImageController {
                                           HttpServletRequest request) throws IOException {
         //获取提交文件名称
         String filename = pictureFile.getOriginalFilename();
+        //在文件更名为时间戳，避免重名
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+        String time=sdf.format(new Date());
+        String type=filename.substring(filename.lastIndexOf("."));
+        String newfilename=time+type;
         //定义上传文件存放的路径
 //        String path = request.getSession().getServletContext().getRealPath(fileLocation);//此处为tomcat下的路径，服务重启路径会变化
+       //存到根目录下
         String pathlocal=System.getProperty("user.dir")+"\\src\\main\\resources\\static\\image";
+        //存到缓存文件下
 //        String pathurl= ClassUtils.getDefaultClassLoader().getResource("").getPath()+"static/image/";
 //        System.out.println(pathlocal);
     /*    //返回保存的url，根据url可以进行文件查看或者下载
         String filePath = request.getScheme() + "://" + request.getServerName()
 //                + ":" + request.getServerPort() //端口 https443端口无需添加
                 + pathlocal + filename;*/
-        String pictureFileURL = pathlocal+"\\"+filename;//根路径+文件名
+        String pictureFileURL = pathlocal+"\\"+newfilename;//根路径+文件名
 //        System.out.println(pictureFileURL);
         //写入文件
         try {
 //            pictureFile.write(pictureFileURL);
-            fileupload(pictureFile.getBytes(),pathlocal,filename);
-            //插入这条Food数据
+            fileupload(pictureFile.getBytes(),pathlocal,newfilename);
+            //插入这条数据
             imageService.addImage(new Image(name, userId, picId, pictureFileURL));
             result.put("Result", "添加图片信息成功");
         } catch (IOException e) {
