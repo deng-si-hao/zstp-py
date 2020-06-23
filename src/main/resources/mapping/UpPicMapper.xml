@@ -3,7 +3,7 @@
 <mapper namespace="com.cavin.culture.dao.ImageDao">
     <resultMap id="image" type="com.cavin.culture.model.Image">
         <id property="picId" column="pic_id" jdbcType="INTEGER"/>
-        <result property="userId" column="user_id" jdbcType="INTEGER"/>
+        <result property="userId" column="user_id" jdbcType="VARCHAR"/>
         <result property="picName" column="pic_name" jdbcType="VARCHAR"/>
         <result property="picUrl" column="pic_url" jdbcType="VARCHAR"/>
     </resultMap>
@@ -13,4 +13,7 @@
             values (#{picId,jdbcType=VARCHAR}, #{userId}, #{picName}, #{picUrl})
     </insert>
 
+    <select id="findById" parameterType="java.lang.String" resultMap="image">
+        select * from image where FIND_IN_SET(#{userId}, user_id) ;
+    </select>
 </mapper>

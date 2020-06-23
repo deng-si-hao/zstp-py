@@ -2,10 +2,7 @@ package com.cavin.culture.controller;
 
 import com.cavin.culture.model.Image;
 import com.cavin.culture.service.ImageService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
@@ -16,6 +13,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -32,6 +30,10 @@ public class UPImageController {
     @Resource
     private ImageService imageService;
 
+    /**
+    * 接收前端传的fromData数据
+    *
+    * */
     @PostMapping("/addImage")
     @ResponseBody
     public Map<String, Object> uploadFood(String name, String userId, String picId, MultipartFile pictureFile,
@@ -103,6 +105,13 @@ public class UPImageController {
         out.write(file);
         out.flush();
         out.close();
+    }
+
+    @GetMapping("/findPicById")
+    public List<Image> findPicById(String userId){
+        List<Image> imageByUser= imageService.findById(userId);
+        System.out.println(imageByUser.size());
+        return imageByUser;
     }
 
 }
