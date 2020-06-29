@@ -7,6 +7,8 @@ import com.cavin.culture.neo4jdao.E3Dao;
 import com.cavin.culture.neo4jdao.E4Dao;
 import com.cavin.culture.util.Neo4jUtil;
 import com.cavin.culture.util.PythonUtil;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.neo4j.driver.internal.InternalNode;
@@ -32,6 +34,7 @@ public class MapDisplayController {
 
 //    private static final String path="F:\\zhishitupu\\zstp\\src\\main\\resources\\static\\py\\neo4j2json_cons.py";
     static Resource resource= new ClassPathResource("static/excl/元器件筛选、DPA数据.xlsx");
+
 
     //初始化连接
     static Driver driver = GraphDatabase.driver("bolt://localhost:7687", AuthTokens.basic("neo4j", "12345678!a"));
@@ -241,10 +244,13 @@ public class MapDisplayController {
         //读取excl文件
         XSSFWorkbook xwb = new XSSFWorkbook(new FileInputStream(path));
         XSSFSheet xSheet = xwb.getSheetAt(0);
+        String column="column";
         for (int i = 2; i <=10; i++) {
             if (xSheet.getRow(i) == null) {
                 continue;
             }
+//            column+i= (xSheet.getRow(i)).getCell(1).toString();
+
             String shiyanbianhao =  (xSheet.getRow(i)).getCell(1).toString();
             String weituodanwei =  (xSheet.getRow(i)).getCell(2).toString();
             String weituoshijian =  (xSheet.getRow(i)).getCell(3).toString();
@@ -321,6 +327,18 @@ public class MapDisplayController {
         }
         return listNew ;
     }
-
+    /**
+    * 导入自选输出表
+    *
+    * */
+    @RequestMapping("/importData")
+    public void importData() throws IOException {
+        try {
+            Neo4jUtil.importData();
+            System.out.println("导入数据成功！");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
 }

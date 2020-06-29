@@ -3,6 +3,8 @@ package com.cavin.culture.util;
 import com.alibaba.fastjson.JSONObject;
 import com.github.jsonldjava.utils.Obj;
 import org.apache.jena.atlas.json.JSON;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.neo4j.driver.internal.InternalNode;
 import org.neo4j.driver.internal.InternalRelationship;
 import org.neo4j.driver.v1.*;
@@ -10,7 +12,11 @@ import org.neo4j.driver.v1.types.Node;
 import org.neo4j.driver.v1.types.Path;
 import org.neo4j.driver.v1.types.Relationship;
 import org.omg.CORBA.MARSHAL;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -20,6 +26,8 @@ public class Neo4jUtil {
 
     static Driver driver = GraphDatabase.driver("bolt://localhost:7687", AuthTokens.basic("neo4j", "12345678!a"));
     private static Session session = driver.session();
+
+    static Resource resourceOther=new ClassPathResource("static/excl/自选输出表.xlsx");
 
     //Object转Map，用于处理数据
     public static Map<String, Object> objectToMap(Object obj) throws IllegalAccessException {
@@ -189,6 +197,87 @@ public class Neo4jUtil {
             System.out.println("导入信息错误！");
         }
 
+    }
+    /**
+    * 导入自主输出表数据
+    *
+    * */
+    public static void importData() throws IOException {
+        String path = String.valueOf(resourceOther.getFile());
+        //创建实体的cql语句
+//        List<String> labelCql= new ArrayList<>();
+        //创建关系的cql语句
+//        List<String> relationCql= new ArrayList<>();
+        //创建用于去重得list
+        List<String> weituoCql= new ArrayList<>();
+        //装所有cql语句的list
+        List<List<String>> allcql=new ArrayList<>();
+        //读取excl文件
+        XSSFWorkbook xwb = new XSSFWorkbook(new FileInputStream(path));
+        XSSFSheet xSheet = xwb.getSheetAt(0);
+        for (int i = 1; i <=xSheet.getLastRowNum(); i++) {
+            if (xSheet.getRow(i) == null) {
+                continue;
+            }
+            String chanpinfenlei =  (xSheet.getRow(i)).getCell(2).toString();
+            String chanpinmingcheng =  (xSheet.getRow(i)).getCell(3).toString();
+            String xilie =  (xSheet.getRow(i)).getCell(4).toString();
+            String xinghaoguige =  (xSheet.getRow(i)).getCell(5).toString();
+            String shengchanchangjia =  (xSheet.getRow(i)).getCell(6).toString();
+            String gonghuozhuangtai =  (xSheet.getRow(i)).getCell(7).toString();
+            String zhiliangdengji =  (xSheet.getRow(i)).getCell(8).toString();
+            String yujidengji =  (xSheet.getRow(i)).getCell(9).toString();
+            String fengzhuangxingshi =  (xSheet.getRow(i)).getCell(10).toString();
+            String wendufanwei =  (xSheet.getRow(i)).getCell(11).toString();
+            String xingnengcanshu =  (xSheet.getRow(i)).getCell(12).toString();
+            String xuanyongdengji =  (xSheet.getRow(i)).getCell(13).toString();
+            String anquanyansedengji =  (xSheet.getRow(i)).getCell(14).toString();
+            String tidaixinxi =  (xSheet.getRow(i)).getCell(15).toString();
+            String chuangjianshijian =  (xSheet.getRow(i)).getCell(16).toString();
+
+
+            //创建实体
+            //元器件
+            String yqjcql = "create (:EEPROM{name:\"" + xilie + "\",label:\""+chanpinfenlei+"\",系列:\""+xilie+"\",型号规格:\""+xinghaoguige+"\"," +
+                    "封装形式:\""+fengzhuangxingshi+"\",工作温度范围:\""+wendufanwei+"\",主要性能参数:\""+xingnengcanshu+"\",封装形式:\""+fengzhuangxingshi+"\"})";
+            //委托单位
+            String wtdwcql="create (:生产厂家{name:\""+shengchanchangjia+"\",label:\"生产厂家\"})";
+            //试验单位
+//            String sydw="create (:unit{name:\""+shiyandanwei+"\",label:\"unit\"})";
+            //委托关系
+//            String recql = "create (from:co{name:\"" + yuanqijianmingcheng + "\"})-[r:entrust{name:\"" + weituodanwei + "\"}]->(to:entrust{name:\"" + weituodanwei + "\"})";
+//            String recql="match (from:entrust{name:\"" + weituodanwei + "\"}),(to:co{name:\""+yuanqijianmingcheng+"\"})  merge (from)-[r:entrust{name:\""+weituodanwei+"\",name:\""+yuanqijianmingcheng+"\"}]->(to)";
+//            String recql1="match (from:co{name:\"" + yuanqijianmingcheng + "\"}),(to:entrust{name:\""+weituodanwei+"\"})  merge (from)-[r:entrust{name:\""+yuanqijianmingcheng+"\",name:\""+weituodanwei+"\"}]->(to)";
+            //生产关系
+//            String syrecql="create (from:co{name:\"" + yuanqijianmingcheng + "\"})-[r:test{name:\"" + shiyandanwei + "\"}]->(to:unit{name:\"" + shiyandanwei + "\"})";
+            String syrecql="match (from:生产厂家{name:\"" + shengchanchangjia + "\"}),(to:EEPROM{name:\""+xilie+"\"})  create (from)-[r:"+gonghuozhuangtai+"{name:\""+shengchanchangjia+"\",name:\""+xilie+"\"}]->(to)";
+            String syrecql1="match (from:EEPROM{name:\"" + xilie + "\"}),(to:生产厂家{name:\""+shengchanchangjia+"\"})  create (from)-[r:"+gonghuozhuangtai+"{name:\""+xilie+"\",name:\""+shengchanchangjia+"\"}]->(to)";
+
+            //数据去重
+            weituoCql.add(yqjcql);
+            weituoCql.add(wtdwcql);
+            weituoCql.add(syrecql);
+            weituoCql.add(syrecql1);
+
+
+        }
+        allcql.add(delRepeat(weituoCql));
+        //执行cql
+        for(List<String> l:allcql){
+            for(String s:l){
+                session.run(s);
+            }
+        }
+    }
+    // 遍历后判断赋给另一个list集合，保持原来顺序
+    public static List<String> delRepeat(List<String> list) {
+        List<String> listNew = new ArrayList<String>();
+        for (String str : list) {
+            if (!listNew.contains(str)) {
+                listNew.add(str);
+            }
+        }
+        return listNew ;
     }
 
 }

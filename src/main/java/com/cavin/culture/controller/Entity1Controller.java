@@ -2,7 +2,9 @@ package com.cavin.culture.controller;
 
 import com.cavin.culture.controller.InitializeData.InitializeNeoData;
 import com.cavin.culture.neo4jRelationship.ContainsARelationship;
+import com.cavin.culture.neo4jRelationship.Relationship;
 import com.cavin.culture.neo4jdao.*;
+import com.cavin.culture.neo4jmodel.GeneralNode;
 import com.cavin.culture.neo4jmodel.e1;
 import com.cavin.culture.neo4jmodel.e2;
 import com.cavin.culture.util.Neo4jUtil;
@@ -11,7 +13,7 @@ import org.neo4j.driver.internal.InternalRelationship;
 import org.neo4j.driver.v1.*;
 import org.neo4j.driver.v1.types.Node;
 import org.neo4j.driver.v1.types.Path;
-import org.neo4j.driver.v1.types.Relationship;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -137,9 +139,9 @@ public class Entity1Controller {
         //cql语句
         String cql = "match l=shortestPath(({name:'"+param1+"'})-[*]-({name:'"+param2+"'})) return l";
         //待返回的值，与cql return后的值顺序对应
-        Set<Map<String ,Object>> nodeList = new HashSet<>();
+        List<Map<String ,Object>> nodeList = new ArrayList<>();
         Set<Map<String ,Object>> edgeList = new HashSet<>();
-//        Neo4jUtil.RunCypher(cql,nodeList,edgeList);
+        Neo4jUtil.RunCypher(null,cql,nodeList,edgeList);
         retMap.put("nodeList",nodeList);
         retMap.put("edgeList",edgeList);
         return retMap;
@@ -166,7 +168,46 @@ public class Entity1Controller {
 
     }
 
+    public void insertNode(GeneralNode generalNode){
+        //TODO 多个属性的node插入语句
+        String cql="create (:"+generalNode.getLabel()+"{name:\""+generalNode.getName()+"\",label:\""+generalNode.getLabel()+"\"})";
 
+    }
 
+    public void insertRelation(Relationship relationship){
+        //TODO 插入关系的cql语句 （相互指向）双线
+        String relationLeft="match (from:"+relationship.getStartType()+"{name:\"" + relationship.getStart() + "\"})," +
+                "(to:"+relationship.getEndType()+"{name:\""+relationship.getEnd()+"\"})  merge (from)-[r:"+relationship.getRelationType()+"" +
+                "{name:\""+relationship.getStart()+"\",name:\""+relationship.getEnd()+"\"}]->(to)";
+        String relationRight="match (from:"+relationship.getEndType()+"{name:\"" + relationship.getEnd() + "\"}),(to:"+relationship.getStartType()
+                +"{name:\""+relationship.getStart()+"\"})  merge (from)-[r:"+relationship.getRelationType()+"{name:\""+relationship.getEnd()+
+                "\",name:\""+relationship.getStart()+"\"}]->(to)";
+    }
+    /**
+    * 传入一个图，即nodeList和edgeList
+    *
+    * */
+    public void addGraph(List<Map<String,Object>> nodeList,List<Map<String,Object>> edgeList){
+        //TODO 处理node
+        for(Map map:nodeList){
+            String nodeId = (String) map.get("id");
+            String label = (String) map.get("label");
+            String name = (String) map.get("name");
+        }
+
+        //TODO 处理edge
+        for(Map map:edgeList){
+            String sourceType= (String) map.get("sourceLabel");
+            String source = (String) map.get("source");
+            String targetType= (String) map.get("targetLabel");
+            String target = (String) map.get("target");
+            String type = (String) map.get("type");
+            String relationRight="match (from:"+sourceType+"{name:\"" +source+ "\"}),(to:"+targetType
+                    +"{name:\""+target+"\"})  merge (from)-[r:"+type+"{name:\""+source+
+                    "\",name:\""+target+"\"}]->(to)";
+
+        }
+
+    }
 
 }
