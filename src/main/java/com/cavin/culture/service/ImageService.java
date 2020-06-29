@@ -21,5 +21,8 @@ public class ImageService {
         return  imageDao.findById(userId);
     }
 
+    public void delUserId(String userId,int picId){
+        imageDao.delUserId(userId, picId);
+    }
 
 }

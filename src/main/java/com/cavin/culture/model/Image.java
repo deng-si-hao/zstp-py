@@ -1,5 +1,7 @@
 package com.cavin.culture.model;
 
+import java.util.Date;
+
 public class Image {
     String picName;
 
@@ -8,6 +10,26 @@ public class Image {
     String picId;
 
     String picUrl;
+
+    String createBy;
+
+    String createDate;
+
+    public String getCreateBy() {
+        return createBy;
+    }
+
+    public void setCreateBy(String createBy) {
+        this.createBy = createBy;
+    }
+
+    public String getCreateDate() {
+        return createDate;
+    }
+
+    public void setCreateDate(String createDate) {
+        this.createDate = createDate;
+    }
 
     public String getPicName() {
         return picName;
@@ -44,10 +66,12 @@ public class Image {
     public Image() {
     }
 
-    public Image(String picName,String userId, String picId, String picUrl) {
+    public Image(String picName,String userId, String picId, String picUrl,String createBy,String createDate) {
         this.picName=picName;
         this.userId = userId;
         this.picId = picId;
         this.picUrl = picUrl;
+        this.createBy=createBy;
+        this.createDate=createDate;
     }
 }

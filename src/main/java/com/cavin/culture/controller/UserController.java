@@ -77,11 +77,13 @@ public class UserController {
                     // 登陆成功
                     String token = JWTUtil.getJwtToken(checkUser.getUserName());
                     Cookie cookie = new Cookie("access_token", token);
+                    Cookie cookieUserId = new Cookie("userId",(String.valueOf(checkUser.getId())));
                     cookie.setDomain("localhost");
                     cookie.setPath("/");
                     cookie.setHttpOnly(true);
                     cookie.setMaxAge(3*24*60*60);
                     response.addCookie(cookie);
+                    response.addCookie(cookieUserId);
                     return JsonMessage.adminLogin(checkUser.getLevel());
             }else {
                     return JsonMessage.error(400, "密码错误！");

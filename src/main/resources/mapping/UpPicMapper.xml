@@ -6,14 +6,20 @@
         <result property="userId" column="user_id" jdbcType="VARCHAR"/>
         <result property="picName" column="pic_name" jdbcType="VARCHAR"/>
         <result property="picUrl" column="pic_url" jdbcType="VARCHAR"/>
+        <result property="createBy" column="createBy" jdbcType="VARCHAR"/>
+        <result property="createDate" column="createDate" jdbcType="VARCHAR"/>
     </resultMap>
 
     <insert id="addImage" parameterType="com.cavin.culture.model.Image">
-        insert into image (pic_id, user_id, pic_name, pic_url)
-            values (#{picId,jdbcType=VARCHAR}, #{userId}, #{picName}, #{picUrl})
+        insert into image (pic_id, user_id, pic_name, pic_url,createBy,createDate)
+            values (#{picId,jdbcType=VARCHAR}, #{userId}, #{picName}, #{picUrl},#{createBy},#{createDate})
     </insert>
 
     <select id="findById" parameterType="java.lang.String" resultMap="image">
         select * from image where FIND_IN_SET(#{userId}, user_id) ;
     </select>
+
+    <update id="updateUserId">
+        update image set user_id = replace(user_id,#{userId},'') where pic_id =#{picId}
+    </update>
 </mapper>

@@ -372,4 +372,9 @@ class CultureApplicationTests {
         }
     }
 
+
+    public void addCookie(){
+
+    }
+
 }
