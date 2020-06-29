@@ -22,7 +22,7 @@ public class ImageService {
     }
 
     public void delUserId(String userId,int picId){
-        imageDao.delUserId(userId, picId);
+        imageDao.updateUserId(userId, picId);
     }
 
 }

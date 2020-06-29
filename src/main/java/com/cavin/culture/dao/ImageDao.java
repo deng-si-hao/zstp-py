@@ -13,5 +13,5 @@ public interface ImageDao {
     //按照用户id查询所属图片
     List<Image> findById(@Param("userId") String userId);
     //根据userId删除对应分享
-    void delUserId(@Param("userId")String userId,@Param("picId")int picId);
+    void updateUserId(@Param("userId")String userId,@Param("picId")int picId);
 }
