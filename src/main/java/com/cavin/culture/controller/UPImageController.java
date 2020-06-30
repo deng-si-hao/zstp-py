@@ -2,6 +2,7 @@ package com.cavin.culture.controller;
 
 import com.cavin.culture.model.Image;
 import com.cavin.culture.service.ImageService;
+import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -64,25 +65,26 @@ public class UPImageController {
         //定义上传文件存放的路径
 //        String path = request.getSession().getServletContext().getRealPath(fileLocation);//此处为tomcat下的路径，服务重启路径会变化
        //存到根目录下
-        String pathlocal=System.getProperty("user.dir")+"\\src\\main\\resources\\static\\image";
+//        String pathlocal=System.getProperty("user.dir")+"\\src\\main\\resources\\static\\image";
         //存到缓存文件下
-//        String pathurl= ClassUtils.getDefaultClassLoader().getResource("").getPath()+"static/image/";
+        String pathurl= ClassUtils.getDefaultClassLoader().getResource("").getPath()+"static/image/";
+        String pathUrl = pathurl.substring(1);
 //        System.out.println(pathlocal);
     /*    //返回保存的url，根据url可以进行文件查看或者下载
         String filePath = request.getScheme() + "://" + request.getServerName()
 //                + ":" + request.getServerPort() //端口 https443端口无需添加
                 + pathlocal + filename;*/
-        String pictureFileURL = pathlocal+"\\"+newfilename;//根路径+文件名
+        String pictureFileURL = pathUrl+"\\"+newfilename;//根路径+文件名
         //生成UUID用于标识图片
-        String uuid = UUID.randomUUID().toString().replaceAll("-","");
+        String picId = UUID.randomUUID().toString().replaceAll("-","");
         //获取当前登录用户id
 //        System.out.println(pictureFileURL);
         //写入文件
         try {
 //            pictureFile.write(pictureFileURL);
-            fileupload(pictureFile.getBytes(),pathlocal,newfilename);
+            fileupload(pictureFile.getBytes(),pathUrl,newfilename);
             //插入这条数据
-            imageService.addImage(new Image(name, userId, uuid, pictureFileURL,createBy,new Date()));
+            imageService.addImage(new Image(name, userId, picId, pictureFileURL,createBy,new Date()));
             result.put("Result", "添加图片信息成功");
         } catch (IOException e) {
             e.printStackTrace();
