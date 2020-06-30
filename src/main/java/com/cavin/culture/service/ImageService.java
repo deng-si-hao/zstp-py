@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class ImageService {
@@ -17,8 +18,8 @@ public class ImageService {
        return imageDao.addImage(image);
     }
 
-    public List<Image> findById(String userId){
-        return  imageDao.findById(userId);
+    public List<Image> findById(Map<String, Object> param){
+        return  imageDao.findById(param);
     }
 
     public void delUserId(String userId,int picId){

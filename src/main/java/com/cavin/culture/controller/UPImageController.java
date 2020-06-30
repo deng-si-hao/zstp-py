@@ -127,8 +127,16 @@ public class UPImageController {
     }
 
     @RequestMapping("/findPicById")
-    public List<Image> findPicById(String userId){
-        List<Image> imageByUser= imageService.findById(userId);
+    public List<Image> findPicById(String userId,Date startDate,Date endDate,String picName){
+        SimpleDateFormat sdf= new SimpleDateFormat("yyyy-MM-dd");
+        String startTime=sdf.format(startDate);
+        String endTime = sdf.format(endDate);
+        Map<String,Object> param = new HashMap<>();
+        param.put("userId",userId);
+        param.put("startTime",startTime);
+        param.put("endTime",endTime);
+        param.put("picName",picName);
+        List<Image> imageByUser= imageService.findById(param);
         System.out.println(imageByUser.size());
         return imageByUser;
     }

@@ -7,16 +7,31 @@
         <result property="picName" column="pic_name" jdbcType="VARCHAR"/>
         <result property="picUrl" column="pic_url" jdbcType="VARCHAR"/>
         <result property="createBy" column="createBy" jdbcType="VARCHAR"/>
-        <result property="createDate" column="createDate" jdbcType="VARCHAR"/>
+        <result property="createDate" column="createDate" jdbcType="DATE"/>
     </resultMap>
+
+    <sql id="columns">
+        pic_id, user_id, pic_name, pic_url,createBy,createDate
+    </sql>
+
+    <sql id="dynamicWhere">
+        <where>
+            FIND_IN_SET(#{userId}, user_id)
+            <if test="pic_name != null">AND pic_name=#{picName}</if>
+            <if test="startTime != null">AND createDate &gt;= #{startTime}</if>
+            <if test="endTime != null">AND createDate &lt;= #{endTime}</if>
+
+        </where>
+    </sql>
 
     <insert id="addImage" parameterType="com.cavin.culture.model.Image">
         insert into image (pic_id, user_id, pic_name, pic_url,createBy,createDate)
             values (#{picId,jdbcType=VARCHAR}, #{userId}, #{picName}, #{picUrl},#{createBy},#{createDate})
     </insert>
 
-    <select id="findById" parameterType="java.lang.String" resultMap="image">
-        select * from image where FIND_IN_SET(#{userId}, user_id) ;
+    <select id="findById" parameterType="java.util.Map" resultMap="image">
+        select <include refid="columns"/> from image
+        <include refid="dynamicWhere"/>
     </select>
 
     <update id="updateUserId">
