@@ -82,7 +82,7 @@ public class UPImageController {
 //            pictureFile.write(pictureFileURL);
             fileupload(pictureFile.getBytes(),pathlocal,newfilename);
             //插入这条数据
-            imageService.addImage(new Image(name, userId, uuid, pictureFileURL,createBy,createDate));
+            imageService.addImage(new Image(name, userId, uuid, pictureFileURL,createBy,new Date()));
             result.put("Result", "添加图片信息成功");
         } catch (IOException e) {
             e.printStackTrace();

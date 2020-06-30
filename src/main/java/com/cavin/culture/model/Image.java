@@ -13,7 +13,7 @@ public class Image {
 
     String createBy;
 
-    String createDate;
+    Date createDate;
 
     public String getCreateBy() {
         return createBy;
@@ -23,11 +23,11 @@ public class Image {
         this.createBy = createBy;
     }
 
-    public String getCreateDate() {
+    public Date getCreateDate() {
         return createDate;
     }
 
-    public void setCreateDate(String createDate) {
+    public void setCreateDate(Date createDate) {
         this.createDate = createDate;
     }
 
@@ -66,7 +66,7 @@ public class Image {
     public Image() {
     }
 
-    public Image(String picName,String userId, String picId, String picUrl,String createBy,String createDate) {
+    public Image(String picName,String userId, String picId, String picUrl,String createBy,Date createDate) {
         this.picName=picName;
         this.userId = userId;
         this.picId = picId;
