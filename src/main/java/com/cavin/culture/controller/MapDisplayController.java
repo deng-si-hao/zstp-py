@@ -340,5 +340,20 @@ public class MapDisplayController {
             e.printStackTrace();
         }
     }
-
+    /**
+    * 按关系扩展下一个实体
+    *
+    * */
+    public Map<String,Object> OpenRelation(String node,String edge){
+        Map<String, Object> retMap = new HashMap<>();
+        //cql语句
+        String cql = "match l = (n)-[r:"+edge+"]-(m) where n.name='"+node+"'  return l;";
+        //待返回的值，与cql return后的值顺序对应
+        List<Map<String ,Object>> nodeList = new ArrayList<>();
+        Set<Map<String ,Object>> edgeList = new HashSet<>();
+        Neo4jUtil.RunCypher(node,cql,nodeList,edgeList);
+        retMap.put("nodes",nodeList);
+        retMap.put("links",edgeList);
+        return retMap;
+    }
 }

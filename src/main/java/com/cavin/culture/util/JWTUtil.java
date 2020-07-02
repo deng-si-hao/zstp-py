@@ -7,7 +7,9 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 
 import java.security.Key;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.UUID;
 
 public class JWTUtil {
 
@@ -43,5 +45,20 @@ public class JWTUtil {
         return claims;
     }
 
+    /**
+    * 生成id
+    * */
+    public static String getNewId() {
+        //获取UUID
+        String uuid = UUID.randomUUID().toString().replaceAll("-", "").toUpperCase();
+        //生成后缀
+        long suffix = Math.abs(uuid.hashCode() % 100000000);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyMMdd");
+        String time = sdf.format(new Date(System.currentTimeMillis()));
+        //生成前缀
+        long prefix = Long.parseLong(time) * 100000000;
+        String userId = String.valueOf(prefix + suffix);
+        return userId;
+    }
 
 }

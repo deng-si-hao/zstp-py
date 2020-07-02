@@ -2,6 +2,7 @@ package com.cavin.culture.controller;
 
 import com.cavin.culture.model.Image;
 import com.cavin.culture.service.ImageService;
+import com.cavin.culture.util.JWTUtil;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -12,6 +13,9 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -76,7 +80,7 @@ public class UPImageController {
                 + pathlocal + filename;*/
         String pictureFileURL = pathUrl+"\\"+newfilename;//根路径+文件名
         //生成UUID用于标识图片
-        String picId = UUID.randomUUID().toString().replaceAll("-","");
+        String picId = JWTUtil.getNewId();
         //获取当前登录用户id
 //        System.out.println(pictureFileURL);
         //写入文件
@@ -155,5 +159,30 @@ public class UPImageController {
         return result;
     }
 
+    @RequestMapping("/downloadPic")
+    public void download(String urlPic, String picName) throws Exception {
+        // 构造URL
+        URL url = new URL(urlPic);
+        // 打开连接
+        URLConnection con = url.openConnection();
+        // 输入流
+        InputStream is = con.getInputStream();
+        // 1K的数据缓冲
+        byte[] bs = new byte[1024];
+        // 读取到的数据长度
+        int len;
+        // 输出的文件流
+        String filename = "D:\\图片下载/" + picName + ".jpg";  //下载路径及下载图片名称
+        File file = new File(filename);
+        FileOutputStream os = new FileOutputStream(file, true);
+        // 开始读取
+        while ((len = is.read(bs)) != -1) {
+            os.write(bs, 0, len);
+        }
+        System.out.println(picName);
+        // 完毕，关闭所有链接
+        os.close();
+        is.close();
+    }
 }
 
