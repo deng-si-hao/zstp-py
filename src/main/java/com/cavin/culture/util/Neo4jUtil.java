@@ -1,8 +1,8 @@
 package com.cavin.culture.util;
 
 import com.alibaba.fastjson.JSONObject;
-import com.github.jsonldjava.utils.Obj;
-import org.apache.jena.atlas.json.JSON;
+import org.apache.jena.ext.com.google.common.collect.HashMultimap;
+import org.apache.jena.ext.com.google.common.collect.Multimap;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.neo4j.driver.internal.InternalNode;
@@ -11,9 +11,11 @@ import org.neo4j.driver.v1.*;
 import org.neo4j.driver.v1.types.Node;
 import org.neo4j.driver.v1.types.Path;
 import org.neo4j.driver.v1.types.Relationship;
-import org.omg.CORBA.MARSHAL;
+import org.neo4j.driver.v1.util.Pair;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.stereotype.Component;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -22,10 +24,14 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Component
 public class Neo4jUtil {
 
-    static Driver driver = GraphDatabase.driver("bolt://localhost:7687", AuthTokens.basic("neo4j", "12345678!a"));
-    private static Session session = driver.session();
+    @Autowired
+    private Driver neo4jDriver;
+
+    /*static Driver driver = GraphDatabase.driver("bolt://localhost:7687", AuthTokens.basic("neo4j", "12345678!a"));*/
+
 
     static Resource resourceOther=new ClassPathResource("static/excl/自选输出表.xlsx");
 
@@ -42,6 +48,21 @@ public class Neo4jUtil {
         return map;
     }
 
+    /**
+    * 执行cypher的通用方法
+    *
+    * */
+    public StatementResult excuteCypherSql(String cypherSql) {
+        StatementResult result = null;
+        try (Session session = neo4jDriver.session()) {
+            System.out.println(cypherSql);
+            result = session.run(cypherSql);
+            session.close();
+        } catch (Exception e) {
+            throw e;
+        }
+        return result;
+    }
 
     /*
     * 子图翻译
@@ -117,10 +138,10 @@ public class Neo4jUtil {
      * @param edgeList 关系
      * @return List<Map<String,Object>>
      */
-    public static <T> void RunCypher(String nodeName,String cql, List<Map<String,Object>> nodeList, Set<Map<String,Object>> edgeList) {
+    public <T> void RunCypher(String nodeName,String cql, List<Map<String,Object>> nodeList, Set<Map<String,Object>> edgeList) {
         try {
             int i=0;
-            StatementResult result = session.run(cql);
+            StatementResult result = excuteCypherSql(cql);
             List<Record> list = result.list();
             for (Record r : list) {
                 for (String index : r.keys()) {
@@ -189,21 +210,22 @@ public class Neo4jUtil {
     /**
     * neo4j导入数据
     * */
-    public static void importNeo4j(String cql){
+    public void importNeo4j(String cql){
         try {
+            Session session = neo4jDriver.session();
             session.run(cql);
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println("导入信息错误！");
         }
-
     }
     /**
     * 导入自主输出表数据
     *
     * */
-    public static void importData() throws IOException {
+    public void importData() throws IOException {
         String path = String.valueOf(resourceOther.getFile());
+
         //创建实体的cql语句
 //        List<String> labelCql= new ArrayList<>();
         //创建关系的cql语句
@@ -235,7 +257,6 @@ public class Neo4jUtil {
             String tidaixinxi =  (xSheet.getRow(i)).getCell(15).toString();
             String chuangjianshijian =  (xSheet.getRow(i)).getCell(16).toString();
 
-
             //创建实体
             //元器件
             String yqjcql = "create (:EEPROM{name:\"" + xilie + "\",label:\""+chanpinfenlei+"\",系列:\""+xilie+"\",型号规格:\""+xinghaoguige+"\"," +
@@ -258,14 +279,12 @@ public class Neo4jUtil {
             weituoCql.add(wtdwcql);
             weituoCql.add(syrecql);
             weituoCql.add(syrecql1);
-
-
         }
         allcql.add(delRepeat(weituoCql));
         //执行cql
         for(List<String> l:allcql){
             for(String s:l){
-                session.run(s);
+                excuteCypherSql(s);
             }
         }
     }
@@ -278,6 +297,215 @@ public class Neo4jUtil {
             }
         }
         return listNew ;
+    }
+
+    /**
+    * 查询label下所有node
+    *
+    * */
+    public List<Map<String,Object>> nodeByLabel(String label){
+        //定义查询节点的cypher语句
+        String cypher = String.format("MATCH l = (n:`%s`) return l", label);
+        List<Map<String,Object>> res=new ArrayList<>();
+        StatementResult result =  excuteCypherSql(cypher);
+        List<Record> list = result.list();
+        for (Record r : list) {
+            for (String index : r.keys()) {
+                Path path = r.get(index).asPath();
+                //节点
+                Iterable<Node> nodes = path.nodes();
+                for (Iterator iter = nodes.iterator(); iter.hasNext();) {
+                    InternalNode nodeInter = (InternalNode) iter.next();
+                    Map<String,Object> map=new HashMap<>();
+                    //节点上设置的属性
+                    map.putAll(nodeInter.asMap());
+                    res.add(map);
+                }
+            }
+        }
+        return res;
+    }
+
+    /**
+    * 获取所有的label
+    *
+    * */
+    public List<Object> init(){
+        List<Object> label=new ArrayList<>();
+        List<Object> labelAll = new ArrayList<>();
+        List<Map<String, Object>> res = new ArrayList<>();
+        String cql = "match l=(n) return l";
+        StatementResult result =excuteCypherSql(cql);
+        List<Record> list = result.list();
+        for (Record r : list) {
+            for (String index : r.keys()) {
+                Path path = r.get(index).asPath();
+                //节点
+                Iterable<Node> nodes = path.nodes();
+                for (Iterator iter = nodes.iterator(); iter.hasNext(); ) {
+                    InternalNode nodeInter = (InternalNode) iter.next();
+                    Map<String, Object> map = new HashMap<>();
+                    //节点上设置的属性
+                    map.putAll(nodeInter.asMap());
+                    map.put("label", nodeInter.get("label"));
+                    res.add(map);
+                }
+            }
+        }
+        //对实体标签去重
+        for (Map<String, Object> map : res) {
+            labelAll.add(map.get("label"));
+        }
+        for (int i = 0; i < labelAll.size(); i++) {
+            Object str = labelAll.get(i);  //获取传入集合对象的每一个元素
+            String one = str.toString();
+            String two = one.substring(1, one.length() - 1);
+            if (!label.contains(two)) {   //查看新集合中是否有指定的元素，如果没有则加入
+                label.add(two);
+            }
+        }
+        labelAll.clear();
+        return label;
+    }
+
+
+    public String getFilterPropertiesJson(String jsonStr) {
+        String propertiesString = jsonStr.replaceAll("\"(\\w+)\"(\\s*:\\s*)", "$1$2"); // 去掉key的引号
+        return propertiesString;
+    }
+
+    public <T>String getkeyvalCyphersql(T obj) {
+        Map<String, Object> map = new HashMap<String, Object>();
+        List<String> sqlList=new ArrayList<String>();
+        // 得到类对象
+        Class userCla = obj.getClass();
+        /* 得到类中的所有属性集合 */
+        Field[] fs = userCla.getDeclaredFields();
+        for (int i = 0; i < fs.length; i++) {
+            Field f = fs[i];
+            Class type = f.getType();
+
+            f.setAccessible(true); // 设置些属性是可以访问的
+            Object val = new Object();
+            try {
+                val = f.get(obj);
+                if(val==null) {
+                    val="";
+                }
+                String sql="";
+                String key=f.getName();
+                System.out.println("key:"+key+"type:"+type);
+                if ( val instanceof   Integer ){
+                    // 得到此属性的值
+                    map.put(key, val);// 设置键值
+                    sql="n."+key+"="+val;
+                }
+                else if ( val instanceof   String[] ){
+                    //如果为true则强转成String数组
+                    String [] arr = ( String[] ) val ;
+                    String v="";
+                    for ( int j = 0 ; j < arr.length ; j++ ){
+                        arr[j]="'"+ arr[j]+"'";
+                    }
+                    v=String.join(",", arr);
+                    sql="n."+key+"=["+val+"]";
+                }
+                else if (val instanceof List){
+                    //如果为true则强转成String数组
+                    List<String> arr = ( ArrayList<String> ) val ;
+                    List<String> aa=new ArrayList<String>();
+                    String v="";
+                    for (String s : arr) {
+                        s="'"+ s+"'";
+                        aa.add(s);
+                    }
+                    v=String.join(",", aa);
+                    sql="n."+key+"=["+v+"]";
+                }
+                else {
+                    // 得到此属性的值
+                    map.put(key, val);// 设置键值
+                    sql="n."+key+"='"+val+"'";
+                }
+
+                sqlList.add(sql);
+            } catch (IllegalArgumentException e) {
+                e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+        String finasql=String.join(",",sqlList);
+        System.out.println("单个对象的所有键值==反射==" + map.toString());
+        return finasql;
+    }
+    //TODO 得根据实际情况修改typename判断
+    public List<HashMap<String, Object>> GetGraphNode(String cypherSql) {
+        List<HashMap<String, Object>> ents = new ArrayList<HashMap<String, Object>>();
+        try {
+            StatementResult result = excuteCypherSql(cypherSql);
+            if (result.hasNext()) {
+                List<Record> records = result.list();
+                for (Record recordItem : records) {
+                    List<Pair<String, Value>> f = recordItem.fields();
+                    for (Pair<String, Value> pair : f) {
+                        HashMap<String, Object> rss = new HashMap<String, Object>();
+                        String typeName = pair.value().type().name();
+                        if (typeName.equals("NODE")) {
+                            Node noe4jNode = pair.value().asNode();
+                            String uuid = String.valueOf(noe4jNode.id());
+                            Map<String, Object> map = noe4jNode.asMap();
+                            for (Map.Entry<String, Object> entry : map.entrySet()) {
+                                String key = entry.getKey();
+                                rss.put(key, entry.getValue());
+                            }
+                            rss.put("uuid", uuid);
+                            ents.add(rss);
+                        }
+                    }
+
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return ents;
+    }
+    //创建关系调用
+    public List<HashMap<String, Object>> GetGraphRelationShip(String cypherSql) {
+        List<HashMap<String, Object>> ents = new ArrayList<HashMap<String, Object>>();
+        try {
+            StatementResult result = excuteCypherSql(cypherSql);
+            if (result.hasNext()) {
+                List<Record> records = result.list();
+                for (Record recordItem : records) {
+                    List<Pair<String, Value>> f = recordItem.fields();
+                    for (Pair<String, Value> pair : f) {
+                        HashMap<String, Object> rss = new HashMap<String, Object>();
+                        String typeName = pair.value().type().name();
+                        if (typeName.equals("RELATIONSHIP")) {
+                            Relationship rship = pair.value().asRelationship();
+                            String uuid = String.valueOf(rship.id());
+                            String sourceid = String.valueOf(rship.startNodeId());
+                            String targetid = String.valueOf(rship.endNodeId());
+                            Map<String, Object> map = rship.asMap();
+                            for (Map.Entry<String, Object> entry : map.entrySet()) {
+                                String key = entry.getKey();
+                                rss.put(key, entry.getValue());
+                            }
+                            rss.put("uuid", uuid);
+                            rss.put("sourceid", sourceid);
+                            rss.put("targetid", targetid);
+                            ents.add(rss);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return ents;
     }
 
 }

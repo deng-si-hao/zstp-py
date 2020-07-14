@@ -4,6 +4,7 @@ import com.cavin.culture.controller.MapDisplayController;
 import com.cavin.culture.dao.UserDao;
 import com.cavin.culture.model.User;
 import com.cavin.culture.service.UserService;
+
 import com.cavin.culture.util.Neo4jUtil;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -22,6 +23,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import javax.annotation.Resource;
 import javax.sql.DataSource;
 import java.io.*;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 @RunWith(SpringRunner.class)
@@ -33,6 +35,9 @@ class CultureApplicationTests {
     private DataSource dataSource;
     @Resource
     private UserDao userDao;
+    
+    @Autowired
+    private Neo4jUtil neo4jUtil;
 
     @Test
     void contextLoads() {
@@ -342,7 +347,7 @@ class CultureApplicationTests {
     public void importNeo4j(){
 //        List<String> csvfile=new ArrayList<>();
         String cql="load csv from \\\"file:///csvf/test.csv\\\" as line \\n create (:test{name:line[1],label:\\\"test\\\"})";
-        Neo4jUtil.importNeo4j(cql);
+        neo4jUtil.importNeo4j(cql);
     }
 
     @Test
@@ -372,8 +377,48 @@ class CultureApplicationTests {
         }
     }
 
+    @Test
+    public void getNewUserId() {
+       /* //获取UUID
+        String uuid = UUID.randomUUID().toString().replaceAll("-", "").toUpperCase();
+        //生成后缀
+        long suffix = Math.abs(uuid.hashCode() % 100000000);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyMMdd");
+        String time = sdf.format(new Date(System.currentTimeMillis()));
+        //生成前缀
+        long prefix = Long.parseLong(time) * 100000000;
+        String userId = String.valueOf(prefix + suffix);
+        System.out.println(userId);*/
+        HashMap<String,Object> hashMap = new HashMap<>();
+        hashMap.put("zhansgan",168);
+        hashMap.put("zhangsan",175);
+        /**
+        * >>	右移运算符，符号左侧数值 按位右移 符号右侧数值指定的位数，若为正数则高位补0，若为负数则高位补1
+          <<	左移运算符，符号左侧数值 按位左移 符号右侧数值指定的位数，并在低位处补0
+          >>>	无符号右移运算符，符号左侧数值 按位右移 符号右侧数值指定的位数，无论正负高位补0
+          &	    与(AND)运算符，对两个整型操作数中对应位执行布尔代数，两个位都为1时输出1，否则0
+          |	    或(OR)运算符，对两个整型操作数中对应位执行布尔代数，两个位中只要有一个为1就输出1，否则为0
+          ^	    异或(XOR)运算符，对两个整型操作数中对应位执行布尔代数，两个位相等则为0，不相等则为1
+          ~	    非(NOT)运算符，按位取反运算符翻转操作数的每一位，即0变成1，1变成0
+        * */
+        int a = -20;//0001 0100   1110 1100
+        int b = 30;
+        int result1 = a << 1;
+        int result2 = a >> 1;
+        int result3 = a >>> 1;
+        int result4 = a & b;
+        int result5 = a | b;
+        int result6 = a ^ b;
+        int result7 = ~ a;
+        System.out.println("a:-20    b:30");
+        System.out.println("a << 1："+result1);
+        System.out.println("a >> 1："+result2);
+        System.out.println("a >>> 1："+result3);
+        System.out.println("a & b："+result4);
+        System.out.println("a | b："+result5);
+        System.out.println("a ^ b："+result6);
+        System.out.println(" ~ a："+result7);
 
-    public void addCookie(){
 
     }
 

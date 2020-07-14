@@ -1,20 +1,10 @@
 package com.cavin.culture.controller;
 
-import com.cavin.culture.controller.InitializeData.InitializeNeoData;
-import com.cavin.culture.neo4jdao.E1Dao;
-import com.cavin.culture.neo4jdao.E2Dao;
-import com.cavin.culture.neo4jdao.E3Dao;
-import com.cavin.culture.neo4jdao.E4Dao;
 import com.cavin.culture.util.Neo4jUtil;
 import com.cavin.culture.util.PythonUtil;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.neo4j.driver.internal.InternalNode;
 import org.neo4j.driver.v1.*;
-import org.neo4j.driver.v1.types.Node;
-import org.neo4j.driver.v1.types.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -41,17 +31,7 @@ public class MapDisplayController {
     private static Session session = driver.session();
 
     @Autowired
-    private E1Dao e1Dao;
-
-    @Autowired
-    private E2Dao e2Dao;
-
-    @Autowired
-    private E3Dao e3Dao;
-
-    @Autowired
-    private E4Dao e4Dao;
-
+    private Neo4jUtil neo4jUtil;
 
     //创建库
     @RequestMapping(value = "/createDb")
@@ -70,65 +50,13 @@ public class MapDisplayController {
     //获取全部实体标签
     @RequestMapping(value = "/getLabel")
     public List<Object> getAllLabel(){
-        return InitializeNeoData.label;
+        return neo4jUtil.init();
     }
 
     //获取标签下所有实体
     @RequestMapping(value = "/getEntityByLabel")
-    public List<?> getEntityByLabel(String label) throws IOException{
-        List<Map<String,Object>> res=new ArrayList<>();
-//        List<String> res=new ArrayList<>();
-        String cql="match l= (n:"+label+") return l";
-        StatementResult result = session.run(cql);
-        List<Record> list = result.list();
-        for (Record r : list) {
-            for (String index : r.keys()) {
-                Path path = r.get(index).asPath();
-                //节点
-                Iterable<Node> nodes = path.nodes();
-                for (Iterator iter = nodes.iterator(); iter.hasNext();) {
-                    InternalNode nodeInter = (InternalNode) iter.next();
-                    Map<String,Object> map=new HashMap<>();
-                    //节点上设置的属性
-                    map.putAll(nodeInter.asMap());
-                   res.add(map);
-                }
-            }
-        }
-        return res;
-       /* switch (label){
-            case "e1":
-//                result.add("label":"e1","name":e1Dao.findBodesByLabel())
-                   res= e1Dao.findBodesByLabel();
-                   map.put("name",res) ;
-                   map.put("label",label);
-                   result.add(map);
-                break;
-            case "e2":
-//                result=e2Dao.findBodesByLabel();
-                res= e2Dao.findBodesByLabel();
-                map.put("name",res) ;
-                map.put("label",label);
-                result.add(map);
-                break;
-            case "e3":
-//                result=e3Dao.findBodesByLabel();
-                res= e3Dao.findBodesByLabel();
-                map.put("name",res) ;
-                map.put("label",label);
-                result.add(map);
-                break;
-            case "e4":
-//                result=e4Dao.findBodesByLabel();
-                res= e4Dao.findBodesByLabel();
-                map.put("name",res) ;
-                map.put("label",label);
-                result.add(map);
-                break;
-            default:
-                result=null;
-        }*/
-
+    public List<?> getEntityByLabel(String label){
+        return neo4jUtil.nodeByLabel(label);
     }
 
     //获取一度关系
@@ -136,42 +64,15 @@ public class MapDisplayController {
     public String getKgR1(String node, String label) throws IOException {
 
         String method="--getkgR1";
-//        PythonModel pythonModel = new PythonModel(String.valueOf(resource.getFile()),method,node);
         String result= PythonUtil.oneParam(String.valueOf(resource.getFile()),method,node);
 
-//        System.out.println(">>>>>>"+result);
         return result;
-/*        List<Map<String,Object>> result=new ArrayList<>();
-        Map<String,Object> map=new HashMap<>();
-//        List<String> res=new ArrayList<>();
-        switch (label){
-            case "e1":
-                map.put("value",e1Dao.findByName(node));
-                break;
-            case "e2":
-                map.put("value",e2Dao.findByName(node));
-//                result=e2Dao.findByName(node);
-                break;
-            case "e3":
-                map.put("value",e3Dao.findByName(node));
-//                result=e3Dao.findByName(node);
-                break;
-            case "e4":
-                map.put("value",e4Dao.findByName(node));
-//                result=e4Dao.findByName(node);
-                break;
-            default:
-                map.put("value","");
-        }
-        return map;*/
     }
     //获取最短路径
     @RequestMapping(value = "/getKgShortestPath")
     public String getKgShortestPath(String node1Name, String node2Name) throws IOException{
         String method="--getkgShortestPath";
-//        PythonModel pythonModel = new PythonModel(String.valueOf(resource.getFile()),method,node1Name,node2Name);
         String res=PythonUtil.twoParam(String.valueOf(resource.getFile()),method,node1Name,node2Name);
-//        System.out.println(">>>>>>"+res);
         return res;
     }
 
@@ -186,7 +87,7 @@ public class MapDisplayController {
         //待返回的值，与cql return后的值顺序对应
         List<Map<String ,Object>> nodeList = new ArrayList<>();
         Set<Map<String ,Object>> edgeList = new HashSet<>();
-        Neo4jUtil.RunCypher(null,cql,nodeList,edgeList);
+        neo4jUtil.RunCypher(null,cql,nodeList,edgeList);
         retMap.put("nodes",nodeList);
         retMap.put("links",edgeList);
         return retMap;
@@ -203,7 +104,7 @@ public class MapDisplayController {
         //待返回的值，与cql return后的值顺序对应
         List<Map<String ,Object>> nodeList = new ArrayList<>();
         Set<Map<String ,Object>> edgeList = new HashSet<>();
-        Neo4jUtil.RunCypher(nodeName,cql,nodeList,edgeList);
+        neo4jUtil.RunCypher(nodeName,cql,nodeList,edgeList);
         retMap.put("nodes",nodeList);
         retMap.put("links",edgeList);
         return retMap;
@@ -334,7 +235,7 @@ public class MapDisplayController {
     @RequestMapping("/importData")
     public void importData() throws IOException {
         try {
-            Neo4jUtil.importData();
+            neo4jUtil.importData();
             System.out.println("导入数据成功！");
         } catch (IOException e) {
             e.printStackTrace();
@@ -351,7 +252,7 @@ public class MapDisplayController {
         //待返回的值，与cql return后的值顺序对应
         List<Map<String ,Object>> nodeList = new ArrayList<>();
         Set<Map<String ,Object>> edgeList = new HashSet<>();
-        Neo4jUtil.RunCypher(node,cql,nodeList,edgeList);
+        neo4jUtil.RunCypher(node,cql,nodeList,edgeList);
         retMap.put("nodes",nodeList);
         retMap.put("links",edgeList);
         return retMap;

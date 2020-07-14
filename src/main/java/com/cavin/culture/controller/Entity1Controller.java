@@ -1,18 +1,6 @@
 package com.cavin.culture.controller;
 
-import com.cavin.culture.controller.InitializeData.InitializeNeoData;
-import com.cavin.culture.neo4jRelationship.ContainsARelationship;
-import com.cavin.culture.neo4jRelationship.Relationship;
-import com.cavin.culture.neo4jdao.*;
-import com.cavin.culture.neo4jmodel.GeneralNode;
-import com.cavin.culture.neo4jmodel.e1;
-import com.cavin.culture.neo4jmodel.e2;
 import com.cavin.culture.util.Neo4jUtil;
-import org.neo4j.driver.internal.InternalNode;
-import org.neo4j.driver.internal.InternalRelationship;
-import org.neo4j.driver.v1.*;
-import org.neo4j.driver.v1.types.Node;
-import org.neo4j.driver.v1.types.Path;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,7 +12,7 @@ import java.util.*;
 @RequestMapping("/test/neo4j")
 public class Entity1Controller {
 
-    @Autowired
+/*    @Autowired
     E1Dao e1Dao;
     @Autowired
     E2Dao e2Dao;
@@ -34,20 +22,20 @@ public class Entity1Controller {
     E4Dao e4Dao;
 
     @Autowired
-    ContainsARelationshipDao containsARelationshipDao;
+    ContainsARelationshipDao containsARelationshipDao;*/
 /*
     @Autowired
     ContainsBRelationship containsBRelationship;*/
 
 
-    @RequestMapping("/get")
+/*    @RequestMapping("/get")
     public e1 GetE1ByName(String name){
         return e1Dao.findByName(name);
     }
     @RequestMapping("/gete1all")
     public Iterable<e1> findAll(){
         return e1Dao.findAll();
-    }
+    }*/
    /* @RequestMapping("/all")
     public List<Map<String, Object>> GetAll() throws IllegalAccessException {
       *//*  result=baseDao.findAllNodes();
@@ -82,7 +70,7 @@ public class Entity1Controller {
     *
     * 会有内存溢出异常/修改为只返回name
     * */
-    @RequestMapping("/getBNameByLabel")
+/*    @RequestMapping("/getBNameByLabel")
     public List<?> findBodesByLabel(String label){
         List<?> result=null;
        switch (label){
@@ -126,14 +114,14 @@ public class Entity1Controller {
     @RequestMapping("/findgetContainsARelationship")
     public Iterable<ContainsARelationship> findgetContainsARelationship(String name){
         return containsARelationshipDao.findByname(name);
-    }
+    }*/
 
     //测试关系接口
 /*    @RequestMapping("/ralationB")
     public Iterable<ContainsBRelationship> getByName(String name){
         return containsBRelationship.findByName(name);
     }*/
-    @RequestMapping("/shortestPath")
+    /*@RequestMapping("/shortestPath")
     public Map<String, Object> getShortPath(String param1,String param2){
         Map<String, Object> retMap = new HashMap<>();
         //cql语句
@@ -145,9 +133,9 @@ public class Entity1Controller {
         retMap.put("nodeList",nodeList);
         retMap.put("edgeList",edgeList);
         return retMap;
-    }
+    }*/
 
-    @RequestMapping("/insertNeo4j")
+/*    @RequestMapping("/insertNeo4j")
     public void insertNeo4j(){
         //productionRelation
         String clearcql="";
@@ -166,9 +154,9 @@ public class Entity1Controller {
             Neo4jUtil.importNeo4j(s);
         }
 
-    }
+    }*/
 
-    public void insertNode(GeneralNode generalNode){
+/*    public void insertNode(GeneralNode generalNode){
         //TODO 多个属性的node插入语句
         String cql="create (:"+generalNode.getLabel()+"{name:\""+generalNode.getName()+"\",label:\""+generalNode.getLabel()+"\"})";
 
@@ -182,7 +170,7 @@ public class Entity1Controller {
         String relationRight="match (from:"+relationship.getEndType()+"{name:\"" + relationship.getEnd() + "\"}),(to:"+relationship.getStartType()
                 +"{name:\""+relationship.getStart()+"\"})  merge (from)-[r:"+relationship.getRelationType()+"{name:\""+relationship.getEnd()+
                 "\",name:\""+relationship.getStart()+"\"}]->(to)";
-    }
+    }*/
     /**
     * 传入一个图，即nodeList和edgeList
     *
