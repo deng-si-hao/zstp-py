@@ -14,7 +14,7 @@ import org.springframework.boot.web.servlet.ServletComponentScan;
 
 @SpringBootApplication
 @ServletComponentScan(basePackages = "com.cavin.culture.controller.*")
-@MapperScan({"com.cavin.culture.dao","com.cavin.culture.neo4jdao"})
+@MapperScan({"com.cavin.culture.dao"})
 public class CultureApplication {
 
     public static void main(String[] args) {

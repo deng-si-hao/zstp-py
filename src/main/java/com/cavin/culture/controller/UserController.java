@@ -123,13 +123,6 @@ public class UserController {
     @RequestMapping(value = "/admin/getAllUser",method = RequestMethod.POST)
     @ResponseBody
     public JsonMessage getAllUserInfo(int currPage, HttpServletResponse response){
-/*        Enumeration<String> parameterNames = request.getParameterNames();
-        while (parameterNames.hasMoreElements()) {
-            String s = parameterNames.nextElement();
-            System.out.println("getParameterNames:" + s);
-            String paraA = request.getParameter(s);
-            System.out.println("getParameter:" + paraA);
-        }*/
         int currPageInt=0;
         int pageSizeInt=8;
         if(currPage==0){
@@ -142,45 +135,12 @@ public class UserController {
         return JsonMessage.success().addData("userInfo",info).addData("total",total);
     }
 
-/*    @RequestMapping(value="/queryAllUser")
-    public void query(HttpServletResponse resp) {
-        try {
-            *//*list集合中存放的是好多student对象*//*
-            List<User> users = userService.getAll();
-            *//*将list集合装换成json对象*//*
-            String json = JSON.toJSONString(users);
-            //接下来发送数据
-            *//*设置编码，防止出现乱码问题*//*
-            resp.setCharacterEncoding("utf-8");
-            *//*得到输出流*//*
-            PrintWriter respWritter = resp.getWriter();
-            *//*将JSON格式的对象toString()后发送*//*
-            respWritter.append(json.toString());
-            System.out.println(json.toString());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }*/
     /**
     * 修改用户信息
     * */
     @RequestMapping(value = "/admin/updateUserInfo",method = RequestMethod.POST)
     @ResponseBody
     public JsonMessage updateUserInfo(@RequestBody User user, HttpServletResponse response){
-/*        String level=null;
-            Cookie[] cookies=request.getCookies();
-            for(Cookie cookie:cookies){
-                if (cookie.getName().equals("access_token")){
-                    level=cookie.getValue();
-                }
-            }
-        System.out.println(level);*/
-//            User user=new User();
-/*            user.setId(Long.valueOf(request.getParameter("id")));
-            user.setUserName(request.getParameter("userName"));
-            user.setUserPassword(request.getParameter("userPassword"));
-            user.setEmail(request.getParameter("email"));
-            user.setLevel(request.getParameter("level"));*/
         try {
             userService.updateUser(user);
             return JsonMessage.success();
@@ -196,21 +156,7 @@ public class UserController {
     @RequestMapping(value = "/admin/queryById",method = RequestMethod.POST)
     @ResponseBody
     public JsonMessage queryById(Long id, HttpServletResponse response){
-//        Long id=request.get
-//        try {
             User user= userService.getUserById(id);
-           /* String json = JSON.toJSONString(user);
-            //接下来发送数据
-            *//*设置编码，防止出现乱码问题*//*
-            response.setCharacterEncoding("utf-8");
-            *//*得到输出流*//*
-            PrintWriter respWritter = response.getWriter();
-            *//*将JSON格式的对象toString()后发送*//*
-            respWritter.append(json.toString());
-            System.out.println(json.toString());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }*/
         System.out.println(user.toString());
         return JsonMessage.success().addData("user",user);
     }
