@@ -4,9 +4,22 @@ import com.alibaba.fastjson.JSON;
 import com.cavin.culture.dao.GraphDao;
 import com.cavin.culture.model.JsonMessage;
 import com.cavin.culture.model.Neo4jEntity;
+import com.cavin.culture.util.CSVUtil;
+import com.cavin.culture.util.ExcelUtil;
 import com.cavin.culture.util.Neo4jUtil;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.neo4j.driver.v1.Record;
+import org.neo4j.driver.v1.StatementResult;
+import org.neo4j.driver.v1.Value;
+import org.neo4j.driver.v1.types.Node;
+import org.neo4j.driver.v1.types.Relationship;
+import org.neo4j.driver.v1.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -352,6 +365,152 @@ public class Neo4jService {
         }
         return rss;
     }
+    /**
+    * 导入的文件处理，csv/excl
+    * */
+    public List<Map<String, Object>> getFormatData(MultipartFile file) throws Exception {
+        List<Map<String, Object>> mapList = new ArrayList<>();
+        try {
+            String fileName = file.getOriginalFilename();
+            if (!fileName.endsWith(".csv")) {
+                Workbook workbook = null;
+                if (ExcelUtil.isExcel2007(fileName)) {
+                    workbook = new XSSFWorkbook(file.getInputStream());
+                } else {
+                    workbook = new HSSFWorkbook(file.getInputStream());
+                }
+                // 有多少个sheet
+                int sheets = workbook.getNumberOfSheets();
+                for (int i = 0; i < sheets; i++) {
+                    Sheet sheet = workbook.getSheetAt(i);
+                    int rowSize = sheet.getPhysicalNumberOfRows();
+                    for (int j = 0; j < rowSize; j++) {
+                        Row row = sheet.getRow(j);
+                        int cellSize = row.getPhysicalNumberOfCells();
+                        if (cellSize != 3) continue; //只读取3列
+                        row.getCell(0).setCellType(CellType.STRING);
+                        Cell cell0 = row.getCell(0);//节点1
+                        row.getCell(1).setCellType(CellType.STRING);
+                        Cell cell1 = row.getCell(1);//节点2
+                        row.getCell(2).setCellType(CellType.STRING);
+                        Cell cell2 = row.getCell(2);//关系
+                        if (null == cell0 || null == cell1 || null == cell2) {
+                            continue;
+                        }
+                        String sourceNode = cell0.getStringCellValue();
+                        String targetNode = cell1.getStringCellValue();
+                        String relationShip = cell2.getStringCellValue();
+                        if (StringUtils.isBlank(sourceNode) || StringUtils.isBlank(targetNode) || StringUtils.isBlank(relationShip))
+                            continue;
+                        Map<String, Object> map = new HashMap<String, Object>();
+                        map.put("sourcenode", sourceNode);
+                        map.put("targetnode", targetNode);
+                        map.put("relationship", relationShip);
+                        mapList.add(map);
+                    }
+                }
+            } else if (fileName.endsWith(".csv")) {
+                List<List<String>> list = CSVUtil.readCsvFile(file);
+                for (int i = 0; i < list.size(); i++) {
+                    List<String> lst = list.get(i);
+                    if (lst.size() != 3) continue;
+                    String sourceNode = lst.get(0);
+                    String targetNode = lst.get(1);
+                    String relationShip = lst.get(2);
+                    if (StringUtils.isBlank(sourceNode) || StringUtils.isBlank(targetNode) || StringUtils.isBlank(relationShip))
+                        continue;
+                    Map<String, Object> map = new HashMap<String, Object>();
+                    map.put("sourcenode", sourceNode);
+                    map.put("targetnode", targetNode);
+                    map.put("relationship", relationShip);
+                    mapList.add(map);
+                }
+            }
+        } catch (Exception ex) {
+            throw new Exception(ex);
+        }
+        return mapList;
+    }
 
+    /**
+    * 批量导入csv文件
+    *
+    * */
+    public void batchInsertByCSV(String domain, String csvUrl, int status) {
+        String loadNodeCypher1 = null;
+        String loadNodeCypher2 = null;
+        String addIndexCypher = null;
+        addIndexCypher = " CREATE INDEX ON :" + domain + "(name);";
+        loadNodeCypher1 = " USING PERIODIC COMMIT 500 LOAD CSV FROM '" + csvUrl + "' AS line " + " MERGE (:`" + domain
+                + "` {name:line[0]});";
+        loadNodeCypher2 = " USING PERIODIC COMMIT 500 LOAD CSV FROM '" + csvUrl + "' AS line " + " MERGE (:`" + domain
+                + "` {name:line[1]});";
+        // 拼接生产关系导入cypher
+        String loadRelCypher = null;
+        String type = "RE";
+        loadRelCypher = " USING PERIODIC COMMIT 500 LOAD CSV FROM  '" + csvUrl + "' AS line " + " MATCH (m:`" + domain
+                + "`),(n:`" + domain + "`) WHERE m.name=line[0] AND n.name=line[1] " + " MERGE (m)-[r:" + type + "]->(n) "
+                + "	SET r.name=line[2];";
+        neo4jUtil.excuteCypherSql(addIndexCypher);
+        neo4jUtil.excuteCypherSql(loadNodeCypher1);
+        neo4jUtil.excuteCypherSql(loadNodeCypher2);
+        neo4jUtil.excuteCypherSql(loadRelCypher);
+    }
+
+    /**
+    * 导出csv，获取图谱数据
+    *
+    * */
+    public List<HashMap<String, Object>> GetGraphItem(String cypherSql) {
+        List<HashMap<String, Object>> ents = new ArrayList<HashMap<String, Object>>();
+        List<String> nodeids = new ArrayList<String>();
+        List<String> shipids = new ArrayList<String>();
+        try {
+            StatementResult result = neo4jUtil.excuteCypherSql(cypherSql);
+            if (result.hasNext()) {
+                List<Record> records = result.list();
+                for (Record recordItem : records) {
+                    List<Pair<String, Value>> f = recordItem.fields();
+                    HashMap<String, Object> rss = new HashMap<String, Object>();
+                    for (Pair<String, Value> pair : f) {
+                        String typeName = pair.value().type().name();
+                        if (typeName.equals("NODE")) {
+                            Node noe4jNode = pair.value().asNode();
+                            String uuid = String.valueOf(noe4jNode.id());
+                            if(!nodeids.contains(uuid)) {
+                                Map<String, Object> map = noe4jNode.asMap();
+                                for (Map.Entry<String, Object> entry : map.entrySet()) {
+                                    String key = entry.getKey();
+                                    rss.put(key, entry.getValue());
+                                }
+                                rss.put("uuid", uuid);
+                            }
+                        }else if (typeName.equals("RELATIONSHIP")) {
+                            Relationship rship = pair.value().asRelationship();
+                            String uuid = String.valueOf(rship.id());
+                            if (!shipids.contains(uuid)) {
+                                String sourceid = String.valueOf(rship.startNodeId());
+                                String targetid = String.valueOf(rship.endNodeId());
+                                Map<String, Object> map = rship.asMap();
+                                for (Map.Entry<String, Object> entry : map.entrySet()) {
+                                    String key = entry.getKey();
+                                    rss.put(key, entry.getValue());
+                                }
+                                rss.put("uuid", uuid);
+                                rss.put("sourceid", sourceid);
+                                rss.put("targetid", targetid);
+                            }
+                        }else {
+                            rss.put(pair.key(),pair.value().toString());
+                        }
+                    }
+                    ents.add(rss);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return ents;
+    }
 
 }

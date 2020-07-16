@@ -1,10 +1,14 @@
 package com.cavin.culture.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.cavin.culture.model.JsonMessage;
 import com.cavin.culture.model.Neo4jEntity;
 import com.cavin.culture.service.Neo4jService;
+import com.cavin.culture.util.CSVUtil;
 import com.cavin.culture.util.Neo4jUtil;
 
+import com.cavin.culture.webFilter.WebMvcConfig;
+import com.csvreader.CsvWriter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jena.ext.com.google.common.collect.HashMultimap;
 import org.apache.jena.ext.com.google.common.collect.Multimap;
@@ -12,11 +16,17 @@ import org.omg.CORBA.OBJ_ADAPTER;
 import org.python.modules._marshal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.*;
 
 @RestController
@@ -25,6 +35,11 @@ public class Neo4jEntityController {
 
     @Resource
     private Neo4jService neo4jService;
+
+    @Autowired
+    private WebMvcConfig config;
+
+
 
     /**
     * 获取自己创建的label
@@ -226,6 +241,7 @@ public class Neo4jEntityController {
     /**
     * 批量创建node
     * */
+    @RequestMapping("/batchAddNode")
     public JsonMessage batchAddNode(String label, String sourcename, String relation, String[] targetnames){
         JsonMessage result = new JsonMessage();
         HashMap<String, Object> res = new HashMap<String, Object>();
@@ -243,6 +259,7 @@ public class Neo4jEntityController {
     /**
     * 批量创建下级接节点
     * */
+    @RequestMapping("/batchLowNode")
     public JsonMessage batchLowNode(String label, String sourceid, String[] targetnames, String relation){
         JsonMessage result = new JsonMessage();
         HashMap<String, Object> res = new HashMap<String, Object>();
@@ -260,6 +277,7 @@ public class Neo4jEntityController {
     /**
     * 批量创建同级节点
     * */
+    @RequestMapping("/batchSameNode")
     public JsonMessage batchSameNode(String label, Integer entitytype, String[] sourcenames){
         JsonMessage result = new JsonMessage();
        HashMap<String, Object> rss = new HashMap<>();
@@ -274,6 +292,104 @@ public class Neo4jEntityController {
             result.setMessage("创建失败!");
         }
         return result;
+    }
+
+    /**
+    * CSV文件导入
+    *
+    * */
+    @ResponseBody
+    @RequestMapping(value = "/importgraph")
+    public JSONObject importgraph(@RequestParam(value = "file", required = true) MultipartFile file,
+                                  HttpServletRequest request, HttpServletResponse response) throws Exception {
+        JSONObject res = new JSONObject();
+        if (file == null) {
+            res.put("code", "500");
+            res.put("msg", "请先选择有效的文件");
+            return res;
+        }
+        // 领域不能为空
+        String label = request.getParameter("domain");
+        if (StringUtils.isBlank(label)) {
+            res.put("code", "500");
+            res.put("msg", "请先选择领域");
+            return res;
+        }
+        List<Map<String, Object>> dataList = neo4jService.getFormatData(file);
+        try {
+            List<List<String>> list = new ArrayList<>();
+            for (Map<String, Object> item : dataList) {
+                List<String> lst = new ArrayList<>();
+                lst.add(item.get("sourcenode").toString());
+                lst.add(item.get("targetnode").toString());
+                lst.add(item.get("relationship").toString());
+                list.add(lst);
+            }
+            String savePath = config.getLocation();
+            String filename = "tc" + System.currentTimeMillis() + ".csv";
+            CSVUtil.createCsvFile(list, savePath,filename);
+            String serverUrl=request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
+            String csvUrl = "http://"+serverUrl+ "/download/" + filename;
+            //String csvUrl = "https://neo4j.com/docs/cypher-manual/3.5/csv/artists.csv";
+            neo4jService.batchInsertByCSV(label, csvUrl, 0);
+            res.put("code", 200);
+            res.put("message", "success!");
+            return res;
+        } catch (Exception e) {
+            res.put("code", 500);
+            res.put("message", "服务器错误!");
+        }
+        return res;
+    }
+
+    /**
+    * 导出csv文件
+    *
+    * */
+    @RequestMapping(value = "/exportgraph")
+    public JSONObject exportgraph(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        JSONObject res = new JSONObject();
+        String label = request.getParameter("domain");
+        String filePath = config.getLocation();
+        String fileName = UUID.randomUUID() + ".csv";
+        String fileUrl = filePath + File.separator + fileName;
+        String cypher = String.format(
+                "MATCH (n:%s) -[r]->(m:%s) return n.name as source,m.name as target,r.name as relation", label, label);
+        List<HashMap<String, Object>> list = neo4jService.GetGraphItem(cypher);
+        File file = new File(fileUrl);
+        try {
+            if (!file.exists()) {
+                file.createNewFile();
+                System.out.println("文件不存在，新建成功！");
+            } else {
+                System.out.println("文件存在！");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        CsvWriter csvWriter = new CsvWriter(fileUrl, ',', Charset.forName("UTF-8"));
+        String[] header = { "source", "target", "relation" };
+        csvWriter.writeRecord(header);
+        for (HashMap<String, Object> hashMap : list) {
+            int colSize = hashMap.size();
+            String[] cntArr = new String[colSize];
+            cntArr[0] = hashMap.get("source").toString().replace("\"", "");
+            cntArr[1] = hashMap.get("target").toString().replace("\"", "");
+            cntArr[2] = hashMap.get("relation").toString().replace("\"", "");
+            try {
+                csvWriter.writeRecord(cntArr);
+            } catch (IOException e) {
+                System.out.println("CSVUtil->createFile: 文件输出异常" + e.getMessage());
+            }
+        }
+        csvWriter.close();
+        String serverUrl=request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
+        String csvUrl = serverUrl + "/kg/download/" + fileName;
+        res.put("code", 200);
+        res.put("csvurl", csvUrl);
+        res.put("message", "success!");
+        return res;
+
     }
 
 
