@@ -1,6 +1,8 @@
 package com.cavin.culture.model;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 public class User {
 
@@ -13,6 +15,16 @@ public class User {
     private Date registerDate;
     private String level;//默认为0，管理员为1，无需添加
     private String isDel;//默认为0，删除为1，无需添加
+
+    private Set<Role> roles = new HashSet<>();
+
+    public Set<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
+    }
 
     public User() {
     }

@@ -1,4 +1,4 @@
-package com.cavin.culture.webFilter;
+package com.cavin.culture.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.MultipartConfigFactory;

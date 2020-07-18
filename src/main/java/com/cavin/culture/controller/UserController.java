@@ -5,6 +5,8 @@ import com.cavin.culture.model.User;
 import com.cavin.culture.service.UserService;
 import com.cavin.culture.util.JWTUtil;
 import com.cavin.culture.util.SHAUtil;
+import org.apache.shiro.crypto.hash.SimpleHash;
+import org.apache.shiro.util.ByteSource;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -17,12 +19,13 @@ import java.util.List;
 
 @RestController
 @CrossOrigin(origins = "*",allowCredentials="true",allowedHeaders = "",methods = {})
+@RequestMapping("/sys")
 public class UserController {
 
     @Resource
     private UserService userService;
 
-    @RequestMapping(value = "/admin/isLogin", method = RequestMethod.GET)
+    @RequestMapping(value = "/user/isLogin", method = RequestMethod.GET)
     @ResponseBody
     public JsonMessage isLogin(HttpServletRequest request) {
         Cookie[] cookies = null;
@@ -50,11 +53,14 @@ public class UserController {
 /**
 * 注册
 * */
-    @RequestMapping(value = "/admin/register", method = RequestMethod.POST)
+    @RequestMapping(value = "/user/register", method = RequestMethod.POST)
     public JsonMessage login(@RequestBody User user) {
         User checkUser = userService.getUserByName(user.getUserName());
         if (checkUser == null) {
 //            Long id= UniqueIdUtil.genId();
+            //shiro的加密方法
+            //Object salt = ByteSource.Util.bytes(user.getUserName());
+            //SimpleHash simpleHash=new SimpleHash("MD5", user.getUserPassword(), salt, 1);
             Integer insertNum = userService.insertUser(user);
             return JsonMessage.success().addData("insertNum", insertNum);
         } else {
@@ -64,7 +70,7 @@ public class UserController {
 /**
 * 登录
 * */
-    @RequestMapping(value = "/admin/login")
+    @RequestMapping(value = "/user/login")
     public JsonMessage login(@RequestBody User user, HttpServletResponse response) {
         String username = user.getUserName();
         String password = user.getUserPassword();
@@ -99,7 +105,7 @@ public class UserController {
 /**
 * 注销
 * */
-    @RequestMapping(value = "/admin/logout", method = RequestMethod.POST)
+    @RequestMapping(value = "/user/logout", method = RequestMethod.POST)
     @ResponseBody
     public JsonMessage logout(HttpServletRequest request, HttpServletResponse response) throws IOException {
         Cookie[] cookies = request.getCookies();
@@ -153,10 +159,11 @@ public class UserController {
     /**
     * 查询单个用户信息
     * */
-    @RequestMapping(value = "/admin/queryById",method = RequestMethod.POST)
+    @RequestMapping(value = "/user/queryById",method = RequestMethod.POST)
     @ResponseBody
     public JsonMessage queryById(Long id, HttpServletResponse response){
             User user= userService.getUserById(id);
+
         System.out.println(user.toString());
         return JsonMessage.success().addData("user",user);
     }

@@ -177,11 +177,11 @@ public class Neo4jUtil {
                         map.put("id", relationInter.id());
                         for(Map<String,Object> t:nodeList){
                             if(t.get("id").equals(relationInter.startNodeId())){
-                                map.put("source",t.get("index"));
+                                map.put("source",t.get("id"));
                                 map.put("source_name",t.get("name"));
                             }
                             if(t.get("id").equals(relationInter.endNodeId())){
-                                map.put("target",t.get("index"));
+                                map.put("target",t.get("id"));
                                 map.put("target_name",t.get("name"));
                             }
                             map.put("type",relationInter.type());

@@ -22,6 +22,7 @@ import java.util.*;
 @CrossOrigin(origins = "*",allowCredentials="true",allowedHeaders = "",methods = {})
 public class MapDisplayController {
 
+/*
 //    private static final String path="F:\\zhishitupu\\zstp\\src\\main\\resources\\static\\py\\neo4j2json_cons.py";
     static Resource resource= new ClassPathResource("static/excl/元器件筛选、DPA数据.xlsx");
 
@@ -29,12 +30,13 @@ public class MapDisplayController {
     //初始化连接
     static Driver driver = GraphDatabase.driver("bolt://localhost:7687", AuthTokens.basic("neo4j", "12345678!a"));
     private static Session session = driver.session();
+*/
 
     @Autowired
     private Neo4jUtil neo4jUtil;
 
     //创建库
-    @RequestMapping(value = "/createDb")
+/*    @RequestMapping(value = "/createDb")
     public String createDb(){
         String method="--cons";
 //        PythonModel pythonModel = null;
@@ -45,7 +47,7 @@ public class MapDisplayController {
             e.printStackTrace();
             return "error";
         }
-    }
+    }*/
 
     //获取全部实体标签
     @RequestMapping(value = "/getLabel")
@@ -59,7 +61,7 @@ public class MapDisplayController {
         return neo4jUtil.nodeByLabel(label);
     }
 
-    //获取一度关系
+/*    //获取一度关系
     @RequestMapping(value = "/getkgR1")
     public String getKgR1(String node, String label) throws IOException {
 
@@ -67,14 +69,14 @@ public class MapDisplayController {
         String result= PythonUtil.oneParam(String.valueOf(resource.getFile()),method,node);
 
         return result;
-    }
-    //获取最短路径
+    }*/
+/*    //获取最短路径
     @RequestMapping(value = "/getKgShortestPath")
     public String getKgShortestPath(String node1Name, String node2Name) throws IOException{
         String method="--getkgShortestPath";
         String res=PythonUtil.twoParam(String.valueOf(resource.getFile()),method,node1Name,node2Name);
         return res;
-    }
+    }*/
 
     /**
     * 获取最短路径（java实现）
@@ -109,7 +111,7 @@ public class MapDisplayController {
         retMap.put("links",edgeList);
         return retMap;
     }
-    //获取全图
+/*    //获取全图
     @RequestMapping(value = "/getalldata")
     public String getAllData() throws IOException{
         String method="--getalldata";
@@ -122,14 +124,14 @@ public class MapDisplayController {
         String method="--searchsubkg";
 //        PythonModel pythonModel = new PythonModel(String.valueOf(resource.getFile()),method,param);
         return PythonUtil.oneParam(String.valueOf(resource.getFile()),method,param);
-    }
+    }*/
 
     /**
     * neo4j数据库excl导入
     * @path 文件路径
     *
     * */
-    @RequestMapping("/insertData")
+/*    @RequestMapping("/insertData")
     public void neo4jTest() throws IOException {
         String path = String.valueOf(resource.getFile());
         //创建实体的cql语句
@@ -217,7 +219,7 @@ public class MapDisplayController {
                 session.run(s);
             }
         }
-    }
+    }*/
     // 遍历后判断赋给另一个list集合，保持原来顺序
     public static List<String> delRepeat(List<String> list) {
         List<String> listNew = new ArrayList<String>();
