@@ -41,9 +41,9 @@
        /* SELECT u.*, r.*, p.*
         FROM user u
         INNER JOIN user_role ur on ur.uid = u.id
-        INNER JOIN role r on r.rid = ur.rid
-        INNER JOIN role_permission pr on pr.rid = r.rid
-        INNER JOIN permission p on pr.pid = p.pid
+        INNER JOIN sys_role r on r.id = ur.rid
+        INNER JOIN role_permission pr on pr.rid = r.id
+        INNER JOIN sys_permission p on pr.pid = p.id
         WHERE u.user_name = #{username}*/
     </select>
 
