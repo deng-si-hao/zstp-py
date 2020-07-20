@@ -1,7 +1,7 @@
 package com.cavin.culture.config;
 
-import com.cavin.culture.model.Permission;
-import com.cavin.culture.model.Role;
+import com.cavin.culture.model.SysPermission;
+import com.cavin.culture.model.SysRole;
 import com.cavin.culture.model.User;
 import com.cavin.culture.service.UserService;
 import org.apache.commons.collections.CollectionUtils;
@@ -27,14 +27,14 @@ public class AuthRealm extends AuthorizingRealm {
         User user = (User) principals.fromRealm(this.getClass().getName()).iterator().next();
         List<String> permissionList = new ArrayList<>();
         List<String> roleNameList = new ArrayList<>();
-        Set<Role> roleSet = user.getRoles();
+        Set<SysRole> roleSet = user.getRoles();
         if (CollectionUtils.isNotEmpty(roleSet)) {
-            for(Role role : roleSet) {
-                roleNameList.add(role.getRname());
-                Set<Permission> permissionSet = role.getPermissions();
+            for(SysRole role : roleSet) {
+                roleNameList.add(role.getRoleName());
+                Set<SysPermission> permissionSet = role.getPermissions();
                 if (CollectionUtils.isNotEmpty(permissionSet)) {
-                    for (Permission permission : permissionSet) {
-                        permissionList.add(permission.getPname());
+                    for (SysPermission permission : permissionSet) {
+                        permissionList.add(permission.getPermissionName());
                     }
                 }
             }

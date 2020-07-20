@@ -6,8 +6,6 @@ import java.util.Set;
 
 public class User {
 
-
-
     private long id;
     private String userName;
     private String userPassword;
@@ -16,13 +14,13 @@ public class User {
     private String level;//默认为0，管理员为1，无需添加
     private String isDel;//默认为0，删除为1，无需添加
 
-    private Set<Role> roles = new HashSet<>();
+    private Set<SysRole> roles = new HashSet<>();
 
-    public Set<Role> getRoles() {
+    public Set<SysRole> getRoles() {
         return roles;
     }
 
-    public void setRoles(Set<Role> roles) {
+    public void setRoles(Set<SysRole> roles) {
         this.roles = roles;
     }
 

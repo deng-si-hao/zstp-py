@@ -1,6 +1,7 @@
 package com.cavin.culture.config;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
 import org.springframework.boot.web.servlet.MultipartConfigFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -8,6 +9,8 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 import javax.servlet.MultipartConfigElement;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 @Configuration
 public class WebMvcConfig extends WebMvcConfigurerAdapter {
@@ -60,6 +63,17 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
 //            registry.addResourceHandler("/restaurantRes/**").addResourceLocations("file:D:/restaurantRes/");
         }
 
+    /*@Bean
+    public TomcatServletWebServerFactory servletWebServerFactory(){
+        String address = "127.0.0.1";
+        TomcatServletWebServerFactory container = new TomcatServletWebServerFactory();
+        try {
+            container.setAddress(InetAddress.getByName(address));
+            return container;
+        } catch (UnknownHostException e) {
+            throw new RuntimeException("can not resolve host:" + address, e);
+        }
+    }*/
 
 
 }

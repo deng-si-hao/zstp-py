@@ -179,9 +179,9 @@
         </dependency>
         <!-- druid -->
         <dependency>
-            <groupId>com.alibaba.druid</groupId>
-            <artifactId>druid-wrapper</artifactId>
-            <version>0.2.9</version>
+            <groupId>com.alibaba</groupId>
+            <artifactId>druid</artifactId>
+            <version>1.0.20</version>
         </dependency>
     </dependencies>
 

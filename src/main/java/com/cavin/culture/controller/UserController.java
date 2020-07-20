@@ -5,7 +5,11 @@ import com.cavin.culture.model.User;
 import com.cavin.culture.service.UserService;
 import com.cavin.culture.util.JWTUtil;
 import com.cavin.culture.util.SHAUtil;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authc.AuthenticationException;
+import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.crypto.hash.SimpleHash;
+import org.apache.shiro.subject.Subject;
 import org.apache.shiro.util.ByteSource;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,6 +17,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.List;
@@ -70,7 +75,7 @@ public class UserController {
 /**
 * 登录
 * */
-    @RequestMapping(value = "/user/login")
+/*    @RequestMapping(value = "/user/login")
     public JsonMessage login(@RequestBody User user, HttpServletResponse response) {
         String username = user.getUserName();
         String password = user.getUserPassword();
@@ -101,7 +106,32 @@ public class UserController {
         } else {
             return JsonMessage.error(400, "用户名不存在！");
         }
+    }*/
+
+    /**
+     * 用户登录
+     * @param response
+     * @param user
+     * @throws IOException
+     */
+    @RequestMapping(value = "/user/login", method = { RequestMethod.POST, RequestMethod.GET })
+    public JsonMessage login(@RequestBody User user, boolean rememberMe, HttpSession session) throws IOException{
+        try {
+            //存入session
+            Subject subject = SecurityUtils.getSubject();
+            //记得传入明文密码
+            subject.login(new UsernamePasswordToken(user.getUserName(), user.getUserPassword(), rememberMe));
+            session.setAttribute("user", user);
+            return JsonMessage.adminLogin("0");
+        } catch (AuthenticationException e) {
+            e.printStackTrace();
+            return JsonMessage.error(500,"登录失败！");
+        }
+
     }
+
+
+
 /**
 * 注销
 * */
@@ -159,7 +189,7 @@ public class UserController {
     /**
     * 查询单个用户信息
     * */
-    @RequestMapping(value = "/user/queryById",method = RequestMethod.POST)
+    @RequestMapping(value = "/admin/queryById",method = RequestMethod.POST)
     @ResponseBody
     public JsonMessage queryById(Long id, HttpServletResponse response){
             User user= userService.getUserById(id);

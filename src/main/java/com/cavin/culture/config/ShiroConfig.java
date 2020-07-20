@@ -26,7 +26,7 @@ public class ShiroConfig {
         * role:该资源必须得到角色权限才能访问
         * */
         //设置的登录页面方法地址
-        bean.setLoginUrl("/login");
+        bean.setLoginUrl("/sys/user/login");
         //设置登录成功后访问的方法地址
         bean.setSuccessUrl("/index");
         //设置登录失败访问的方法地址
@@ -34,8 +34,8 @@ public class ShiroConfig {
         //自定义部分权限访问
         LinkedHashMap<String, String> filterChainDefinitionMap = new LinkedHashMap<>();
         filterChainDefinitionMap.put("/MapDisplay/**", "anon");
-//        filterChainDefinitionMap.put("/sys/user/isLogin","anon");
-//        filterChainDefinitionMap.put("/sys/user/login","anon");
+        filterChainDefinitionMap.put("/sys/admin/*","roles[admin]");
+        filterChainDefinitionMap.put("/sys/user/*","anon");
 //        filterChainDefinitionMap.put("/sys/user/queryById","anon");
 //        filterChainDefinitionMap.put("/sys/admin/**","authc");
 //        filterChainDefinitionMap.put("/login", "anon");
