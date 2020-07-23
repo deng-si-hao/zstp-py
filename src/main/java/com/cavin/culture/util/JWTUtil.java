@@ -47,8 +47,9 @@ public class JWTUtil {
 
     /**
     * 生成id
-    * */
-    public static String getNewId() {
+    *
+     * @return*/
+    public static long getNewId() {
         //获取UUID
         String uuid = UUID.randomUUID().toString().replaceAll("-", "").toUpperCase();
         //生成后缀
@@ -57,7 +58,7 @@ public class JWTUtil {
         String time = sdf.format(new Date(System.currentTimeMillis()));
         //生成前缀
         long prefix = Long.parseLong(time) * 100000000;
-        String userId = String.valueOf(prefix + suffix);
+        long userId = Integer.valueOf(String.valueOf(prefix + suffix));
         return userId;
     }
 

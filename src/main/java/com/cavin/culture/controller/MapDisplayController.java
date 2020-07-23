@@ -1,10 +1,11 @@
 package com.cavin.culture.controller;
 
 import com.cavin.culture.util.Neo4jUtil;
-import com.cavin.culture.util.PythonUtil;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.neo4j.driver.v1.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 
 
@@ -21,10 +23,10 @@ import java.util.*;
 @RequestMapping(value = "/MapDisplay")
 @CrossOrigin(origins = "*",allowCredentials="true",allowedHeaders = "",methods = {})
 public class MapDisplayController {
-
+    static Resource resource= new ClassPathResource("static/excl/ZhiLiangKaPian.xls");
 /*
 //    private static final String path="F:\\zhishitupu\\zstp\\src\\main\\resources\\static\\py\\neo4j2json_cons.py";
-    static Resource resource= new ClassPathResource("static/excl/元器件筛选、DPA数据.xlsx");
+
 
 
     //初始化连接
@@ -83,30 +85,35 @@ public class MapDisplayController {
     * */
     @RequestMapping("/getShortestPath")
     public Map<String, Object> getShortPath(String node1Name,String node2Name){
-        Map<String, Object> retMap = new HashMap<>();
+        HashMap<String, Object> retMap = new HashMap<>();
         //cql语句
         String cql = "match l=shortestPath(({name:'"+node1Name+"'})-[*]-({name:'"+node2Name+"'})) return l";
         //待返回的值，与cql return后的值顺序对应
-        List<Map<String ,Object>> nodeList = new ArrayList<>();
-        Set<Map<String ,Object>> edgeList = new HashSet<>();
-        neo4jUtil.RunCypher(null,cql,nodeList,edgeList);
-        retMap.put("nodes",nodeList);
-        retMap.put("links",edgeList);
+//        List<Map<String ,Object>> nodeList = new ArrayList<>();
+//        Set<Map<String ,Object>> edgeList = new HashSet<>();
+//        neo4jUtil.RunCypher(null,cql,nodeList,edgeList);
+        retMap = neo4jUtil.GetGraphNodeAndShip(cql);
+//        retMap.put("nodes",nodeList);
+//        retMap.put("links",edgeList);
         return retMap;
     }
+
 
     /**
     * 子图查询（java）
     * */
     @RequestMapping("/subGraph")
     public Map<String, Object> getSubGraph(String nodeName){
+//        HashMap<String, Object> ress = new HashMap<>();
         Map<String, Object> retMap = new HashMap<>();
         //cql语句
         String cql = "match l = (n)-[]-(m) where n.name='"+nodeName+"' return l;";
+//        String cql = "match l=(n)-[]-(m)-[]-(j) where n.name='"+nodeName+"' return l;";
         //待返回的值，与cql return后的值顺序对应
         List<Map<String ,Object>> nodeList = new ArrayList<>();
         Set<Map<String ,Object>> edgeList = new HashSet<>();
         neo4jUtil.RunCypher(nodeName,cql,nodeList,edgeList);
+//        retMap = neo4jUtil.GetGraphNodeAndShip(cql);
         retMap.put("nodes",nodeList);
         retMap.put("links",edgeList);
         return retMap;
@@ -131,7 +138,7 @@ public class MapDisplayController {
     * @path 文件路径
     *
     * */
-/*    @RequestMapping("/insertData")
+    @RequestMapping("/insertData")
     public void neo4jTest() throws IOException {
         String path = String.valueOf(resource.getFile());
         //创建实体的cql语句
@@ -139,87 +146,101 @@ public class MapDisplayController {
         //创建关系的cql语句
         List<String> relationCql= new ArrayList<>();
         //创建用于去重得list
-        List<String> weituoCql= new ArrayList<>();
-        List<String> shiyanCql= new ArrayList<>();
-        List<String> guanxiCql= new ArrayList<>();
+        List<String> delRepeatCql= new ArrayList<>();
         //装所有cql语句的list
         List<List<String>> allcql=new ArrayList<>();
         //读取excl文件
-        XSSFWorkbook xwb = new XSSFWorkbook(new FileInputStream(path));
-        XSSFSheet xSheet = xwb.getSheetAt(0);
-        String column="column";
-        for (int i = 2; i <=10; i++) {
-            if (xSheet.getRow(i) == null) {
+
+        Workbook wb = readExcel(path);
+        Sheet sheet = wb.getSheetAt(0);
+//        XSSFWorkbook xwb = new XSSFWorkbook(new FileInputStream(path));
+//        XSSFSheet sheet = xwb.getSheetAt(0);
+        for (int i = 3; i < sheet.getLastRowNum()-1; i++) {
+            if (sheet.getRow(i) == null) {
                 continue;
             }
-//            column+i= (xSheet.getRow(i)).getCell(1).toString();
+//            column+i= (sheet.getRow(i)).getCell(1).toString();
+            for(int j = 0;j < sheet.getRow(i).getLastCellNum();j++){
+                delRepeatCql.add((sheet.getRow(i)).getCell(j).toString());
+            }
+            //取表头作为label，添加各项数据
+            String zlwt = "create (n:"+(sheet.getRow(0)).getCell(1).toString()+"{name:\""+delRepeatCql.get(1)+"\"}) return n";
+            String glbg = "create (n:"+(sheet.getRow(0)).getCell(2).toString()+"{name:\""+delRepeatCql.get(2)+"\"}) return n";
+            String wtbj = "create (n:"+(sheet.getRow(0)).getCell(3).toString()+"{name:\""+delRepeatCql.get(3)+"\"}) return n";
+            String ycms = "create (n:"+(sheet.getRow(0)).getCell(4).toString()+"{name:\""+delRepeatCql.get(4)+"\"}) return n";
+            String xhdh = "create (n:"+(sheet.getRow(0)).getCell(5).toString()+"{name:\""+delRepeatCql.get(5)+"\"}) return n";
+            String xtzy = "create (n:"+(sheet.getRow(0)).getCell(6).toString()+"{name:\""+delRepeatCql.get(6)+"\"}) return n";
+            String cp = "create (n:"+(sheet.getRow(0)).getCell(7).toString()+"{name:\""+delRepeatCql.get(7)+"\"}) return n";
+            String gzdwbj = "create (n:"+(sheet.getRow(0)).getCell(12).toString()+"{name:\""+delRepeatCql.get(12)+"\"}) return n";
+            String zrdw = "create (n:"+(sheet.getRow(0)).getCell(22).toString()+"{name:\""+delRepeatCql.get(22)+"\"}) return n";
 
-            String shiyanbianhao =  (xSheet.getRow(i)).getCell(1).toString();
-            String weituodanwei =  (xSheet.getRow(i)).getCell(2).toString();
-            String weituoshijian =  (xSheet.getRow(i)).getCell(3).toString();
-            String suoshugongcheng =  (xSheet.getRow(i)).getCell(4).toString();
-            String zhixingbiaozhun =  (xSheet.getRow(i)).getCell(5).toString();
-            String yuanqijianleixing =  (xSheet.getRow(i)).getCell(6).toString();
-            String yuanqijianmingcheng =  (xSheet.getRow(i)).getCell(7).toString();
-            String xinghaoguige =  (xSheet.getRow(i)).getCell(8).toString();
-            String fengzhuangcailiao =  (xSheet.getRow(i)).getCell(9).toString();
-            String fengzhuangfangshi =  (xSheet.getRow(i)).getCell(10).toString();
-            String fengzhuangguige =  (xSheet.getRow(i)).getCell(11).toString();
-            String kekaoxingyuji =  (xSheet.getRow(i)).getCell(12).toString();
-            String shengchanbaozheng =  (xSheet.getRow(i)).getCell(13).toString();
-            String shengchanpici =  (xSheet.getRow(i)).getCell(14).toString();
-            String shengchancangjia =  (xSheet.getRow(i)).getCell(15).toString();
-            String guochanjinkou =  (xSheet.getRow(i)).getCell(16).toString();
-            String shiyanleixing =  (xSheet.getRow(i)).getCell(17).toString();
-            String songjianshuliang = (xSheet.getRow(i)).getCell(18).toString();
-            String shiyandanwei = (xSheet.getRow(i)).getCell(19).toString();
-            String shiyanjielun = (xSheet.getRow(i)).getCell(20).toString();
-            String zhiliangdengji = (xSheet.getRow(i)).getCell(29).toString();
-            String fengzhuangxingshi = (xSheet.getRow(i)).getCell(30).toString();
-            String feiyong = (xSheet.getRow(i)).getCell(31).toString();
-            String yijifenlei = (xSheet.getRow(i)).getCell(32).toString();
-            String caigoubianhao = (xSheet.getRow(i)).getCell(36).toString();
+            //添加对应关系
+            String xtxhzcgx = String.format("MATCH (n:`%s`),(m:`%s`) WHERE n.name='%s' AND m.name = '%s' "
+                    + "CREATE (n)-[r:%s{name:'%s'}]->(m)" + "RETURN r", (sheet.getRow(0)).getCell(6).toString(),
+                    (sheet.getRow(0)).getCell(5).toString(), delRepeatCql.get(6),
+                    delRepeatCql.get(5),"系统_型号组成关系","系统_型号组成关系");
+            String cpxtzggx = String.format("MATCH (n:`%s`),(m:`%s`) WHERE n.name='%s' AND m.name = '%s' "
+                            + "CREATE (n)-[r:%s{name:'%s'}]->(m)" + "RETURN r", (sheet.getRow(0)).getCell(7).toString(),
+                    (sheet.getRow(0)).getCell(6).toString(), delRepeatCql.get(7),
+                    delRepeatCql.get(6),"产品_系统组成关系","产品_系统组成关系");
+            String xhwtfsgx = String.format("MATCH (n:`%s`),(m:`%s`) WHERE n.name='%s' AND m.name = '%s' "
+                            + "CREATE (n)-[r:%s{name:'%s'}]->(m)" + "RETURN r", (sheet.getRow(0)).getCell(5).toString(),
+                    (sheet.getRow(0)).getCell(1).toString(), delRepeatCql.get(5),
+                    delRepeatCql.get(1),"型号_问题发生关系","型号_问题发生关系");
+            String cpwtfsgx = String.format("MATCH (n:`%s`),(m:`%s`) WHERE n.name='%s' AND m.name = '%s' "
+                            + "CREATE (n)-[r:%s{name:'%s'}]->(m)" + "RETURN r", (sheet.getRow(0)).getCell(7).toString(),
+                    (sheet.getRow(0)).getCell(1).toString(), delRepeatCql.get(7),
+                    delRepeatCql.get(1),"产品_问题发生关系","产品_问题发生关系");
+            String xhjyfsgx = String.format("MATCH (n:`%s`),(m:`%s`) WHERE n.name='%s' AND m.name = '%s' "
+                            + "CREATE (n)-[r:%s{name:'%s'}]->(m)" + "RETURN r", (sheet.getRow(0)).getCell(1).toString(),
+                    (sheet.getRow(0)).getCell(5).toString(), delRepeatCql.get(1),
+                    delRepeatCql.get(5),"型号举一反三关系","型号举一反三关系");
+            String xtjyfsgx = String.format("MATCH (n:`%s`),(m:`%s`) WHERE n.name='%s' AND m.name = '%s' "
+                            + "CREATE (n)-[r:%s{name:'%s'}]->(m)" + "RETURN r", (sheet.getRow(0)).getCell(1).toString(),
+                    (sheet.getRow(0)).getCell(6).toString(), delRepeatCql.get(1),
+                    delRepeatCql.get(6),"系统举一反三关系","系统举一反三关系");
+            String cpjyfsgx = String.format("MATCH (n:`%s`),(m:`%s`) WHERE n.name='%s' AND m.name = '%s'"
+                            + "CREATE (n)-[r:%s{name:'%s'}]->(m)" + "RETURN r", (sheet.getRow(0)).getCell(1).toString(),
+                    (sheet.getRow(0)).getCell(7).toString(), delRepeatCql.get(1),
+                    delRepeatCql.get(7),"产品举一反三关系","产品举一反三关系");
+            String zrgx = String.format("MATCH (n:`%s`),(m:`%s`) WHERE n.name='%s' AND m.name = '%s' "
+                            + "CREATE (n)-[r:%s{name:'%s'}]->(m)" + "RETURN r", (sheet.getRow(0)).getCell(22).toString(),
+                    (sheet.getRow(0)).getCell(1).toString(), delRepeatCql.get(22),
+                    delRepeatCql.get(1),"责任关系","责任关系");
+            String gygx = String.format("MATCH (n:`%s`),(m:`%s`) WHERE n.name='%s' AND m.name = '%s' "
+                            + "CREATE (n)-[r:%s{name:'%s'}]->(m)" + "RETURN r", (sheet.getRow(0)).getCell(22).toString(),
+                    (sheet.getRow(0)).getCell(7).toString(), delRepeatCql.get(22),
+                    delRepeatCql.get(7),"供应关系","供应关系");
 
-            //创建实体
-            //元器件
-            String yqjcql = "create (:co{name:\"" + yuanqijianmingcheng + "\",label:\"co\",type:\""+yuanqijianleixing+"\",specification:\""+xinghaoguige+"\"," +
-                    "batch:\""+shengchanpici+"\",manufacturer:\""+shengchancangjia+"\",rank:\""+zhiliangdengji+"\",encapsulation:\""+fengzhuangxingshi+"\",fenlei:\""+yijifenlei+"\"" +
-                    ",caigoubianhao:\""+caigoubianhao+"\"})";
-            //委托单位
-            String wtdwcql="create (:entrust{name:\""+weituodanwei+"\",label:\"entrust\"})";
-            //试验单位
-            String sydw="create (:unit{name:\""+shiyandanwei+"\",label:\"unit\"})";
-            //委托关系
-//            String recql = "create (from:co{name:\"" + yuanqijianmingcheng + "\"})-[r:entrust{name:\"" + weituodanwei + "\"}]->(to:entrust{name:\"" + weituodanwei + "\"})";
-            String recql="match (from:entrust{name:\"" + weituodanwei + "\"}),(to:co{name:\""+yuanqijianmingcheng+"\"})  merge (from)-[r:entrust{name:\""+weituodanwei+"\",name:\""+yuanqijianmingcheng+"\"}]->(to)";
-            String recql1="match (from:co{name:\"" + yuanqijianmingcheng + "\"}),(to:entrust{name:\""+weituodanwei+"\"})  merge (from)-[r:entrust{name:\""+yuanqijianmingcheng+"\",name:\""+weituodanwei+"\"}]->(to)";
 
-            //实验关系
-//            String syrecql="create (from:co{name:\"" + yuanqijianmingcheng + "\"})-[r:test{name:\"" + shiyandanwei + "\"}]->(to:unit{name:\"" + shiyandanwei + "\"})";
-            String syrecql="match (from:unit{name:\"" + shiyandanwei + "\"}),(to:co{name:\""+yuanqijianmingcheng+"\"})  merge (from)-[r:test{name:\""+shiyandanwei+"\",name:\""+yuanqijianmingcheng+"\"}]->(to)";
-            String syrecql1="match (from:co{name:\"" + yuanqijianmingcheng + "\"}),(to:unit{name:\""+shiyandanwei+"\"})  merge (from)-[r:test{name:\""+yuanqijianmingcheng+"\",name:\""+shiyandanwei+"\"}]->(to)";
-
-            //数据去重
-            weituoCql.add(wtdwcql);
-            shiyanCql.add(sydw);
-            guanxiCql.add(syrecql);
-            labelCql.add(yqjcql);
-            relationCql.add(recql);
-            relationCql.add(recql1);
-            guanxiCql.add(syrecql1);
+            labelCql.add(zlwt);
+            labelCql.add(glbg);
+            labelCql.add(wtbj);
+            labelCql.add(ycms);
+            labelCql.add(xhdh);
+            labelCql.add(xtzy);
+            labelCql.add(cp);
+            labelCql.add(gzdwbj);
+            labelCql.add(zrdw);
+            relationCql.add(xtxhzcgx);
+            relationCql.add(cpxtzggx);
+            relationCql.add(xhwtfsgx);
+            relationCql.add(cpwtfsgx);
+            relationCql.add(xhjyfsgx);
+            relationCql.add(xtjyfsgx);
+            relationCql.add(cpjyfsgx);
+            relationCql.add(zrgx);
+            relationCql.add(gygx);
         }
-        allcql.add(delRepeat(weituoCql));
-        allcql.add(delRepeat(shiyanCql));
         allcql.add(delRepeat(labelCql));
-        allcql.add(delRepeat(guanxiCql));
         allcql.add(delRepeat(relationCql));
         //执行cql
         for(List<String> l:allcql){
             for(String s:l){
-                session.run(s);
+               neo4jUtil.excuteCypherSql(s);
             }
         }
-    }*/
+    }
     // 遍历后判断赋给另一个list集合，保持原来顺序
     public static List<String> delRepeat(List<String> list) {
         List<String> listNew = new ArrayList<String>();
@@ -229,6 +250,25 @@ public class MapDisplayController {
             }
         }
         return listNew ;
+    }
+    //判断文件格式
+    private static Workbook readExcel(String filePath){
+        if(filePath==null){
+            return null;
+        }
+        String extString = filePath.substring(filePath.lastIndexOf("."));
+
+        try {
+            InputStream is = new FileInputStream(filePath);
+            if(".xls".equals(extString)){
+                return new HSSFWorkbook(is);
+            }else if(".xlsx".equals(extString)){
+                return new XSSFWorkbook(is);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
     /**
     * 导入自选输出表
@@ -247,6 +287,7 @@ public class MapDisplayController {
     * 按关系扩展下一个实体
     *
     * */
+    @RequestMapping("extensionNodes")
     public Map<String,Object> OpenRelation(String node,String edge){
         Map<String, Object> retMap = new HashMap<>();
         //cql语句

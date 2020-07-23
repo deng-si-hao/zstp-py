@@ -5,6 +5,7 @@ import com.cavin.culture.model.User;
 import com.cavin.culture.service.UserService;
 import com.cavin.culture.util.JWTUtil;
 import com.cavin.culture.util.SHAUtil;
+import io.jsonwebtoken.Jwt;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.UsernamePasswordToken;
@@ -30,12 +31,12 @@ public class UserController {
     @Resource
     private UserService userService;
 
+
     @RequestMapping(value = "/user/isLogin", method = RequestMethod.GET)
     @ResponseBody
     public JsonMessage isLogin(HttpServletRequest request) {
         Cookie[] cookies = null;
         cookies = request.getCookies();
-
         if (cookies != null) {
             boolean isLogin = false;
             for (Cookie cookie : cookies) {
@@ -62,10 +63,11 @@ public class UserController {
     public JsonMessage login(@RequestBody User user) {
         User checkUser = userService.getUserByName(user.getUserName());
         if (checkUser == null) {
-//            Long id= UniqueIdUtil.genId();
+            //Long id= UniqueIdUtil.genId();
             //shiro的加密方法
             //Object salt = ByteSource.Util.bytes(user.getUserName());
             //SimpleHash simpleHash=new SimpleHash("MD5", user.getUserPassword(), salt, 1);
+            user.setId(JWTUtil.getNewId());
             Integer insertNum = userService.insertUser(user);
             return JsonMessage.success().addData("insertNum", insertNum);
         } else {
@@ -110,18 +112,17 @@ public class UserController {
 
     /**
      * 用户登录
-     * @param response
      * @param user
      * @throws IOException
      */
     @RequestMapping(value = "/user/login", method = { RequestMethod.POST, RequestMethod.GET })
-    public JsonMessage login(@RequestBody User user, boolean rememberMe, HttpSession session) throws IOException{
+    public JsonMessage login(@RequestBody User user, boolean rememberMe, HttpServletRequest request) throws IOException{
         try {
             //存入session
             Subject subject = SecurityUtils.getSubject();
             //记得传入明文密码
             subject.login(new UsernamePasswordToken(user.getUserName(), user.getUserPassword(), rememberMe));
-            session.setAttribute("user", user);
+            request.getSession().setAttribute("user", user);
             return JsonMessage.adminLogin("0");
         } catch (AuthenticationException e) {
             e.printStackTrace();
@@ -138,8 +139,18 @@ public class UserController {
     @RequestMapping(value = "/user/logout", method = RequestMethod.POST)
     @ResponseBody
     public JsonMessage logout(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
+       /* Cookie[] cookies = request.getCookies();
+        request.getSession().removeAttribute("user");*/
+
+        try {
+            Subject subject = SecurityUtils.getSubject();
+            subject.logout();
+            return JsonMessage.success();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return JsonMessage.error(500,"注销失败！");
+        }
+        /*if (cookies != null) {
             for (Cookie cookie : cookies) {
                 if (cookie.getName().equals("access_token")) {
                     cookie.setValue(null);
@@ -151,7 +162,7 @@ public class UserController {
             return JsonMessage.success();
         } else {
             return JsonMessage.error(401, "请先登录！");
-        }
+        }*/
     }
     /**
     * 查询所有用户信息

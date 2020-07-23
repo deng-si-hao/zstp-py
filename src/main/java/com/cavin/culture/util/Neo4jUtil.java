@@ -139,7 +139,6 @@ public class Neo4jUtil {
      */
     public <T> void RunCypher(String nodeName,String cql, List<Map<String,Object>> nodeList, Set<Map<String,Object>> edgeList) {
         try {
-            int i=0;
             StatementResult result = excuteCypherSql(cql);
             List<Record> list = result.list();
             for (Record r : list) {
@@ -154,7 +153,7 @@ public class Neo4jUtil {
                         map.putAll(nodeInter.asMap());
                         //外加一个固定属性
                         map.put("id", nodeInter.id());
-                        map.put("index",i);
+                        map.put("labels",nodeInter.labels());
                         //node去重
                         for(Map<String,Object> node:nodeList){
                             if(node.get("id")!=null && node.get("id").equals(map.get("id"))){
@@ -164,7 +163,6 @@ public class Neo4jUtil {
                         }
                         if(!map.isEmpty()){
                             nodeList.add(map);
-                            i++;
                         }
                     }
                     //关系
@@ -175,28 +173,32 @@ public class Neo4jUtil {
                         map.putAll(relationInter.asMap());
                         //关系上设置的属性
                         map.put("id", relationInter.id());
-                        for(Map<String,Object> t:nodeList){
-                            if(t.get("id").equals(relationInter.startNodeId())){
-                                map.put("source",t.get("id"));
-                                map.put("source_name",t.get("name"));
-                            }
-                            if(t.get("id").equals(relationInter.endNodeId())){
-                                map.put("target",t.get("id"));
-                                map.put("target_name",t.get("name"));
-                            }
-                            map.put("type",relationInter.type());
+                        map.put("source",relationInter.startNodeId());
+                        map.put("target",relationInter.endNodeId());
+                        map.put("type",relationInter.type());
 
-                        }
+//                        for(Map<String,Object> t:nodeList){
+//                            if(t.get("id").equals(relationInter.startNodeId())){
+//                                map.put("source",t.get("id"));
+//                                map.put("source_name",t.get("name"));
+//                            }
+//                            if(t.get("id").equals(relationInter.endNodeId())){
+//                                map.put("target",t.get("id"));
+//                                map.put("target_name",t.get("name"));
+//                            }
+//                            map.put("type",relationInter.type());
+//
+//                        }
 //                        map.put("type",relationInter.type());
                         //判断一度关系查询和路径查询
                         if(nodeName==null){
                             edgeList.add(map);
                         }else {
-                            if(map.get("source_name")!=null&&!map.get("source_name").equals(nodeName)){
-                                map.clear();
-                            }else {
+//                            if(map.get("source")!=null&&!map.get("source").equals(nodeName)){
+//                                map.clear();
+//                            }else {
                                 edgeList.add(map);
-                            }
+//                            }
                         }
                     }
                 }
@@ -205,6 +207,191 @@ public class Neo4jUtil {
             e.printStackTrace();
         }
     }
+
+    public HashMap<String, Object> GetGraphNodeAndShip(String cypherSql) {
+        HashMap<String, Object> mo = new HashMap<String, Object>();
+        try {
+            StatementResult result = excuteCypherSql(cypherSql);
+            if (result.hasNext()) {
+                List<Record> records = result.list();
+                List<HashMap<String, Object>> ents = new ArrayList<HashMap<String, Object>>();
+                List<HashMap<String, Object>> ships = new ArrayList<HashMap<String, Object>>();
+                List<String> uuids = new ArrayList<String>();
+                List<String> shipids = new ArrayList<String>();
+                for (Record recordItem : records) {
+                    List<Pair<String, Value>> f = recordItem.fields();
+                    for (Pair<String, Value> pair : f) {
+                        HashMap<String, Object> rships = new HashMap<String, Object>();
+                        HashMap<String, Object> rss = new HashMap<String, Object>();
+                        String typeName = pair.value().type().name();
+                        if (typeName.equals("NULL")) {
+                            continue;
+                        } else if (typeName.equals("NODE")) {
+                            Node noe4jNode = pair.value().asNode();
+                            Map<String, Object> map = noe4jNode.asMap();
+                            String uuid = String.valueOf(noe4jNode.id());
+                            if (!uuids.contains(uuid)) {
+                                for (Map.Entry<String, Object> entry : map.entrySet()) {
+                                    String key = entry.getKey();
+                                    rss.put(key, entry.getValue());
+                                }
+                                rss.put("id", uuid);
+                                uuids.add(uuid);
+                            }
+                            if (rss != null && !rss.isEmpty()) {
+                                ents.add(rss);
+                            }
+                        } else if (typeName.equals("RELATIONSHIP")) {
+                            Relationship rship = pair.value().asRelationship();
+                            String uuid = String.valueOf(rship.id());
+                            if (!shipids.contains(uuid)) {
+                                String sourceid = String.valueOf(rship.startNodeId());
+                                String targetid = String.valueOf(rship.endNodeId());
+                                Map<String, Object> map = rship.asMap();
+                                for (Map.Entry<String, Object> entry : map.entrySet()) {
+                                    String key = entry.getKey();
+                                    rships.put(key, entry.getValue());
+                                }
+                                rships.put("id", uuid);
+                                rships.put("source", sourceid);
+                                rships.put("target", targetid);
+                                shipids.add(uuid);
+                                if (rships != null && !rships.isEmpty()) {
+                                    ships.add(rships);
+                                }
+                            }
+
+                        } else if (typeName.equals("PATH")) {
+                            Path path = pair.value().asPath();
+
+//                            //节点
+//                            Iterable<Node> nodes = path.nodes();
+//                            for (Iterator iter = nodes.iterator(); iter.hasNext();) {
+//                                InternalNode nodeInter = (InternalNode) iter.next();
+//                                Map<String, Object> map = new HashMap<>();
+//                                //节点上设置的属性
+//                                map.putAll(nodeInter.asMap());
+//                                //外加一个固定属性
+//                                map.put("id", nodeInter.id());
+//                                map.put("labels",nodeInter.labels());
+//                            }
+
+//                            Map<String, Object> startNodemap = path.start().asMap();
+//                            String startNodeuuid = String.valueOf(path.start().id());
+//                            if (!uuids.contains(startNodeuuid)) {
+//                                rss=new HashMap<String, Object>();
+//                                for (Map.Entry<String, Object> entry : startNodemap.entrySet()) {
+//                                    String key = entry.getKey();
+//                                    rss.put(key, entry.getValue());
+//                                }
+//                                rss.put("id", startNodeuuid);
+//                                uuids.add(startNodeuuid);
+//                                if (rss != null && !rss.isEmpty()) {
+//                                    ents.add(rss);
+//                                }
+//                            }
+//
+//                            Map<String, Object> endNodemap = path.end().asMap();
+//                            String endNodeuuid = String.valueOf(path.end().id());
+//                            if (!uuids.contains(endNodeuuid)) {
+//                                rss=new HashMap<String, Object>();
+//                                for (Map.Entry<String, Object> entry : endNodemap.entrySet()) {
+//                                    String key = entry.getKey();
+//                                    rss.put(key, entry.getValue());
+//                                }
+//                                rss.put("id", endNodeuuid);
+//                                uuids.add(endNodeuuid);
+//                                if (rss != null && !rss.isEmpty()) {
+//                                    ents.add(rss);
+//                                }
+//                            }
+                            Iterator<Node> allNodes = path.nodes().iterator();
+                            while (allNodes.hasNext()) {
+                                Node next = allNodes.next();
+                                String uuid = String.valueOf(next.id());
+                                if (!uuids.contains(uuid)) {
+                                    rss=new HashMap<String, Object>();
+                                    Map<String, Object> map = next.asMap();
+                                    for (Map.Entry<String, Object> entry : map.entrySet()) {
+                                        String key = entry.getKey();
+                                        rss.put(key, entry.getValue());
+                                    }
+                                    rss.put("id", uuid);
+                                    rss.put("labels",next.labels());
+                                    uuids.add(uuid);
+                                    if (rss != null && !rss.isEmpty()) {
+                                        ents.add(rss);
+                                    }
+                                }
+                            }
+                            Iterator<Relationship> reships = path.relationships().iterator();
+                            while (reships.hasNext()) {
+                                Relationship next = reships.next();
+                                String uuid = String.valueOf(next.id());
+                                if (!shipids.contains(uuid)) {
+                                    rships=new HashMap<String, Object>();
+                                    String sourceid = String.valueOf(next.startNodeId());
+                                    String targetid = String.valueOf(next.endNodeId());
+                                    Map<String, Object> map = next.asMap();
+                                    for (Map.Entry<String, Object> entry : map.entrySet()) {
+                                        String key = entry.getKey();
+                                        rships.put(key, entry.getValue());
+                                    }
+                                    rships.put("id", uuid);
+                                    rships.put("source", sourceid);
+                                    rships.put("target", targetid);
+                                    shipids.add(uuid);
+                                    if (rships != null && !rships.isEmpty()) {
+                                        ships.add(rships);
+                                    }
+                                }
+                            }
+                        } else if (typeName.contains("LIST")) {
+                            Iterable<Value> val=pair.value().values();
+                            Value next = val.iterator().next();
+                            String type=next.type().name();
+                            if (type.equals("RELATIONSHIP")) {
+                                Relationship rship = next.asRelationship();
+                                String uuid = String.valueOf(rship.id());
+                                if (!shipids.contains(uuid)) {
+                                    String sourceid = String.valueOf(rship.startNodeId());
+                                    String targetid = String.valueOf(rship.endNodeId());
+                                    Map<String, Object> map = rship.asMap();
+                                    for (Map.Entry<String, Object> entry : map.entrySet()) {
+                                        String key = entry.getKey();
+                                        rships.put(key, entry.getValue());
+                                    }
+                                    rships.put("id", uuid);
+                                    rships.put("source", sourceid);
+                                    rships.put("target", targetid);
+                                    shipids.add(uuid);
+                                    if (rships != null && !rships.isEmpty()) {
+                                        ships.add(rships);
+                                    }
+                                }
+                            }
+                        } else if (typeName.contains("MAP")) {
+                            rss.put(pair.key(), pair.value().asMap());
+                        } else {
+                            rss.put(pair.key(), pair.value().toString());
+                            if (rss != null && !rss.isEmpty()) {
+                                ents.add(rss);
+                            }
+                        }
+
+                    }
+                }
+                mo.put("nodes", ents);
+                mo.put("links", ships);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+        return mo;
+    }
+
 
     /**
     * neo4j导入数据

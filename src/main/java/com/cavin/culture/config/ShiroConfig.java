@@ -32,6 +32,7 @@ public class ShiroConfig {
         //设置登录失败访问的方法地址
         bean.setUnauthorizedUrl("/unauthorized");
         //自定义部分权限访问
+        //查询数据库数据，动态修改权限
         LinkedHashMap<String, String> filterChainDefinitionMap = new LinkedHashMap<>();
         filterChainDefinitionMap.put("/MapDisplay/**", "anon");
         filterChainDefinitionMap.put("/sys/admin/*","roles[admin]");

@@ -42,7 +42,7 @@ public class Neo4jEntityController {
     public JsonMessage getLabelList(HttpServletRequest request){
         JsonMessage result = new JsonMessage();
         HashMap<String,Object> res = new HashMap<>();
-        try {
+        try {//todo
             List<Map<String, Object>> labelList = neo4jService.getLabelList("");
             res.put("lableList",labelList);
             result.setCode(200);
