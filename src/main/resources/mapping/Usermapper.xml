@@ -9,20 +9,6 @@
         <result property="registerDate" column="register_date" jdbcType="VARCHAR"/>
         <result property="level" column="level" jdbcType="VARCHAR"/>
         <result property="isDel" column="isdel" jdbcType="VARCHAR"/>
-        <collection property="roles" ofType="com.cavin.culture.model.SysRole">
-            <id property="roleId" column="role_id" />
-            <result property="roleName" column="role_name" />
-            <result property="roleType" column="role_type"/>
-            <result property="roleStatus" column="role_status"/>
-            <result property="roleRemark" column="role_remark"/>
-            <collection property="permissions" ofType="com.cavin.culture.model.SysPermission">
-                <id property="permissionId" column="permission_id" />
-                <result property="permissionName" column="permission_name"/>
-                <result property="permissionCode" column="permission_code"/>
-                <result property="permissionStatus" column="permission_status"/>
-                <result property="permissionRemark" column="permission_remark"/>
-            </collection>
-        </collection>
     </resultMap>
 
 
@@ -42,14 +28,7 @@
     </sql>
 
     <select id="getUserByName" parameterType="java.lang.String" resultMap="user">
-
-        SELECT u.*, r.*, p.*
-        FROM user u
-        INNER JOIN user_role ur on ur.uid = u.id
-        INNER JOIN sys_role r on r.role_id = ur.rid
-        INNER JOIN role_permission pr on pr.rid = r.role_id
-        INNER JOIN sys_permission p on pr.pid = p.permission_id
-        WHERE u.user_name = #{username}
+        select * from user where user_name = #{userName,jdbcType=VARCHAR}
     </select>
 
     <select id="getPasswordByName" parameterType="java.lang.String" resultType="java.lang.String">
@@ -57,9 +36,9 @@
     </select>
 
     <insert id="insertUser" parameterType="com.cavin.culture.model.User">
-        insert into user(user_name,user_password,email,register_date,level,isdel)
+        insert into user(id,user_name,user_password,email,register_date,level,isdel)
         values
-        (#{userName,jdbcType=VARCHAR},#{userPassword,jdbcType=VARCHAR},#{email,jdbcType=VARCHAR},
+        (#{id,jdbcType=NUMERIC},#{userName,jdbcType=VARCHAR},#{userPassword,jdbcType=VARCHAR},#{email,jdbcType=VARCHAR},
         #{registerDate,jdbcType=TIMESTAMP},#{level,jdbcType=VARCHAR},#{isDel,jdbcType=VARCHAR})
     </insert>
 

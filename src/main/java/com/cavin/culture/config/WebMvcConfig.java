@@ -57,11 +57,11 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
     }
 
         @Override
-        public void addResourceHandlers(ResourceHandlerRegistry registry) {
-            registry.addResourceHandler("/static/**").addResourceLocations("classpath:/static/image");
-            //windows本地文件目录
-//            registry.addResourceHandler("/restaurantRes/**").addResourceLocations("file:D:/restaurantRes/");
-        }
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("/static/image/**").addResourceLocations("classpath:/static/image/");
+        //windows本地文件目录
+//        registry.addResourceHandler("/restaurantRes/**").addResourceLocations("file:D:/restaurantRes/");
+    }
 
     /*@Bean
     public TomcatServletWebServerFactory servletWebServerFactory(){

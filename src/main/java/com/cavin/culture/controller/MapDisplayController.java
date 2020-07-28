@@ -1,6 +1,15 @@
 package com.cavin.culture.controller;
 
+import com.auth0.jwt.interfaces.Claim;
+import com.cavin.culture.config.WebMvcConfig;
+import com.cavin.culture.model.JsonMessage;
+import com.cavin.culture.model.User;
+import com.cavin.culture.service.Neo4jService;
+import com.cavin.culture.util.ExcelResolve;
+import com.cavin.culture.util.JWTMEUtil;
+import com.cavin.culture.util.JWTUtil;
 import com.cavin.culture.util.Neo4jUtil;
+import com.csvreader.CsvWriter;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -8,14 +17,17 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import javax.annotation.Resource;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
+import java.nio.charset.Charset;
 import java.util.*;
 
 
@@ -23,33 +35,16 @@ import java.util.*;
 @RequestMapping(value = "/MapDisplay")
 @CrossOrigin(origins = "*",allowCredentials="true",allowedHeaders = "",methods = {})
 public class MapDisplayController {
-    static Resource resource= new ClassPathResource("static/excl/ZhiLiangKaPian.xls");
-/*
-//    private static final String path="F:\\zhishitupu\\zstp\\src\\main\\resources\\static\\py\\neo4j2json_cons.py";
-
-
-
-    //初始化连接
-    static Driver driver = GraphDatabase.driver("bolt://localhost:7687", AuthTokens.basic("neo4j", "12345678!a"));
-    private static Session session = driver.session();
-*/
 
     @Autowired
     private Neo4jUtil neo4jUtil;
 
-    //创建库
-/*    @RequestMapping(value = "/createDb")
-    public String createDb(){
-        String method="--cons";
-//        PythonModel pythonModel = null;
-        try {
-//            pythonModel = new PythonModel(String.valueOf(resource.getFile()),method);
-            return PythonUtil.noParam(String.valueOf(resource.getFile()),method);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return "error";
-        }
-    }*/
+    @Resource
+    private Neo4jService neo4jService;
+
+    @Resource
+    private WebMvcConfig config;
+
 
     //获取全部实体标签
     @RequestMapping(value = "/getLabel")
@@ -62,23 +57,6 @@ public class MapDisplayController {
     public List<?> getEntityByLabel(String label){
         return neo4jUtil.nodeByLabel(label);
     }
-
-/*    //获取一度关系
-    @RequestMapping(value = "/getkgR1")
-    public String getKgR1(String node, String label) throws IOException {
-
-        String method="--getkgR1";
-        String result= PythonUtil.oneParam(String.valueOf(resource.getFile()),method,node);
-
-        return result;
-    }*/
-/*    //获取最短路径
-    @RequestMapping(value = "/getKgShortestPath")
-    public String getKgShortestPath(String node1Name, String node2Name) throws IOException{
-        String method="--getkgShortestPath";
-        String res=PythonUtil.twoParam(String.valueOf(resource.getFile()),method,node1Name,node2Name);
-        return res;
-    }*/
 
     /**
     * 获取最短路径（java实现）
@@ -118,20 +96,6 @@ public class MapDisplayController {
         retMap.put("links",edgeList);
         return retMap;
     }
-/*    //获取全图
-    @RequestMapping(value = "/getalldata")
-    public String getAllData() throws IOException{
-        String method="--getalldata";
-//        PythonModel pythonModel = new PythonModel(String.valueOf(resource.getFile()),method);
-        return PythonUtil.noParam(String.valueOf(resource.getFile()),method);
-    }
-    //查询子图
-    @RequestMapping(value = "/searchSubKg")
-    public String searchSubKg(String param) throws IOException{
-        String method="--searchsubkg";
-//        PythonModel pythonModel = new PythonModel(String.valueOf(resource.getFile()),method,param);
-        return PythonUtil.oneParam(String.valueOf(resource.getFile()),method,param);
-    }*/
 
     /**
     * neo4j数据库excl导入
@@ -139,10 +103,45 @@ public class MapDisplayController {
     *
     * */
     @RequestMapping("/insertData")
-    public void neo4jTest() throws IOException {
-        String path = String.valueOf(resource.getFile());
-        //创建实体的cql语句
-        List<String> labelCql= new ArrayList<>();
+    public JsonMessage importNeo4jData(HttpServletRequest request,MultipartFile file){
+/*        String token = null;
+        String level = null;
+        Map<String, Claim> tokenRes = new HashMap<>();
+        Cookie[] cookies = request.getCookies();
+        if(cookies != null){
+            for(Cookie cookie:cookies){
+                if(cookie.getName().equals("access_token")){
+                    token = cookie.getValue();
+                    try {
+                        tokenRes = JWTMEUtil.verifyToken(token);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    level = tokenRes.get("level").asString();
+                }
+            }
+        }
+        if(level==null){
+            return JsonMessage.error(400,"您没有访问权限");
+        }
+        if(level.equals(User.commander)){
+            if(neo4jService.importData(file)){
+                return JsonMessage.success();
+            }else {
+                return JsonMessage.error(500,"导入数据失败！");
+            }
+
+        }else {
+            return JsonMessage.error(400,"您的权限不足，请联系管理员");
+        }*/
+        if(neo4jService.importData(file)){
+            return JsonMessage.success();
+        }else {
+            return JsonMessage.error(500,"导入失败");
+        }
+
+        /*//获取提交文件名称
+        String filename = file.getOriginalFilename();
         //创建关系的cql语句
         List<String> relationCql= new ArrayList<>();
         //创建用于去重得list
@@ -151,7 +150,7 @@ public class MapDisplayController {
         List<List<String>> allcql=new ArrayList<>();
         //读取excl文件
 
-        Workbook wb = readExcel(path);
+        Workbook wb = readExcel(filename);
         Sheet sheet = wb.getSheetAt(0);
 //        XSSFWorkbook xwb = new XSSFWorkbook(new FileInputStream(path));
 //        XSSFSheet sheet = xwb.getSheetAt(0);
@@ -239,37 +238,10 @@ public class MapDisplayController {
             for(String s:l){
                neo4jUtil.excuteCypherSql(s);
             }
-        }
-    }
-    // 遍历后判断赋给另一个list集合，保持原来顺序
-    public static List<String> delRepeat(List<String> list) {
-        List<String> listNew = new ArrayList<String>();
-        for (String str : list) {
-            if (!listNew.contains(str)) {
-                listNew.add(str);
-            }
-        }
-        return listNew ;
-    }
-    //判断文件格式
-    private static Workbook readExcel(String filePath){
-        if(filePath==null){
-            return null;
-        }
-        String extString = filePath.substring(filePath.lastIndexOf("."));
+        }*/
 
-        try {
-            InputStream is = new FileInputStream(filePath);
-            if(".xls".equals(extString)){
-                return new HSSFWorkbook(is);
-            }else if(".xlsx".equals(extString)){
-                return new XSSFWorkbook(is);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
     }
+
     /**
     * 导入自选输出表
     *
@@ -300,4 +272,95 @@ public class MapDisplayController {
         retMap.put("links",edgeList);
         return retMap;
     }
+
+    /**
+    * 导出neo4j数据为csv文件
+    *
+    * */
+    @RequestMapping("/exportData")
+    public void exportData(HttpServletRequest request, HttpServletResponse response){
+        String cypher=null;
+        String source = request.getParameter("source");
+        String target = request.getParameter("target");
+        String filePath = config.getLocation();
+        String fileName = JWTUtil.getNewId() + ".csv";
+        String fileUrl = filePath + File.separator + fileName;
+        if(source!=null && target == null){
+            cypher = String.format(
+                    "MATCH (n) -[r]-(m) where n.name= '%s' return n.name as source,m.name as target,r.name as relation", source);
+        }else if(source != null && target != null){
+            cypher = String.format(
+                    "MATCH (n) -[r]-(m) where n.name= '%s' and m.name='%s' return n.name as source,m.name as target,r.name as relation", source,target);
+        }else {
+            cypher = "MATCH (n) -[r]-(m) return n.name as source,m.name as target,r.name as relation";
+        }
+       List<HashMap<String, Object>> list = neo4jService.GetGraphItem(cypher);
+        File file = new File(fileUrl);
+        try {
+            if (!file.exists()) {
+                file.createNewFile();
+                System.out.println("文件不存在，新建成功！");
+            } else {
+                System.out.println("文件存在！");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        CsvWriter csvWriter = new CsvWriter(fileUrl, ',', Charset.forName("UTF-8"));
+        String[] header = { "source", "target", "relation" };
+        try {
+            csvWriter.writeRecord(header);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        for (HashMap<String, Object> hashMap : list) {
+            int colSize = hashMap.size();
+            String[] cntArr = new String[colSize];
+            cntArr[0] = hashMap.get("source").toString().replace("\"", "");
+            cntArr[1] = hashMap.get("target").toString().replace("\"", "");
+            cntArr[2] = hashMap.get("relation").toString().replace("\"", "");
+            try {
+                csvWriter.writeRecord(cntArr);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        csvWriter.close();
+            if (file.exists()) {
+                //response.setContentType("application/force-download");// 设置强制下载不打开
+                response.addHeader("Content-Disposition", "attachment;fileName=" + fileName);// 设置文件名
+                byte[] buffer = new byte[1024];
+                FileInputStream fis = null;
+                BufferedInputStream bis = null;
+                try {
+                    fis = new FileInputStream(file);
+                    bis = new BufferedInputStream(fis);
+                    OutputStream os = response.getOutputStream();
+                    int i = bis.read(buffer);
+                    while (i != -1) {
+                        os.write(buffer, 0, i);
+                        i = bis.read(buffer);
+                    }
+                    System.out.println("success");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    if (bis != null) {
+                        try {
+                            bis.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    if (fis != null) {
+                        try {
+                            fis.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+    }
+
 }

@@ -19,13 +19,13 @@ public class JWTUtil {
         key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
     }
 
-    public static String getJwtToken(String username) {
+    public static String getJwtToken(String userId) {
         // JWT的生成时间
         long nowMillis = System.currentTimeMillis();
         Date now = new Date(nowMillis);
 
         // JWT的id
-        String timestampId = String.valueOf(now.getTime()) + username;
+        String timestampId = String.valueOf(now.getTime()) + userId;
 
         // 生成JWT
         JwtBuilder builder = Jwts.builder()
@@ -33,7 +33,7 @@ public class JWTUtil {
                 .setIssuedAt(now)
                 .setSubject("UserInfo")
                 .setIssuer("HHHHHjjw")
-                .setAudience(username)
+                .setAudience(userId)
                 .signWith(key);
 
         String token = builder.compact();
@@ -49,7 +49,7 @@ public class JWTUtil {
     * 生成id
     *
      * @return*/
-    public static long getNewId() {
+    public static String getNewId() {
         //获取UUID
         String uuid = UUID.randomUUID().toString().replaceAll("-", "").toUpperCase();
         //生成后缀
@@ -58,7 +58,7 @@ public class JWTUtil {
         String time = sdf.format(new Date(System.currentTimeMillis()));
         //生成前缀
         long prefix = Long.parseLong(time) * 100000000;
-        long userId = Integer.valueOf(String.valueOf(prefix + suffix));
+        String userId =String.valueOf(prefix + suffix);
         return userId;
     }
 

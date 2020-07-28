@@ -5,6 +5,7 @@ import com.cavin.culture.dao.GraphDao;
 import com.cavin.culture.model.JsonMessage;
 import com.cavin.culture.model.Neo4jEntity;
 import com.cavin.culture.util.CSVUtil;
+import com.cavin.culture.util.ExcelResolve;
 import com.cavin.culture.util.ExcelUtil;
 import com.cavin.culture.util.Neo4jUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -21,17 +22,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import javax.annotation.Resource;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
+
 @Service
 public class Neo4jService {
 
     @Autowired
     private Neo4jUtil neo4jUtil;
 
-    @Autowired
+    @Resource
     private GraphDao graphDao;
 
     /**
@@ -511,6 +514,106 @@ public class Neo4jService {
             e.printStackTrace();
         }
         return ents;
+    }
+
+    public boolean importData(MultipartFile file){
+        //创建实体的cql语句
+        List<String> labelCql= new ArrayList<>();
+        String[] label=null;
+        String shipCql=null;
+        Boolean bool = ExcelResolve.checkFile(file);
+        if(!bool){
+            return false;
+        }
+        HashMap<String, ArrayList<String[]>> hashMap = null;
+        try {
+            hashMap = ExcelResolve.analysisFile(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        ArrayList<String[]> arrayList = hashMap.get("OK");
+        if(arrayList == null){
+            Set<String> strings = hashMap.keySet();
+            String next = strings.iterator().next();
+            return false;
+        }
+        //读list，eg.[aaa,bbb,ccc,ddd]
+        for(int i = 0;i<arrayList.size();i++){
+            String[] row = arrayList.get(i);
+            if(i==0){
+                label = arrayList.get(i);
+                continue;
+            }
+            if(i==1){
+                continue;
+            }
+            String zhiliangwentiCql = String.format("create (n:`%s`{name:'%s',FASHENGWENTISHIJIAN:'%s',WENTIXIANXIANG:'%s',WENTIYUANYINHUOZHEJINZHAN:'%s',CAIQUCUOSHI:'%s',SHIFOUGUILING:'%s'," +
+                    "SHIFOUWAIXIEWAIGOU:'%s',SHIFOUERCIWAIXIE:'%s',SHIFOUWAIXIEFANGWEITUOYUANYIN:'%s',SUOCHUJIEDUAN:'%s',FASHENGSHIJI:'%s'," +
+                    "SHIFOUWEIPICIXINGWENTI:'%s',YINGXIANGCHANPINSHULIANG:'%s',GUILINGZHOUQI:'%s',JUYIFANSAN:'%s',XIANXIANGMIAOSHU:'%s',YUANYINJIANSHU:'%s'}) return n",
+                    label[0], row[0], row[8], row[9], row[10], row[12], row[13], row[14], row[15], row[16], row[21], row[22], row[23], row[24],
+                    row[25], row[26], row[27], row[28]);
+            String guilingbaogaoCql = String.format("create (n:`%s`{name:'%s'}) return n", label[1], row[1]);
+            String wentibujianCql = String.format("create (n:`%s`{name:'%s'}) return n", label[2], row[2]);
+            String yichangmiaoshuCql = String.format("create (n:`%s`{name:'%s'}) return n", label[3], row[3]);
+            String xinghaomingchengCql = String.format("create (n:`%s`{name:'%s',XINGHAODAIHAO:'%s'}) return n", label[5], row[5],row[4]);
+            String xitongzhuanyeCql = String.format("create (n:`%s`{name:'%s'}) return n", label[6], row[6]);
+            String chanpinCql = String.format("create (n:`%s`{name:'%s'}) return n", label[7], row[7]);
+            String guzhangdingweibujianCql = String.format("create (n:`%s`{name:'%s'}) return n", label[11], row[11]);
+            String yuanyinfenleiCql = String.format("create (n:`%s`{name:'%s',`YUANYINFENLEI(YIJI)`:'%s',`YUANYINFENLEI(ERJI)`:'%s'}) return n", label[17], row[17],row[17], row[18]);
+            String zerendanweiCql = String.format("create (n:`%s`{name:'%s',NEIBUZERENDANWEI:'%s',WAIBUZERENDANWEI:'%s'}) return n", label[19], row[19], row[19], row[20]);
+            labelCql.add(zhiliangwentiCql);
+            labelCql.add(guilingbaogaoCql);
+            labelCql.add(wentibujianCql);
+            labelCql.add(yichangmiaoshuCql);
+            labelCql.add(xinghaomingchengCql);
+            labelCql.add(xitongzhuanyeCql);
+            labelCql.add(chanpinCql);
+            labelCql.add(guzhangdingweibujianCql);
+            labelCql.add(yuanyinfenleiCql);
+            labelCql.add(zerendanweiCql);
+
+            String xtxhship = String.format("MATCH (n:`%s`),(m:`%s`) WHERE n.name='%s' AND m.name = '%s' "
+                            + "CREATE (n)-[r:%s{name:'%s'}]->(m)" + "RETURN r", label[6], label[5], row[6], row[5],"XITONG_XINGHAOGUANXI","系统_型号组成关系");
+            String cpxtship = String.format("MATCH (n:`%s`),(m:`%s`) WHERE n.name='%s' AND m.name = '%s' "
+                    + "CREATE (n)-[r:%s{name:'%s'}]->(m)" + "RETURN r", label[7], label[6], row[7], row[6],"CHANPIN_WENTIZUCHENGGUANXI","产品_系统组成关系");
+            String xhwtship = String.format("MATCH (n:`%s`),(m:`%s`) WHERE n.name='%s' AND m.name = '%s' "
+                    + "CREATE (n)-[r:%s{name:'%s'}]->(m)" + "RETURN r", label[5], label[2], row[5], row[2],"XINGHAO_WENTIFASHENGGUANXI","型号_问题发生关系");
+            String cpwtfsship = String.format("MATCH (n:`%s`),(m:`%s`) WHERE n.name='%s' AND m.name = '%s' "
+                    + "CREATE (n)-[r:%s{name:'%s'}]->(m)" + "RETURN r", label[7], label[0], row[7], row[0],"CHANPIN_WENTIFASHENGGUANXI","产品_问题发生关系");
+            String xtwtfsship = String.format("MATCH (n:`%s`),(m:`%s`) WHERE n.name='%s' AND m.name = '%s' "
+                    + "CREATE (n)-[r:%s{name:'%s'}]->(m)" + "RETURN r", label[6], label[0], row[6], row[0],"XITONG_WENTIFASHENGGUANXI","系统_问题发生关系");
+            labelCql.add(xtxhship);
+            labelCql.add(cpxtship);
+            labelCql.add(xhwtship);
+            labelCql.add(cpwtfsship);
+            labelCql.add(xtwtfsship);
+            /*//读内容
+            for(int j=0;j<row.length;j++){
+                nodeCql = String.format("create (n:%s{name:'%s'}) return n", label[j], row[j]);
+                labelCql.add(nodeCql);
+                nodeCql=null;
+                String xtxhzcgx = String.format("MATCH (n:`%s`),(m:`%s`) WHERE n.name='%s' AND m.name = '%s' "
+                        + "CREATE (n)-[r:%s{name:'%s'}]->(m)" + "RETURN r", label[6],label[5], row[6], row[5],"系统_型号组成关系","系统_型号组成关系");
+                //TODO 关系语句的构建，需要确定表单格式，没办法写成动态传入参数，这里需要写死列数和行数
+            }*/
+        }
+        List<String> res=delRepeat(labelCql);
+        //执行cql
+        for(String s:res){
+            neo4jUtil.excuteCypherSql(s);
+        }
+        return true;
+    }
+
+    // 遍历后判断赋给另一个list集合，保持原来顺序
+    public static List<String> delRepeat(List<String> list) {
+        List<String> listNew = new ArrayList<String>();
+        for (String str : list) {
+            if (!listNew.contains(str)) {
+                listNew.add(str);
+            }
+        }
+        return listNew ;
     }
 
 }

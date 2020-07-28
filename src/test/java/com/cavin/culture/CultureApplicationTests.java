@@ -5,6 +5,7 @@ import com.cavin.culture.dao.UserDao;
 import com.cavin.culture.model.User;
 import com.cavin.culture.service.UserService;
 
+import com.cavin.culture.util.ExcelResolve;
 import com.cavin.culture.util.Neo4jUtil;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -421,5 +422,11 @@ class CultureApplicationTests {
 
 
     }
+
+    @Autowired
+    private ExcelResolve excelResolve;
+
+
+
 
 }

@@ -1,7 +1,9 @@
 package com.cavin.culture.controller;
 
+import com.auth0.jwt.interfaces.Claim;
 import com.cavin.culture.model.Image;
 import com.cavin.culture.service.ImageService;
+import com.cavin.culture.util.JWTMEUtil;
 import com.cavin.culture.util.JWTUtil;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.annotation.*;
@@ -42,11 +44,22 @@ public class UPImageController {
                                           HttpServletRequest request) throws IOException {
         //获取cookie中的用户id
         Cookie[] cookies = request.getCookies();
+        String token = null;
+        Map<String, Claim> tokenRes = new HashMap<>();
         String createBy=null;
         if(cookies != null){
             for(Cookie cookie:cookies){
-                if(cookie.getName().equals("userId"));
-                createBy=cookie.getValue();
+                if(cookie.getName().equals("access_token")){
+                    token=cookie.getValue();
+                    try {
+                        tokenRes = JWTMEUtil.verifyToken(token);
+                        createBy = tokenRes.get("userId").asLong().toString();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                }
+
             }
         }
         //如果createBy为空，设置一个默认值(测试数据用)
@@ -70,6 +83,10 @@ public class UPImageController {
 //        String path = request.getSession().getServletContext().getRealPath(fileLocation);//此处为tomcat下的路径，服务重启路径会变化
        //存到根目录下
 //        String pathlocal=System.getProperty("user.dir")+"\\src\\main\\resources\\static\\image";
+        //todo
+        String returnUrl = request.getScheme() + "://" + request.getServerName() + ":" +
+                request.getServerPort() +"/static/image/";//存储路径
+
         //存到缓存文件下
         String pathurl= ClassUtils.getDefaultClassLoader().getResource("").getPath()+"static/image/";
         String pathUrl = pathurl.substring(1);

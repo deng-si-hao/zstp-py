@@ -1,8 +1,10 @@
 package com.cavin.culture.controller;
 
+import com.auth0.jwt.interfaces.Claim;
 import com.cavin.culture.model.JsonMessage;
 import com.cavin.culture.model.User;
 import com.cavin.culture.service.UserService;
+import com.cavin.culture.util.JWTMEUtil;
 import com.cavin.culture.util.JWTUtil;
 import com.cavin.culture.util.SHAUtil;
 import io.jsonwebtoken.Jwt;
@@ -12,6 +14,7 @@ import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.crypto.hash.SimpleHash;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.util.ByteSource;
+import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -20,8 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.util.Enumeration;
-import java.util.List;
+import java.util.*;
 
 @RestController
 @CrossOrigin(origins = "*",allowCredentials="true",allowedHeaders = "",methods = {})
@@ -67,7 +69,7 @@ public class UserController {
             //shiro的加密方法
             //Object salt = ByteSource.Util.bytes(user.getUserName());
             //SimpleHash simpleHash=new SimpleHash("MD5", user.getUserPassword(), salt, 1);
-            user.setId(JWTUtil.getNewId());
+            user.setId(Long.parseLong(JWTUtil.getNewId()));
             Integer insertNum = userService.insertUser(user);
             return JsonMessage.success().addData("insertNum", insertNum);
         } else {
@@ -77,8 +79,8 @@ public class UserController {
 /**
 * 登录
 * */
-/*    @RequestMapping(value = "/user/login")
-    public JsonMessage login(@RequestBody User user, HttpServletResponse response) {
+    @RequestMapping(value = "/user/login")
+    public JsonMessage login(@RequestBody User user, HttpServletResponse response) throws Exception {
         String username = user.getUserName();
         String password = user.getUserPassword();
         User checkUser = userService.getUserByName(username);
@@ -88,16 +90,15 @@ public class UserController {
                 String storedPassword = userService.getPasswordByName(username);
                 if (checkPassword.equals(storedPassword)) {
                     // 登陆成功
-                    String token = JWTUtil.getJwtToken(checkUser.getUserName());
+                    String token = JWTMEUtil.createToken(checkUser.getLevel(),checkUser.getId(),checkUser.getUserName());
+//                    String token = JWTUtil.getJwtToken(checkUser.getUserName());
                     Cookie cookie = new Cookie("access_token", token);
-                    Cookie cookieUserId = new Cookie("userId",(String.valueOf(checkUser.getId())));
                     cookie.setDomain("localhost");
                     cookie.setPath("/");
                     cookie.setHttpOnly(true);
                     cookie.setMaxAge(3*24*60*60);
                     response.addCookie(cookie);
-                    response.addCookie(cookieUserId);
-                    return JsonMessage.adminLogin(checkUser.getLevel());
+                    return JsonMessage.success();
             }else {
                     return JsonMessage.error(400, "密码错误！");
                 }
@@ -108,13 +109,14 @@ public class UserController {
         } else {
             return JsonMessage.error(400, "用户名不存在！");
         }
-    }*/
+    }
 
     /**
      * 用户登录
      * @param user
      * @throws IOException
      */
+/*
     @RequestMapping(value = "/user/login", method = { RequestMethod.POST, RequestMethod.GET })
     public JsonMessage login(@RequestBody User user, boolean rememberMe, HttpServletRequest request) throws IOException{
         try {
@@ -130,6 +132,7 @@ public class UserController {
         }
 
     }
+*/
 
 
 
@@ -139,18 +142,8 @@ public class UserController {
     @RequestMapping(value = "/user/logout", method = RequestMethod.POST)
     @ResponseBody
     public JsonMessage logout(HttpServletRequest request, HttpServletResponse response) throws IOException {
-       /* Cookie[] cookies = request.getCookies();
-        request.getSession().removeAttribute("user");*/
-
-        try {
-            Subject subject = SecurityUtils.getSubject();
-            subject.logout();
-            return JsonMessage.success();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return JsonMessage.error(500,"注销失败！");
-        }
-        /*if (cookies != null) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
             for (Cookie cookie : cookies) {
                 if (cookie.getName().equals("access_token")) {
                     cookie.setValue(null);
@@ -162,24 +155,59 @@ public class UserController {
             return JsonMessage.success();
         } else {
             return JsonMessage.error(401, "请先登录！");
+        }
+        /*
+        //shiro的内置注销方式
+
+        try {
+            Subject subject = SecurityUtils.getSubject();
+            subject.logout();
+            return JsonMessage.success();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return JsonMessage.error(500,"注销失败！");
         }*/
+
     }
     /**
     * 查询所有用户信息
     * */
     @RequestMapping(value = "/admin/getAllUser",method = RequestMethod.POST)
     @ResponseBody
-    public JsonMessage getAllUserInfo(int currPage, HttpServletResponse response){
-        int currPageInt=0;
-        int pageSizeInt=8;
-        if(currPage==0){
-            currPageInt=1;
-        }else {
-            currPageInt=currPage;
+    public JsonMessage getAllUserInfo(HttpServletRequest request, int currPage, HttpServletResponse response) throws Exception {
+        long userId=0L;
+        String userName =null;
+        String level = null;
+        String token = null;
+        Map<String, Claim> tokenRes = new HashMap<>();
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals("access_token")) {
+                    token = cookie.getValue();
+                    tokenRes = JWTMEUtil.verifyToken(token);
+                    userId =tokenRes.get("userId").asLong();
+                    userName = tokenRes.get("userName").asString();
+                    level = tokenRes.get("level").asString();
+                }
+            }
         }
-        List<User> info= userService.getAll(currPageInt,pageSizeInt);
-        int total=userService.getUserCount();
-        return JsonMessage.success().addData("userInfo",info).addData("total",total);
+        if(level.equals(User.commander)){
+            int currPageInt = 0;
+            int pageSizeInt = 8;
+            if (currPage == 0) {
+                currPageInt = 1;
+            } else {
+                currPageInt = currPage;
+            }
+            List<User> info = userService.getAll(currPageInt, pageSizeInt);
+            int total = userService.getUserCount();
+            return JsonMessage.success().addData("userInfo", info).addData("total", total);
+        }else {
+            return JsonMessage.error(400,"您的权限不足，请联系管理员");
+        }
+
+
     }
 
     /**
@@ -187,39 +215,92 @@ public class UserController {
     * */
     @RequestMapping(value = "/admin/updateUserInfo",method = RequestMethod.POST)
     @ResponseBody
-    public JsonMessage updateUserInfo(@RequestBody User user, HttpServletResponse response){
-        try {
-            userService.updateUser(user);
-            return JsonMessage.success();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return JsonMessage.error(400,"删除失败");
+    public JsonMessage updateUserInfo(@RequestBody User user,HttpServletRequest request, HttpServletResponse response) throws Exception {
+        String token = null;
+        String level = null;
+        Map<String,Claim> tokenRes = new HashMap<>();
+        Cookie[] cookies = request.getCookies();
+        if(cookies != null){
+            for(Cookie cookie:cookies){
+                if(cookie.getName().equals("access_token")){
+                    token = cookie.getValue();
+                    tokenRes = JWTMEUtil.verifyToken(token);
+                    level = tokenRes.get("level").asString();
+                }
+            }
         }
-
+        if(level.equals(User.commander)){
+            try {
+                userService.updateUser(user);
+                return JsonMessage.success();
+            } catch (Exception e) {
+                e.printStackTrace();
+                return JsonMessage.error(400,"修改信息失败");
+            }
+        }else {
+            return JsonMessage.error(400,"您的权限不足，请联系管理员");
+        }
     }
     /**
     * 查询单个用户信息
     * */
     @RequestMapping(value = "/admin/queryById",method = RequestMethod.POST)
     @ResponseBody
-    public JsonMessage queryById(Long id, HttpServletResponse response){
+    public JsonMessage queryById(Long id,HttpServletRequest request, HttpServletResponse response) throws Exception {
+        String token = null;
+        String level = null;
+        Map<String,Claim> tokenRes = new HashMap<>();
+        Cookie[] cookies = request.getCookies();
+        if(cookies != null){
+            for(Cookie cookie:cookies){
+                if(cookie.getName().equals("access_token")){
+                    token = cookie.getValue();
+                    tokenRes = JWTMEUtil.verifyToken(token);
+                    level = tokenRes.get("level").asString();
+                }
+            }
+        }
+        if(level.equals(User.commander)){
             User user= userService.getUserById(id);
+            System.out.println(user.toString());
+            return JsonMessage.success().addData("user",user);
+        }else {
+            return JsonMessage.error(400,"您的权限不足，请联系管理员");
+        }
 
-        System.out.println(user.toString());
-        return JsonMessage.success().addData("user",user);
     }
     /**
     * 删除用户信息id
     * */
     @RequestMapping(value = "/admin/delUser",method = RequestMethod.POST)
     @ResponseBody
-    public JsonMessage delUser(Long id){
-        try {
-            userService.delUserById(id);
-            return JsonMessage.success();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return JsonMessage.error(400,"删除失败！");
+    public JsonMessage delUser(Long id,HttpServletRequest request) throws Exception {
+        String token = null;
+        String level = null;
+        Map<String,Claim> tokenRes = new HashMap<>();
+        Cookie[] cookies = request.getCookies();
+        if(cookies != null){
+            for(Cookie cookie:cookies){
+                if(cookie.getName().equals("access_token")){
+                    token = cookie.getValue();
+                    tokenRes = JWTMEUtil.verifyToken(token);
+                    level = tokenRes.get("level").asString();
+                }
+            }
         }
+        if(level.equals(User.commander)){
+            try {
+                userService.delUserById(id);
+                return JsonMessage.success();
+            } catch (Exception e) {
+                e.printStackTrace();
+                return JsonMessage.error(400,"删除失败！");
+            }
+        }else {
+            return JsonMessage.error(400,"您的权限不足，请联系管理员");
+        }
+
     }
+
+
 }

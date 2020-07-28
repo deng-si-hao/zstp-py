@@ -35,8 +35,8 @@ public class ShiroConfig {
         //查询数据库数据，动态修改权限
         LinkedHashMap<String, String> filterChainDefinitionMap = new LinkedHashMap<>();
         filterChainDefinitionMap.put("/MapDisplay/**", "anon");
-        filterChainDefinitionMap.put("/sys/admin/*","roles[admin]");
-        filterChainDefinitionMap.put("/sys/user/*","anon");
+//        filterChainDefinitionMap.put("/sys/admin/*","roles[admin]");
+//        filterChainDefinitionMap.put("/sys/user/*","anon");
 //        filterChainDefinitionMap.put("/sys/user/queryById","anon");
 //        filterChainDefinitionMap.put("/sys/admin/**","authc");
 //        filterChainDefinitionMap.put("/login", "anon");

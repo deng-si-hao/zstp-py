@@ -519,12 +519,14 @@ public class Neo4jUtil {
     public List<Object> init(){
         List<Object> label=new ArrayList<>();
         List<Object> labelAll = new ArrayList<>();
-        List<Map<String, Object>> res = new ArrayList<>();
-        String cql = "match l=(n) return l";
+        List<String> res = new ArrayList<>();
+        String cql = "call db.labels";
         StatementResult result =excuteCypherSql(cql);
         List<Record> list = result.list();
         for (Record r : list) {
-            for (String index : r.keys()) {
+            String labels = r.values().get(0).toString();
+
+            /*for (String index : r.keys()) {
                 Path path = r.get(index).asPath();
                 //节点
                 Iterable<Node> nodes = path.nodes();
@@ -536,14 +538,15 @@ public class Neo4jUtil {
                     map.put("label", nodeInter.get("label"));
                     res.add(map);
                 }
-            }
+            }*/
+            res.add(labels);
         }
         //对实体标签去重
-        for (Map<String, Object> map : res) {
-            labelAll.add(map.get("label"));
-        }
-        for (int i = 0; i < labelAll.size(); i++) {
-            Object str = labelAll.get(i);  //获取传入集合对象的每一个元素
+        /*for (Map<String, Object> map : res) {
+            labelAll.add(map.get("name"));
+        }*/
+        for (int i = 0; i < res.size(); i++) {
+            Object str = res.get(i);  //获取传入集合对象的每一个元素
             String one = str.toString();
             String two = one.substring(1, one.length() - 1);
             if (!label.contains(two)) {   //查看新集合中是否有指定的元素，如果没有则加入

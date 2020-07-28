@@ -6,6 +6,8 @@ import java.util.Set;
 
 public class User {
 
+    public static final String commander="1";
+
     private long id;
     private String userName;
     private String userPassword;
