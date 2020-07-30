@@ -17,9 +17,9 @@
     <sql id="dynamicWhere">
         <where>
             FIND_IN_SET(#{userId}, user_id)
-            <if test="pic_name != null">AND pic_name=#{picName}</if>
-            <if test="startTime != null">AND createDate &gt;= #{startTime}</if>
-            <if test="endTime != null">AND createDate &lt;= #{endTime}</if>
+            <if test="pic_name != null and pic_name != ''">AND pic_name=#{picName}</if>
+            <if test="startTime != null and startTime != ''">AND  DATE_FORMAT(createDate,'%Y-%m-%d') &gt;= DATE_FORMAT(#{startTime},'%Y-%m-%d')</if>
+            <if test="endTime != null and endTime != ''">AND DATE_FORMAT(createDate,'%Y-%m-%d') &lt;=DATE_FORMAT(#{endTime},'%Y-%m-%d')</if>
 
         </where>
     </sql>
@@ -32,6 +32,13 @@
     <select id="findById" parameterType="java.util.Map" resultMap="image">
         select <include refid="columns"/> from image
         <include refid="dynamicWhere"/>
+        limit #{currIndex},#{pageSize}
+    </select>
+
+    <select id="getCount" parameterType="java.util.Map" resultType="java.lang.Integer">
+        select count(*) from image
+        <include refid="dynamicWhere"/>
+
     </select>
 
     <update id="updateUserId">

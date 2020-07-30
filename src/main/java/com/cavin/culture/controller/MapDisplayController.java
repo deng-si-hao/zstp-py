@@ -98,6 +98,19 @@ public class MapDisplayController {
     }
 
     /**
+    * 获取节点的所有关系类型
+    *
+    * */
+    @RequestMapping("/getShipByNode")
+    public List<String> getShipByNode(String nodeName){
+        List<String> resultList = new ArrayList<>();
+        String cql = String.format("match l = (n)-[r]-() where n.name='%s' return r",nodeName);
+        resultList = neo4jService.getShipByNode(cql);
+        return resultList;
+    }
+
+
+    /**
     * neo4j数据库excl导入
     * @path 文件路径
     *
@@ -259,7 +272,7 @@ public class MapDisplayController {
     * 按关系扩展下一个实体
     *
     * */
-    @RequestMapping("extensionNodes")
+    @RequestMapping("/extensionNodes")
     public Map<String,Object> OpenRelation(String node,String edge){
         Map<String, Object> retMap = new HashMap<>();
         //cql语句

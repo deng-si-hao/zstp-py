@@ -2,9 +2,11 @@ package com.cavin.culture.controller;
 
 import com.auth0.jwt.interfaces.Claim;
 import com.cavin.culture.model.Image;
+import com.cavin.culture.model.JsonMessage;
 import com.cavin.culture.service.ImageService;
 import com.cavin.culture.util.JWTMEUtil;
 import com.cavin.culture.util.JWTUtil;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,10 +20,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 @RestController
+@CrossOrigin(origins = "*",allowCredentials="true",allowedHeaders = "",methods = {})
 @RequestMapping(value = "/upload/pic")
 public class UPImageController {
 
@@ -39,8 +43,11 @@ public class UPImageController {
     * 接收前端传的fromData数据
     *
     * */
+    @Value("${file.serverurl}")
+    private String serverurl;
+
     @PostMapping("/addImage")
-    public Map<String, Object> uploadPic(String name,String userId, MultipartFile pictureFile,
+    public JsonMessage uploadPic(String name,String userId, MultipartFile pictureFile,
                                           HttpServletRequest request) throws IOException {
         //获取cookie中的用户id
         Cookie[] cookies = request.getCookies();
@@ -67,9 +74,15 @@ public class UPImageController {
             createBy="100012";
         }
         //获取当前时间
-        String createDate = null;
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        createDate = simpleDateFormat.format(new Date());
+        Date createDate = new Date();
+        /*SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String newDate = simpleDateFormat.format(new Date());
+        try {
+            createDate = simpleDateFormat.parse(newDate);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }*/
+//        createDate = simpleDateFormat.format(new Date());
 
         //获取提交文件名称
         String filename = pictureFile.getOriginalFilename();
@@ -83,9 +96,7 @@ public class UPImageController {
 //        String path = request.getSession().getServletContext().getRealPath(fileLocation);//此处为tomcat下的路径，服务重启路径会变化
        //存到根目录下
 //        String pathlocal=System.getProperty("user.dir")+"\\src\\main\\resources\\static\\image";
-        //todo
-        String returnUrl = request.getScheme() + "://" + request.getServerName() + ":" +
-                request.getServerPort() +"/static/image/";//存储路径
+
 
         //存到缓存文件下
         String pathurl= ClassUtils.getDefaultClassLoader().getResource("").getPath()+"static/image/";
@@ -95,7 +106,7 @@ public class UPImageController {
         String filePath = request.getScheme() + "://" + request.getServerName()
 //                + ":" + request.getServerPort() //端口 https443端口无需添加
                 + pathlocal + filename;*/
-        String pictureFileURL = pathUrl+"\\"+newfilename;//根路径+文件名
+        String pictureFileURL = serverurl+"/static/image/"+newfilename;//根路径+文件名
         //生成UUID用于标识图片
         String picId = JWTUtil.getNewId();
         //获取当前登录用户id
@@ -105,13 +116,14 @@ public class UPImageController {
 //            pictureFile.write(pictureFileURL);
             fileupload(pictureFile.getBytes(),pathUrl,newfilename);
             //插入这条数据
-            imageService.addImage(new Image(name, userId, picId, pictureFileURL,createBy,new Date()));
-            result.put("Result", "添加图片信息成功");
+            imageService.addImage(new Image(name, userId, picId, pictureFileURL,createBy,createDate));
+            return JsonMessage.success().addData("result","添加图片成功");
+//            result.put("Result", "添加图片信息成功");
         } catch (IOException e) {
             e.printStackTrace();
-            result.put("Result", "添加图片信息失败");
+            return JsonMessage.error(401,"添加图片失败");
         }
-        return result;
+
     }
 /*    *//**
      * 获取当前系统路径
@@ -150,22 +162,36 @@ public class UPImageController {
     }
 
     @RequestMapping("/findPicById")
-    public List<Image> findPicById(String userId,Date startDate,Date endDate,String picName){
-        SimpleDateFormat sdf= new SimpleDateFormat("yyyy-MM-dd");
-        String startTime=sdf.format(startDate);
-        String endTime = sdf.format(endDate);
+    public JsonMessage findPicById(String userId,String startDate,String endDate,String picName,Integer currPage){
+//        SimpleDateFormat sdf= new SimpleDateFormat("yyyy-MM-dd");
+        String startTime =null;
+        String endTime = null;
+        if(startDate!=null){
+            startTime=startDate;
+        }
+        if(endDate!=null){
+            endTime =endDate;
+        }
+        int currPageInt = 0;
+        int pageSizeInt = 12;
+        if (currPage != null) {
+            currPageInt = (currPage-1)*pageSizeInt;
+        }
         Map<String,Object> param = new HashMap<>();
         param.put("userId",userId);
         param.put("startTime",startTime);
         param.put("endTime",endTime);
         param.put("picName",picName);
+        param.put("currIndex",currPageInt);
+        param.put("pageSize",pageSizeInt);
         List<Image> imageByUser= imageService.findById(param);
-        System.out.println(imageByUser.size());
-        return imageByUser;
+        int total = imageService.getCount(param);
+        System.out.println("图片数量："+imageByUser.size());
+        return JsonMessage.success().addData("imageList",imageByUser).addData("total",total);
     }
 
     @RequestMapping("/delUserId")
-    public Map<String, Object> delUserId(String userId,int picId){
+    public Map<String, Object> delUserId(String userId,String picId){
         try {
             imageService.delUserId(userId,picId);
             result.put("Result","删除成功！");

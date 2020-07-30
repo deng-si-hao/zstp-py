@@ -22,8 +22,12 @@ public class ImageService {
         return  imageDao.findById(param);
     }
 
-    public void delUserId(String userId,int picId){
+    public void delUserId(String userId,String picId){
         imageDao.updateUserId(userId, picId);
+    }
+
+    public int getCount(Map<String, Object> param){
+        return imageDao.getCount(param);
     }
 
 }

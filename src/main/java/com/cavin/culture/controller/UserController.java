@@ -174,9 +174,7 @@ public class UserController {
     * */
     @RequestMapping(value = "/admin/getAllUser",method = RequestMethod.POST)
     @ResponseBody
-    public JsonMessage getAllUserInfo(HttpServletRequest request, int currPage, HttpServletResponse response) throws Exception {
-        long userId=0L;
-        String userName =null;
+    public JsonMessage getAllUserInfo(HttpServletRequest request, Integer currPage, HttpServletResponse response) throws Exception {
         String level = null;
         String token = null;
         Map<String, Claim> tokenRes = new HashMap<>();
@@ -186,11 +184,11 @@ public class UserController {
                 if (cookie.getName().equals("access_token")) {
                     token = cookie.getValue();
                     tokenRes = JWTMEUtil.verifyToken(token);
-                    userId =tokenRes.get("userId").asLong();
-                    userName = tokenRes.get("userName").asString();
                     level = tokenRes.get("level").asString();
                 }
             }
+        }else {
+            return JsonMessage.error(401,"请先登录！");
         }
         if(level.equals(User.commander)){
             int currPageInt = 0;
@@ -228,6 +226,8 @@ public class UserController {
                     level = tokenRes.get("level").asString();
                 }
             }
+        }else {
+            return JsonMessage.error(401,"请先登录！");
         }
         if(level.equals(User.commander)){
             try {
@@ -259,6 +259,8 @@ public class UserController {
                     level = tokenRes.get("level").asString();
                 }
             }
+        }else {
+            return JsonMessage.error(401,"请先登录！");
         }
         if(level.equals(User.commander)){
             User user= userService.getUserById(id);
@@ -287,6 +289,8 @@ public class UserController {
                     level = tokenRes.get("level").asString();
                 }
             }
+        }else {
+            return JsonMessage.error(401,"请先登录！");
         }
         if(level.equals(User.commander)){
             try {

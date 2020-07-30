@@ -616,4 +616,23 @@ public class Neo4jService {
         return listNew ;
     }
 
+    //获取当前节点的所有关系类型
+    public List<String> getShipByNode(String cql){
+        List<String> res = new ArrayList<>();
+        StatementResult result = neo4jUtil.excuteCypherSql(cql);
+        if (result.hasNext()) {
+            List<Record> records = result.list();
+            for (Record recordItem : records) {
+                List<Pair<String, Value>> f = recordItem.fields();
+                HashMap<String, Object> rss = new HashMap<String, Object>();
+                for (Pair<String, Value> pair : f) {
+                    String ss = pair.value().asRelationship().type();
+                    res.add(ss);
+                }
+
+            }
+        }
+        List<String> resultList = delRepeat(res);
+       return resultList;
+    }
 }
