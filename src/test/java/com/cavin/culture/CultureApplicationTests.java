@@ -1,3 +1,4 @@
+
 package com.cavin.culture;
 
 import com.cavin.culture.controller.MapDisplayController;
@@ -9,14 +10,13 @@ import com.cavin.culture.util.ExcelResolve;
 import com.cavin.culture.util.Neo4jUtil;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.junit.jupiter.api.Test;
+
 import org.junit.runner.RunWith;
 import org.neo4j.driver.v1.*;
 import org.neo4j.driver.v1.types.Node;
 import org.neo4j.driver.v1.types.Path;
 import org.neo4j.driver.v1.types.Relationship;
-import org.python.core.*;
-import org.python.util.PythonInterpreter;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -36,25 +36,29 @@ class CultureApplicationTests {
     private DataSource dataSource;
     @Resource
     private UserDao userDao;
-    
+
     @Autowired
     private Neo4jUtil neo4jUtil;
-
+}
+/*
     @Test
     void contextLoads() {
     }
 
 
     //测试逻辑删除用户 信息
-  /*  @Test
+  */
+/*  @Test
     public void delUser(){
         Long i=1L;
         userService.delUserById(i);
         User user=userService.getUserById(i);
         System.out.println(user);
-    }*/
+    }*//*
+
     //测试修改用户信息
-  /*  @Test
+  */
+/*  @Test
     public void updateUser(){
         Long id=1L;
         String name="test01";
@@ -68,7 +72,9 @@ class CultureApplicationTests {
         user.setLevel(level);
         userService.updateUser(user);
         System.out.println(userService.getUserById(id));
-    }*/
+    }*//*
+
+*/
 /*    @Test
     public void testId(){
 //        Long id= UniquelUtil.genId();
@@ -79,7 +85,8 @@ class CultureApplicationTests {
 //        User name=userService.getUserByName("test02");
         System.out.println(users.toString());
 
-    }*/
+    }*//*
+
 
     @Test
     public void testpython(){
@@ -147,7 +154,8 @@ class CultureApplicationTests {
         System.setProperty("python.home","D:\\jython2.7.0");
 
         // 1. Python面向函数式编程: 在Java中调用Python函数
-        /*String pythonFunc = "E:\\testByTupu\\tornado_kg copy\\neo4j2json.py";
+        */
+/*String pythonFunc = "E:\\testByTupu\\tornado_kg copy\\neo4j2json.py";
 
         PythonInterpreter interp = new PythonInterpreter();
         interp.exec("import sys");
@@ -159,7 +167,8 @@ class CultureApplicationTests {
         PyObject dddRes = pyf.__call__();
         System.out.println(dddRes);
         interp.cleanup();
-        interp.close();*/
+        interp.close();*//*
+
 
         // 2. 面向对象式编程: 在Java中调用Python对象实例的方法
         String pythonClass = "E:\\testByTupu\\tornado_kg copy\\neo4j2json.py";
@@ -222,10 +231,12 @@ class CultureApplicationTests {
             String line=null;
             String result="";
             //直到读完为止
-           /* while((line=br.readLine())!=null)
+           */
+/* while((line=br.readLine())!=null)
             {
                 result+=line;
-            }*/
+            }*//*
+
 
             ArrayList<String> strBuffer = new ArrayList<String>();
             ArrayList<String> str = new ArrayList<String>();
@@ -236,19 +247,25 @@ class CultureApplicationTests {
 //                result+=line;
             }
             for(int i=1;i<str.size();i++){
+*/
 /*                strBuffer.add(str.get(i));
-                System.out.println(strBuffer);*/
+                System.out.println(strBuffer);*//*
+
                 result += str.get(i);
+*/
 /*                strBuffer.add(str.get(i));
                 System.out.println("***********************");
-                System.out.println(strBuffer);*/
+                System.out.println(strBuffer);*//*
+
 //                result = new String(result.getBytes("GBK"), "UTF-8");
                 System.out.println(result);
             }
 
+*/
 /*            System.out.println(result);
             JSONObject jsonObject = JSONObject.parseObject(result);
-            System.out.println(jsonObject);*/
+            System.out.println(jsonObject);*//*
+
 
         }
         catch(IOException e)
@@ -258,8 +275,10 @@ class CultureApplicationTests {
     }
     @Test
     public void PyhtonUtilTest() throws IOException{
-    /*    org.springframework.core.io.Resource resource= new ClassPathResource("static/py/neo4j2json_cons.py");
-        System.out.println(resource.getFile());*/
+    */
+/*    org.springframework.core.io.Resource resource= new ClassPathResource("static/py/neo4j2json_cons.py");
+        System.out.println(resource.getFile());*//*
+
         MapDisplayController mapDisplayController= new MapDisplayController();
         mapDisplayController.getAllLabel();
         System.out.println(mapDisplayController.getAllLabel());
@@ -321,17 +340,21 @@ class CultureApplicationTests {
                             nodesMap.put(node.id(), node);
                         }
 
-                        /**
+                        */
+/**
                          * 打印最短路径里面的关系 == 关系包括起始节点的ID和末尾节点的ID，以及关系的type类型
-                         */
+                         *//*
+
                         Iterable<Relationship> relationships = p.relationships();
                         for (Relationship relationship : relationships) {
                             Long startID = relationship.startNodeId();
                             Long endID = relationship.endNodeId();
                             String rType = relationship.type();
-                            /**
+                            */
+/**
                              * asMap 相当于 节点的properties属性信息
-                             */
+                             *//*
+
                             System.out.println(
                                     nodesMap.get(startID).asMap() + "-" + rType + "-"
                                             + nodesMap.get(endID).asMap());
@@ -380,7 +403,8 @@ class CultureApplicationTests {
 
     @Test
     public void getNewUserId() {
-       /* //获取UUID
+       */
+/* //获取UUID
         String uuid = UUID.randomUUID().toString().replaceAll("-", "").toUpperCase();
         //生成后缀
         long suffix = Math.abs(uuid.hashCode() % 100000000);
@@ -389,11 +413,13 @@ class CultureApplicationTests {
         //生成前缀
         long prefix = Long.parseLong(time) * 100000000;
         String userId = String.valueOf(prefix + suffix);
-        System.out.println(userId);*/
+        System.out.println(userId);*//*
+
         HashMap<String,Object> hashMap = new HashMap<>();
         hashMap.put("zhansgan",168);
         hashMap.put("zhangsan",175);
-        /**
+        */
+/**
         * >>	右移运算符，符号左侧数值 按位右移 符号右侧数值指定的位数，若为正数则高位补0，若为负数则高位补1
           <<	左移运算符，符号左侧数值 按位左移 符号右侧数值指定的位数，并在低位处补0
           >>>	无符号右移运算符，符号左侧数值 按位右移 符号右侧数值指定的位数，无论正负高位补0
@@ -401,7 +427,8 @@ class CultureApplicationTests {
           |	    或(OR)运算符，对两个整型操作数中对应位执行布尔代数，两个位中只要有一个为1就输出1，否则为0
           ^	    异或(XOR)运算符，对两个整型操作数中对应位执行布尔代数，两个位相等则为0，不相等则为1
           ~	    非(NOT)运算符，按位取反运算符翻转操作数的每一位，即0变成1，1变成0
-        * */
+        * *//*
+
         int a = -20;//0001 0100   1110 1100
         int b = 30;
         int result1 = a << 1;
@@ -430,3 +457,4 @@ class CultureApplicationTests {
 
 
 }
+*/

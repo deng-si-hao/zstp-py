@@ -40,7 +40,7 @@ public class UserService {
             user.setLevel(rank);
         }
         if(user.getRegisterDate()==null){
-            user.setRegisterDate(new Date());
+            user.setRegisterDate((new Date()).toString());
         }
         Integer insertNum = userDao.insertUser(user);
 //        String id= UniqueIdUtil

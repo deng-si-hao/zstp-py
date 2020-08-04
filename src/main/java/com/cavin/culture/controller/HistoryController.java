@@ -1,12 +1,12 @@
 package com.cavin.culture.controller;
 
+import com.auth0.jwt.interfaces.Claim;
 import com.cavin.culture.model.History;
 import com.cavin.culture.model.JsonMessage;
 import com.cavin.culture.model.User;
 import com.cavin.culture.service.HistoryService;
 import com.cavin.culture.service.UserService;
-import com.cavin.culture.util.JWTUtil;
-import io.jsonwebtoken.Claims;
+import com.cavin.culture.util.JWTMEUtil;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -36,8 +36,14 @@ public class HistoryController {
                 token = cookie.getValue();
             }
         }
-        Claims claims = JWTUtil.parseToken(token);
-        String username = claims.getAudience();
+        String username = null;
+        try {
+            Map<String, Claim> tokenRes = JWTMEUtil.verifyToken(token);
+            username = tokenRes.get("userName").asString();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
 
         List<History> histories = historyService.getHistoriesByNameAndType(username, type);
         return JsonMessage.success().addData("histories", histories);
@@ -53,8 +59,13 @@ public class HistoryController {
                 token = cookie.getValue();
             }
         }
-        Claims claims = JWTUtil.parseToken(token);
-        String username = claims.getAudience();
+        String username = null;
+        try {
+            Map<String, Claim> tokenRes = JWTMEUtil.verifyToken(token);
+            username = tokenRes.get("userName").asString();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         history.setUserName(username);
         User user = userService.getUserByName(username);
         history.setUserId(user.getId());
@@ -79,8 +90,13 @@ public class HistoryController {
                 token = cookie.getValue();
             }
         }
-        Claims claims = JWTUtil.parseToken(token);
-        String username = claims.getAudience();
+        String username = null;
+        try {
+            Map<String, Claim> tokenRes = JWTMEUtil.verifyToken(token);
+            username = tokenRes.get("userName").asString();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         List<String> suggestion = historyService.getInputSuggestion(queryString,username);
         return JsonMessage.success().addData("suggestion", suggestion);
     }

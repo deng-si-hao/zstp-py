@@ -84,7 +84,7 @@ public class JWTMEUtil {
         String time = sdf.format(new Date(System.currentTimeMillis()));
         //生成前缀
         long prefix = Long.parseLong(time) * 100000000;
-        long userId = Integer.valueOf(String.valueOf(prefix + suffix));
+        long userId = Long.parseLong(String.valueOf(prefix + suffix));
         return userId;
     }
 

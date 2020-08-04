@@ -1,7 +1,6 @@
 package com.cavin.culture.config;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
 import org.springframework.boot.web.servlet.MultipartConfigFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,15 +8,14 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 import javax.servlet.MultipartConfigElement;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+
 
 @Configuration
 public class WebMvcConfig extends WebMvcConfigurerAdapter {
 
 
     /**
-            * 在配置文件中配置的文件保存路径
+     * 在配置文件中配置的文件保存路径
      */
     @Value("${file.location}")
     private String location;

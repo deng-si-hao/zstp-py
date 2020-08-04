@@ -5,7 +5,6 @@ import com.cavin.culture.model.Image;
 import com.cavin.culture.model.JsonMessage;
 import com.cavin.culture.service.ImageService;
 import com.cavin.culture.util.JWTMEUtil;
-import com.cavin.culture.util.JWTUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +19,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -108,7 +106,7 @@ public class UPImageController {
                 + pathlocal + filename;*/
         String pictureFileURL = serverurl+"/static/image/"+newfilename;//根路径+文件名
         //生成UUID用于标识图片
-        String picId = JWTUtil.getNewId();
+        String picId = String.valueOf(JWTMEUtil.getNewId());
         //获取当前登录用户id
 //        System.out.println(pictureFileURL);
         //写入文件

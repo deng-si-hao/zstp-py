@@ -1,6 +1,5 @@
 package com.cavin.culture.controller;
 
-import com.alibaba.fastjson.JSONObject;
 import com.cavin.culture.model.JsonMessage;
 import com.cavin.culture.model.Neo4jEntity;
 import com.cavin.culture.service.Neo4jService;
@@ -295,19 +294,19 @@ public class Neo4jEntityController {
     * */
     @ResponseBody
     @RequestMapping(value = "/importgraph")
-    public JSONObject importgraph(@RequestParam(value = "file", required = true) MultipartFile file,
+    public JsonMessage importgraph(@RequestParam(value = "file", required = true) MultipartFile file,
                                   HttpServletRequest request, HttpServletResponse response) throws Exception {
-        JSONObject res = new JSONObject();
+        JsonMessage res = new JsonMessage();
         if (file == null) {
-            res.put("code", "500");
-            res.put("msg", "请先选择有效的文件");
+            res.setCode(500);
+            res.setMessage("请先选择有效的文件");
             return res;
         }
         // 领域不能为空
         String label = request.getParameter("domain");
         if (StringUtils.isBlank(label)) {
-            res.put("code", "500");
-            res.put("msg", "请先选择领域");
+            res.setCode(500);
+            res.setMessage("请先选择领域");
             return res;
         }
         List<Map<String, Object>> dataList = neo4jService.getFormatData(file);
@@ -327,12 +326,10 @@ public class Neo4jEntityController {
             String csvUrl = "http://"+serverUrl+ "/download/" + filename;
             //String csvUrl = "https://neo4j.com/docs/cypher-manual/3.5/csv/artists.csv";
             neo4jService.batchInsertByCSV(label, csvUrl, 0);
-            res.put("code", 200);
-            res.put("message", "success!");
-            return res;
+            return JsonMessage.success();
         } catch (Exception e) {
-            res.put("code", 500);
-            res.put("message", "服务器错误!");
+            res.setCode(500);
+            res.setMessage("服务器错误");
         }
         return res;
     }
@@ -342,8 +339,8 @@ public class Neo4jEntityController {
     *
     * */
     @RequestMapping(value = "/exportgraph")
-    public JSONObject exportgraph(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        JSONObject res = new JSONObject();
+    public JsonMessage exportgraph(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        JsonMessage res = new JsonMessage();
         String label = request.getParameter("domain");
         String filePath = config.getLocation();
         String fileName = UUID.randomUUID() + ".csv";
@@ -380,9 +377,9 @@ public class Neo4jEntityController {
         csvWriter.close();
         String serverUrl=request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
         String csvUrl = serverUrl + "/kg/download/" + fileName;
-        res.put("code", 200);
-        res.put("csvurl", csvUrl);
-        res.put("message", "success!");
+        res.setCode(200);
+        res.setMessage("success!");
+        res.addData("csvurl",csvUrl);
         return res;
 
     }

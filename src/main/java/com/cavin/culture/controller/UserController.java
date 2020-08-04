@@ -5,23 +5,14 @@ import com.cavin.culture.model.JsonMessage;
 import com.cavin.culture.model.User;
 import com.cavin.culture.service.UserService;
 import com.cavin.culture.util.JWTMEUtil;
-import com.cavin.culture.util.JWTUtil;
 import com.cavin.culture.util.SHAUtil;
-import io.jsonwebtoken.Jwt;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authc.AuthenticationException;
-import org.apache.shiro.authc.UsernamePasswordToken;
-import org.apache.shiro.crypto.hash.SimpleHash;
-import org.apache.shiro.subject.Subject;
-import org.apache.shiro.util.ByteSource;
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
+
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.*;
 
@@ -69,7 +60,7 @@ public class UserController {
             //shiro的加密方法
             //Object salt = ByteSource.Util.bytes(user.getUserName());
             //SimpleHash simpleHash=new SimpleHash("MD5", user.getUserPassword(), salt, 1);
-            user.setId(Long.parseLong(JWTUtil.getNewId()));
+            user.setId(JWTMEUtil.getNewId());
             Integer insertNum = userService.insertUser(user);
             return JsonMessage.success().addData("insertNum", insertNum);
         } else {

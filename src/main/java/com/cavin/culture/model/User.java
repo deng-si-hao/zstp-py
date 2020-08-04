@@ -8,11 +8,11 @@ public class User {
 
     public static final String commander="1";
 
-    private long id;
+    private Long id;
     private String userName;
     private String userPassword;
     private String email;
-    private Date registerDate;
+    private String registerDate;
     private String level;//默认为0，管理员为1，无需添加
     private String isDel;//默认为0，删除为1，无需添加
 
@@ -29,7 +29,7 @@ public class User {
     public User() {
     }
 
-    public User(Long id, String userName, String userPassword, String email, Date registerDate, String level, String isDel) {
+    public User(Long id, String userName, String userPassword, String email, String registerDate, String level, String isDel) {
         this.id=id;
         this.userName = userName;
         this.userPassword = userPassword;
@@ -39,11 +39,11 @@ public class User {
         this.isDel=isDel;
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -87,11 +87,11 @@ public class User {
         this.email = email;
     }
 
-    public Date getRegisterDate() {
+    public String getRegisterDate() {
         return registerDate;
     }
 
-    public void setRegisterDate(Date registerDate) {
+    public void setRegisterDate(String registerDate) {
         this.registerDate = registerDate;
     }
 

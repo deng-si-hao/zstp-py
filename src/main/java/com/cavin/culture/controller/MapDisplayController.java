@@ -1,29 +1,18 @@
 package com.cavin.culture.controller;
 
-import com.auth0.jwt.interfaces.Claim;
 import com.cavin.culture.config.WebMvcConfig;
 import com.cavin.culture.model.JsonMessage;
-import com.cavin.culture.model.User;
 import com.cavin.culture.service.Neo4jService;
-import com.cavin.culture.util.ExcelResolve;
 import com.cavin.culture.util.JWTMEUtil;
-import com.cavin.culture.util.JWTUtil;
 import com.cavin.culture.util.Neo4jUtil;
 import com.csvreader.CsvWriter;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
@@ -283,6 +272,7 @@ public class MapDisplayController {
         neo4jUtil.RunCypher(node,cql,nodeList,edgeList);
         retMap.put("nodes",nodeList);
         retMap.put("links",edgeList);
+        System.out.println(retMap.toString());
         return retMap;
     }
 
@@ -296,7 +286,7 @@ public class MapDisplayController {
         String source = request.getParameter("source");
         String target = request.getParameter("target");
         String filePath = config.getLocation();
-        String fileName = JWTUtil.getNewId() + ".csv";
+        String fileName = JWTMEUtil.getNewId() + ".csv";
         String fileUrl = filePath + File.separator + fileName;
         if(source!=null && target == null){
             cypher = String.format(
