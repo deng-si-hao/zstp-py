@@ -26,7 +26,6 @@ public class UserController {
 
 
     @RequestMapping(value = "/user/isLogin", method = RequestMethod.GET)
-    @ResponseBody
     public JsonMessage isLogin(HttpServletRequest request) {
         Cookie[] cookies = null;
         cookies = request.getCookies();
@@ -71,7 +70,7 @@ public class UserController {
 * 登录
 * */
     @RequestMapping(value = "/user/login")
-    public JsonMessage login(@RequestBody User user, HttpServletResponse response) throws Exception {
+    public JsonMessage login(@RequestBody User user, HttpServletResponse response){
         String username = user.getUserName();
         String password = user.getUserPassword();
         User checkUser = userService.getUserByName(username);
@@ -81,7 +80,12 @@ public class UserController {
                 String storedPassword = userService.getPasswordByName(username);
                 if (checkPassword.equals(storedPassword)) {
                     // 登陆成功
-                    String token = JWTMEUtil.createToken(checkUser.getLevel(),checkUser.getId(),checkUser.getUserName());
+                    String token = null;
+                    try {
+                        token = JWTMEUtil.createToken(checkUser.getLevel(),checkUser.getId(),checkUser.getUserName());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
 //                    String token = JWTUtil.getJwtToken(checkUser.getUserName());
                     Cookie cookie = new Cookie("access_token", token);
                     cookie.setDomain("localhost");
@@ -89,9 +93,9 @@ public class UserController {
                     cookie.setHttpOnly(true);
                     cookie.setMaxAge(3*24*60*60);
                     response.addCookie(cookie);
-                    return JsonMessage.success();
+                    return JsonMessage.success().addData("token",token);
             }else {
-                    return JsonMessage.error(400, "密码错误！");
+                    return JsonMessage.error(400, "用户名或密码错误！");
                 }
             } else {
                 return JsonMessage.error(400,"用户被锁定，请联系管理员！");
@@ -131,8 +135,7 @@ public class UserController {
 * 注销
 * */
     @RequestMapping(value = "/user/logout", method = RequestMethod.POST)
-    @ResponseBody
-    public JsonMessage logout(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public JsonMessage logout(HttpServletRequest request, HttpServletResponse response){
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
@@ -164,8 +167,7 @@ public class UserController {
     * 查询所有用户信息
     * */
     @RequestMapping(value = "/admin/getAllUser",method = RequestMethod.POST)
-    @ResponseBody
-    public JsonMessage getAllUserInfo(HttpServletRequest request, Integer currPage, HttpServletResponse response) throws Exception {
+    public JsonMessage getAllUserInfo(HttpServletRequest request, Integer currPage, HttpServletResponse response){
         String level = null;
         String token = null;
         Map<String, Claim> tokenRes = new HashMap<>();
@@ -174,7 +176,11 @@ public class UserController {
             for (Cookie cookie : cookies) {
                 if (cookie.getName().equals("access_token")) {
                     token = cookie.getValue();
-                    tokenRes = JWTMEUtil.verifyToken(token);
+                    try {
+                        tokenRes = JWTMEUtil.verifyToken(token);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                     level = tokenRes.get("level").asString();
                 }
             }
@@ -203,8 +209,7 @@ public class UserController {
     * 修改用户信息
     * */
     @RequestMapping(value = "/admin/updateUserInfo",method = RequestMethod.POST)
-    @ResponseBody
-    public JsonMessage updateUserInfo(@RequestBody User user,HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public JsonMessage updateUserInfo(@RequestBody User user,HttpServletRequest request, HttpServletResponse response){
         String token = null;
         String level = null;
         Map<String,Claim> tokenRes = new HashMap<>();
@@ -213,7 +218,11 @@ public class UserController {
             for(Cookie cookie:cookies){
                 if(cookie.getName().equals("access_token")){
                     token = cookie.getValue();
-                    tokenRes = JWTMEUtil.verifyToken(token);
+                    try {
+                        tokenRes = JWTMEUtil.verifyToken(token);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                     level = tokenRes.get("level").asString();
                 }
             }
@@ -236,8 +245,7 @@ public class UserController {
     * 查询单个用户信息
     * */
     @RequestMapping(value = "/admin/queryById",method = RequestMethod.POST)
-    @ResponseBody
-    public JsonMessage queryById(Long id,HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public JsonMessage queryById(Long id,HttpServletRequest request, HttpServletResponse response){
         String token = null;
         String level = null;
         Map<String,Claim> tokenRes = new HashMap<>();
@@ -246,7 +254,11 @@ public class UserController {
             for(Cookie cookie:cookies){
                 if(cookie.getName().equals("access_token")){
                     token = cookie.getValue();
-                    tokenRes = JWTMEUtil.verifyToken(token);
+                    try {
+                        tokenRes = JWTMEUtil.verifyToken(token);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                     level = tokenRes.get("level").asString();
                 }
             }
@@ -266,8 +278,7 @@ public class UserController {
     * 删除用户信息id
     * */
     @RequestMapping(value = "/admin/delUser",method = RequestMethod.POST)
-    @ResponseBody
-    public JsonMessage delUser(Long id,HttpServletRequest request) throws Exception {
+    public JsonMessage delUser(Long id,HttpServletRequest request){
         String token = null;
         String level = null;
         Map<String,Claim> tokenRes = new HashMap<>();
@@ -276,7 +287,11 @@ public class UserController {
             for(Cookie cookie:cookies){
                 if(cookie.getName().equals("access_token")){
                     token = cookie.getValue();
-                    tokenRes = JWTMEUtil.verifyToken(token);
+                    try {
+                        tokenRes = JWTMEUtil.verifyToken(token);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                     level = tokenRes.get("level").asString();
                 }
             }

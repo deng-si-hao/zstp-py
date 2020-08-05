@@ -72,14 +72,9 @@ public class UPImageController {
             createBy="100012";
         }
         //获取当前时间
-        Date createDate = new Date();
-        /*SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String newDate = simpleDateFormat.format(new Date());
-        try {
-            createDate = simpleDateFormat.parse(newDate);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }*/
 //        createDate = simpleDateFormat.format(new Date());
 
         //获取提交文件名称
@@ -114,7 +109,8 @@ public class UPImageController {
 //            pictureFile.write(pictureFileURL);
             fileupload(pictureFile.getBytes(),pathUrl,newfilename);
             //插入这条数据
-            imageService.addImage(new Image(name, userId, picId, pictureFileURL,createBy,createDate));
+
+            imageService.addImage(new Image(name, userId, picId, pictureFileURL,createBy,newDate));
             return JsonMessage.success().addData("result","添加图片成功");
 //            result.put("Result", "添加图片信息成功");
         } catch (IOException e) {

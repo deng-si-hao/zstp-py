@@ -1,5 +1,6 @@
 package com.cavin.culture.controller;
 
+import com.auth0.jwt.interfaces.Claim;
 import com.cavin.culture.config.WebMvcConfig;
 import com.cavin.culture.model.JsonMessage;
 import com.cavin.culture.service.Neo4jService;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
@@ -70,7 +72,24 @@ public class MapDisplayController {
     * 子图查询（java）
     * */
     @RequestMapping("/subGraph")
-    public Map<String, Object> getSubGraph(String nodeName){
+    public Map<String, Object> getSubGraph(HttpServletRequest request,String nodeName){
+        String level = null;
+        String token = null;
+        Map<String, Claim> tokenRes = new HashMap<>();
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals("access_token")) {
+                    token = cookie.getValue();
+                    try {
+                        tokenRes = JWTMEUtil.verifyToken(token);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    level = tokenRes.get("level").asString();
+                }
+            }
+        }
 //        HashMap<String, Object> ress = new HashMap<>();
         Map<String, Object> retMap = new HashMap<>();
         //cql语句

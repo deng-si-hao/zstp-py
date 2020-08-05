@@ -16,8 +16,8 @@
 
     <sql id="dynamicWhere">
         <where>
-            FIND_IN_SET(#{userId}, user_id)
-            <if test="pic_name != null and pic_name != ''">AND pic_name like #{picName}</if>
+            <if test="userId != null">(',' || user_id || ',') LIKE '%${userId}%' </if>
+            <if test="picName != null and picName != ''">AND pic_name like #{picName}</if>
             <if test="startTime != null and startTime != ''">AND  DATE_FORMAT(createDate,'%Y-%m-%d') &gt;= DATE_FORMAT(#{startTime},'%Y-%m-%d')</if>
             <if test="endTime != null and endTime != ''">AND DATE_FORMAT(createDate,'%Y-%m-%d') &lt;=DATE_FORMAT(#{endTime},'%Y-%m-%d')</if>
 
