@@ -14,20 +14,24 @@ public class ImageService {
     @Resource
     private ImageDao imageDao;
 
-    public int addImage(Image image){
-       return imageDao.addImage(image);
+    public int addImage(Image image) {
+        return imageDao.addImage(image);
     }
 
-    public List<Image> findById(Map<String, Object> param){
-        return  imageDao.findById(param);
+    public List<Image> findById(Map<String, Object> param) {
+        return imageDao.findById(param);
     }
 
-    public void delUserId(String userId,String picId){
+    public void delUserId(String userId, String picId) {
         imageDao.updateUserId(userId, picId);
     }
 
-    public int getCount(Map<String, Object> param){
+    public int getCount(Map<String, Object> param) {
         return imageDao.getCount(param);
+    }
+
+    public int savePhoto(Image image){
+        return imageDao.savePhoto(image);
     }
 
 }

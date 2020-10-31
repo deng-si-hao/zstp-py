@@ -12,19 +12,16 @@ public class RoleService {
     @Resource
     private RoleDao roleDao;
 
-    public void save(SysRole role){
-        if(role != null){
-            if(checkExist(role.getRoleName(),role.getRoleId())){
-               roleDao.update(role);
-            }else {
+    public void save(SysRole role) {
+        if (role != null) {
+            if (checkExist(role.getRoleName(), role.getRoleId())) {
+                roleDao.update(role);
+            } else {
                 roleDao.insert(role);
             }
         }
 
     }
-
-
-
 
 
     private boolean checkExist(String name, Integer id) {

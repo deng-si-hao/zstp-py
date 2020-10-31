@@ -4,10 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.cavin.culture.dao.GraphDao;
 import com.cavin.culture.model.JsonMessage;
 import com.cavin.culture.model.Neo4jEntity;
-import com.cavin.culture.util.CSVUtil;
-import com.cavin.culture.util.ExcelResolve;
-import com.cavin.culture.util.ExcelUtil;
-import com.cavin.culture.util.Neo4jUtil;
+import com.cavin.culture.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
@@ -19,10 +16,12 @@ import org.neo4j.driver.v1.types.Node;
 import org.neo4j.driver.v1.types.Relationship;
 import org.neo4j.driver.v1.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -37,26 +36,27 @@ public class Neo4jService {
     @Resource
     private GraphDao graphDao;
 
+    static org.springframework.core.io.Resource resource = new ClassPathResource("static/excl/ZhiLiangKaPian.xls");
+
     /**
-    * 获取label标签
-    *
-    * */
-    public List<Map<String,Object>> getLabelList(String creater){
+     * 获取label标签
+     */
+    public List<Map<String, Object>> getLabelList(String creater) {
         return graphDao.getLabelList(creater);
     }
 
     /**
-    * 向mysql中添加label数据
-    * 用于记录label的数量
-    * */
-    public int addGraphData(Map<String,Object> params){
-       return graphDao.addGraphData(params);
+     * 向mysql中添加label数据
+     * 用于记录label的数量
+     */
+    public int addGraphData(Map<String, Object> params) {
+        return graphDao.addGraphData(params);
     }
 
     /**
-    * 根据名称查询mysql中的label名称
-    * */
-    public String getLabelByName(String label){
+     * 根据名称查询mysql中的label名称
+     */
+    public String getLabelByName(String label) {
         return graphDao.getLabelByName(label);
     }
 
@@ -74,6 +74,7 @@ public class Neo4jService {
             e.printStackTrace();
         }
     }
+
     /**
      * 创建单个节点
      *
@@ -108,6 +109,7 @@ public class Neo4jService {
 
         return rss;
     }
+
     /**
      * 更新节点名称
      *
@@ -131,24 +133,21 @@ public class Neo4jService {
         }
         return result;
     }
+
     /**
      * 添加关系
      *
-     * @param domain
-     *            领域
-     * @param sourceid
-     *            源节点id
-     * @param targetid
-     *            目标节点id
-     * @param ship
-     *            关系
+     * @param domain   领域
+     * @param sourceid 源节点id
+     * @param targetid 目标节点id
+     * @param ship     关系
      * @return
      */
     public HashMap<String, Object> createlink(String domain, long sourceid, long targetid, String ship) {
         HashMap<String, Object> rss = new HashMap<String, Object>();
         try {
             String cypherSql = String.format("MATCH (n:`%s`),(m:`%s`) WHERE id(n)=%s AND id(m) = %s "
-                    + "CREATE (n)-[r:%s{name:'%s'}]->(m)" + "RETURN r", domain, domain, sourceid, targetid,ship,ship);
+                    + "CREATE (n)-[r:%s{name:'%s'}]->(m)" + "RETURN r", domain, domain, sourceid, targetid, ship, ship);
             List<HashMap<String, Object>> cypherResult = neo4jUtil.GetGraphRelationShip(cypherSql);
             if (cypherResult.size() > 0) {
                 rss = cypherResult.get(0);
@@ -159,15 +158,13 @@ public class Neo4jService {
 
         return rss;
     }
+
     /**
      * 更新关系
      *
-     * @param domain
-     *            领域
-     * @param shipid
-     *            关系id
-     * @param shipname
-     *            关系名称
+     * @param domain   领域
+     * @param shipid   关系id
+     * @param shipname 关系名称
      * @return
      */
     public HashMap<String, Object> updateLink(String domain, long shipid, String shipname) {
@@ -231,10 +228,10 @@ public class Neo4jService {
         }
     }
 
-/*    *//**
-    * 删除带有关系的节点
-    *
-    * *//*
+    /*    *//**
+     * 删除带有关系的节点
+     *
+     * *//*
     public List<HashMap<String, Object>> delNodeAndLink(String label, long nodeid){
         List<HashMap<String, Object>> result = new ArrayList<HashMap<String, Object>>();
         try {
@@ -254,9 +251,9 @@ public class Neo4jService {
     }*/
 
     /**
-    * 删除label
-    * */
-    public void deleteLabel(String label){
+     * 删除label
+     */
+    public void deleteLabel(String label) {
         try {
             String rSql = String.format("MATCH (n:`%s`) -[r]-(m)  delete r", label);
             neo4jUtil.excuteCypherSql(rSql);
@@ -268,19 +265,20 @@ public class Neo4jService {
 
         }
     }
+
     /**
-    * 删除mysql中的label记录
-    * */
-    public void delLabelInMysql(long labelid){
+     * 删除mysql中的label记录
+     */
+    public void delLabelInMysql(long labelid) {
         graphDao.delLabelInMysql(labelid);
     }
 
     /**
-    * 批量创建节点及关系
-    * */
-    public HashMap<String,Object> batchAddNode(String domain, String sourcename, String relation,
-                                    String[] targetnames){
-        HashMap<String,Object> res = new HashMap<>();
+     * 批量创建节点及关系
+     */
+    public HashMap<String, Object> batchAddNode(String domain, String sourcename, String relation,
+                                                String[] targetnames) {
+        HashMap<String, Object> res = new HashMap<>();
         List<HashMap<String, Object>> nodes = new ArrayList<HashMap<String, Object>>();
         List<HashMap<String, Object>> ships = new ArrayList<HashMap<String, Object>>();
         try {
@@ -314,11 +312,11 @@ public class Neo4jService {
         }
         return res;
     }
+
     /**
-    * 批量创建下级节点
-    *
-    * */
-    public HashMap<String, Object> batchLowNode(String label, String sourceid, String[] targetnames, String relation){
+     * 批量创建下级节点
+     */
+    public HashMap<String, Object> batchLowNode(String label, String sourceid, String[] targetnames, String relation) {
         HashMap<String, Object> rss = new HashMap<String, Object>();
         List<HashMap<String, Object>> nodes = new ArrayList<HashMap<String, Object>>();
         List<HashMap<String, Object>> ships = new ArrayList<HashMap<String, Object>>();
@@ -351,10 +349,11 @@ public class Neo4jService {
         }
         return rss;
     }
+
     /**
-    * 批量创建同级节点
-    * */
-    public List<HashMap<String, Object>> batchSameNode(String label, Integer entitytype, String[] sourcenames){
+     * 批量创建同级节点
+     */
+    public List<HashMap<String, Object>> batchSameNode(String label, Integer entitytype, String[] sourcenames) {
         List<HashMap<String, Object>> rss = new ArrayList<HashMap<String, Object>>();
         try {
             String cypherSqlFmt = "create (n:`%s`{name:'%s',color:'#ff4500',r:30}) return n";
@@ -368,9 +367,10 @@ public class Neo4jService {
         }
         return rss;
     }
+
     /**
-    * 导入的文件处理，csv/excl
-    * */
+     * 导入的文件处理，csv/excl
+     */
     public List<Map<String, Object>> getFormatData(MultipartFile file) throws Exception {
         List<Map<String, Object>> mapList = new ArrayList<>();
         try {
@@ -436,9 +436,8 @@ public class Neo4jService {
     }
 
     /**
-    * 批量导入csv文件
-    *
-    * */
+     * 批量导入csv文件
+     */
     public void batchInsertByCSV(String domain, String csvUrl, int status) {
         String loadNodeCypher1 = null;
         String loadNodeCypher2 = null;
@@ -461,9 +460,8 @@ public class Neo4jService {
     }
 
     /**
-    * 导出csv，获取图谱数据
-    *
-    * */
+     * 导出csv，获取图谱数据
+     */
     public List<HashMap<String, Object>> GetGraphItem(String cypherSql) {
         List<HashMap<String, Object>> ents = new ArrayList<HashMap<String, Object>>();
         List<String> nodeids = new ArrayList<String>();
@@ -480,7 +478,7 @@ public class Neo4jService {
                         if (typeName.equals("NODE")) {
                             Node noe4jNode = pair.value().asNode();
                             String uuid = String.valueOf(noe4jNode.id());
-                            if(!nodeids.contains(uuid)) {
+                            if (!nodeids.contains(uuid)) {
                                 Map<String, Object> map = noe4jNode.asMap();
                                 for (Map.Entry<String, Object> entry : map.entrySet()) {
                                     String key = entry.getKey();
@@ -488,7 +486,7 @@ public class Neo4jService {
                                 }
                                 rss.put("uuid", uuid);
                             }
-                        }else if (typeName.equals("RELATIONSHIP")) {
+                        } else if (typeName.equals("RELATIONSHIP")) {
                             Relationship rship = pair.value().asRelationship();
                             String uuid = String.valueOf(rship.id());
                             if (!shipids.contains(uuid)) {
@@ -503,8 +501,8 @@ public class Neo4jService {
                                 rss.put("sourceid", sourceid);
                                 rss.put("targetid", targetid);
                             }
-                        }else {
-                            rss.put(pair.key(),pair.value().toString());
+                        } else {
+                            rss.put(pair.key(), pair.value().toString());
                         }
                     }
                     ents.add(rss);
@@ -516,13 +514,13 @@ public class Neo4jService {
         return ents;
     }
 
-    public boolean importData(MultipartFile file){
+    public boolean importData(MultipartFile file) {
         //创建实体的cql语句
-        List<String> labelCql= new ArrayList<>();
-        String[] label=null;
-        String shipCql=null;
+        List<String> labelCql = new ArrayList<>();
+        String[] label = null;
+        String shipCql = null;
         Boolean bool = ExcelResolve.checkFile(file);
-        if(!bool){
+        if (!bool) {
             return false;
         }
         HashMap<String, ArrayList<String[]>> hashMap = null;
@@ -532,61 +530,78 @@ public class Neo4jService {
             e.printStackTrace();
         }
         ArrayList<String[]> arrayList = hashMap.get("OK");
-        if(arrayList == null){
+        if (arrayList == null) {
             Set<String> strings = hashMap.keySet();
             String next = strings.iterator().next();
             return false;
         }
         //读list，eg.[aaa,bbb,ccc,ddd]
-        for(int i = 0;i<arrayList.size();i++){
+        for (int i = 0; i < arrayList.size(); i++) {
             String[] row = arrayList.get(i);
-            if(i==0){
+            if (i == 0) {
                 label = arrayList.get(i);
                 continue;
             }
-            if(i==1){
+            if (i == 1) {
                 continue;
             }
-            String zhiliangwentiCql = String.format("create (n:`%s`{name:'%s',FASHENGWENTISHIJIAN:'%s',WENTIXIANXIANG:'%s',WENTIYUANYINHUOZHEJINZHAN:'%s',CAIQUCUOSHI:'%s',SHIFOUGUILING:'%s'," +
-                    "SHIFOUWAIXIEWAIGOU:'%s',SHIFOUERCIWAIXIE:'%s',SHIFOUWAIXIEFANGWEITUOYUANYIN:'%s',SUOCHUJIEDUAN:'%s',FASHENGSHIJI:'%s'," +
-                    "SHIFOUWEIPICIXINGWENTI:'%s',YINGXIANGCHANPINSHULIANG:'%s',GUILINGZHOUQI:'%s',JUYIFANSAN:'%s',XIANXIANGMIAOSHU:'%s',YUANYINJIANSHU:'%s'}) return n",
-                    label[0], row[0], row[8], row[9], row[10], row[12], row[13], row[14], row[15], row[16], row[21], row[22], row[23], row[24],
-                    row[25], row[26], row[27], row[28]);
-            String guilingbaogaoCql = String.format("create (n:`%s`{name:'%s'}) return n", label[1], row[1]);
-            String wentibujianCql = String.format("create (n:`%s`{name:'%s'}) return n", label[2], row[2]);
-            String yichangmiaoshuCql = String.format("create (n:`%s`{name:'%s'}) return n", label[3], row[3]);
-            String xinghaomingchengCql = String.format("create (n:`%s`{name:'%s',XINGHAODAIHAO:'%s'}) return n", label[5], row[5],row[4]);
-            String xitongzhuanyeCql = String.format("create (n:`%s`{name:'%s'}) return n", label[6], row[6]);
-            String chanpinCql = String.format("create (n:`%s`{name:'%s'}) return n", label[7], row[7]);
-            String guzhangdingweibujianCql = String.format("create (n:`%s`{name:'%s'}) return n", label[11], row[11]);
-            String yuanyinfenleiCql = String.format("create (n:`%s`{name:'%s',`YUANYINFENLEI(YIJI)`:'%s',`YUANYINFENLEI(ERJI)`:'%s'}) return n", label[17], row[17],row[17], row[18]);
-            String zerendanweiCql = String.format("create (n:`%s`{name:'%s',NEIBUZERENDANWEI:'%s',WAIBUZERENDANWEI:'%s'}) return n", label[19], row[19], row[19], row[20]);
+            String zhiliangwentiCql = String.format("merge (n:`%s`{name:'%s',FASHENGWENTISHIJIAN:'%s',WENTIXIANXIANG:'%s',WENTIYUANYINHUOZHEJINZHAN:'%s',CAIQUCUOSHI:'%s',SHIFOUGUILING:'%s'," +
+                            "SHIFOUWAIXIEWAIGOU:'%s',SHIFOUERCIWAIXIE:'%s',SHIFOUWAIXIEFANGWEITUOYUANYIN:'%s',SUOCHUJIEDUAN:'%s',FASHENGSHIJI:'%s'," +
+                            "SHIFOUWEIPICIXINGWENTI:'%s',YINGXIANGCHANPINSHULIANG:'%s',GUILINGZHOUQI:'%s'}) return n",
+                    label[1], row[1], row[6], row[7], row[8], row[11], row[12], row[13], row[14], row[15], row[20], row[21], row[22], row[23],
+                    row[24]);
+//            String guilingbaogaoCql = String.format("create (n:`%s`{name:'%s'}) return n", label[1], row[1]);
+//            String wentibujianCql = String.format("create (n:`%s`{name:'%s'}) return n", label[2], row[2]);
+            String wentibujianCql = String.format("merge (n:`%s`{name:'%s'}) return n", label[3], row[3]);
+//            String xinghaomingchengCql = String.format("create (n:`%s`{name:'%s',XINGHAODAIHAO:'%s'}) return n", label[5], row[5], row[4]);
+//            String xitongzhuanyeCql = String.format("create (n:`%s`{name:'%s'}) return n", label[6], row[6]);
+            String chanpinCql = String.format("merge (n:`%s`{name:'%s'}) return n", label[5], row[5]);
+            String guzhangdingweibujianCql = String.format("merge (n:`%s`{name:'%s'}) return n", label[9], row[9]);
+            String yuanyinfenleiCql = String.format("merge (n:`%s`{name:'%s',`YUANYINFENLEI(YIJI)`:'%s',`YUANYINFENLEI(ERJI)`:'%s'}) return n", label[16], row[16], row[16], row[17]);
+            String zerendanweiCql = String.format("merge (n:`%s`{name:'%s',NEIBUZERENDANWEI:'%s',WAIBUZERENDANWEI:'%s'}) return n", label[19], row[18], row[18], row[19]);
             labelCql.add(zhiliangwentiCql);
-            labelCql.add(guilingbaogaoCql);
+//            labelCql.add(guilingbaogaoCql);
+//            labelCql.add(wentibujianCql);
             labelCql.add(wentibujianCql);
-            labelCql.add(yichangmiaoshuCql);
-            labelCql.add(xinghaomingchengCql);
-            labelCql.add(xitongzhuanyeCql);
+//            labelCql.add(xinghaomingchengCql);
+//            labelCql.add(xitongzhuanyeCql);
             labelCql.add(chanpinCql);
             labelCql.add(guzhangdingweibujianCql);
             labelCql.add(yuanyinfenleiCql);
             labelCql.add(zerendanweiCql);
 
-            String xtxhship = String.format("MATCH (n:`%s`),(m:`%s`) WHERE n.name='%s' AND m.name = '%s' "
-                            + "CREATE (n)-[r:%s{name:'%s'}]->(m)" + "RETURN r", label[6], label[5], row[6], row[5],"XITONG_XINGHAOGUANXI","系统_型号组成关系");
-            String cpxtship = String.format("MATCH (n:`%s`),(m:`%s`) WHERE n.name='%s' AND m.name = '%s' "
-                    + "CREATE (n)-[r:%s{name:'%s'}]->(m)" + "RETURN r", label[7], label[6], row[7], row[6],"CHANPIN_WENTIZUCHENGGUANXI","产品_系统组成关系");
-            String xhwtship = String.format("MATCH (n:`%s`),(m:`%s`) WHERE n.name='%s' AND m.name = '%s' "
-                    + "CREATE (n)-[r:%s{name:'%s'}]->(m)" + "RETURN r", label[5], label[2], row[5], row[2],"XINGHAO_WENTIFASHENGGUANXI","型号_问题发生关系");
-            String cpwtfsship = String.format("MATCH (n:`%s`),(m:`%s`) WHERE n.name='%s' AND m.name = '%s' "
-                    + "CREATE (n)-[r:%s{name:'%s'}]->(m)" + "RETURN r", label[7], label[0], row[7], row[0],"CHANPIN_WENTIFASHENGGUANXI","产品_问题发生关系");
-            String xtwtfsship = String.format("MATCH (n:`%s`),(m:`%s`) WHERE n.name='%s' AND m.name = '%s' "
-                    + "CREATE (n)-[r:%s{name:'%s'}]->(m)" + "RETURN r", label[6], label[0], row[6], row[0],"XITONG_WENTIFASHENGGUANXI","系统_问题发生关系");
-            labelCql.add(xtxhship);
-            labelCql.add(cpxtship);
-            labelCql.add(xhwtship);
-            labelCql.add(cpwtfsship);
-            labelCql.add(xtwtfsship);
+            String CPWTFSSHIP = String.format("MATCH (n:`%s`),(m:`%s`) WHERE n.name='%s' AND m.name = '%s' "
+                    + "MERGE (n)-[r:%s{name:'%s'}]->(m)" + "RETURN r", label[5], label[2], row[5], row[2], "产品_问题发生关系", "产品_问题发生关系");
+            String CPJYFSSHIP = String.format("MATCH (n:`%s`),(m:`%s`) WHERE n.name='%s' AND m.name = '%s' "
+                    + "MERGE (n)-[r:%s{name:'%s'}]->(m)" + "RETURN r", label[2], label[5], row[2], row[5], "产品_举一反三关系", "产品_举一反三关系");
+            String ZRSHIP = String.format("MATCH (n:`%s`),(m:`%s`) WHERE n.name='%s' AND m.name = '%s' "
+                    + "MERGE (n)-[r:%s{name:'%s'}]->(m)" + "RETURN r", label[18], label[2], row[18], row[2], "责任关系", "责任关系");
+            String GYSHIP = String.format("MATCH (n:`%s`),(m:`%s`) WHERE n.name='%s' AND m.name = '%s' "
+                    + "MERGE (n)-[r:%s{name:'%s'}]->(m)" + "RETURN r", label[18], label[5], row[18], row[5], "供应关系", "供应关系");
+            String BJWTBXSHIP = String.format("MATCH (n:`%s`),(m:`%s`) WHERE n.name='%s' AND m.name = '%s' "
+                    + "MERGE (n)-[r:%s{name:'%s'}]->(m)" + "RETURN r", label[3], label[2], row[3], row[2], "部件_问题表象关系", "部件_问题表象关系");
+
+            String BJCPSHIP = String.format("MATCH (n:`%s`),(m:`%s`) WHERE n.name='%s' AND m.name = '%s' "
+                    + "MERGE (n)-[r:%s{name:'%s'}]->(m)" + "RETURN r", label[3], label[5], row[3], row[5], "部件_产品关系", "部件_产品关系");
+            String BJWTDWSHIP = String.format("MATCH (n:`%s`),(m:`%s`) WHERE n.name='%s' AND m.name = '%s' "
+                    + "MERGE (n)-[r:%s{name:'%s'}]->(m)" + "RETURN r", label[9], label[2], row[9], row[2], "部件_问题定位关系", "部件_问题定位关系");
+            String BJMSSHIP = String.format("MATCH (n:`%s`),(m:`%s`) WHERE n.name='%s' AND m.name = '%s' "
+                    + "MERGE (n)-[r:%s{name:'%s'}]->(m)" + "RETURN r", label[3], label[4], row[3], row[4], "部件_描述关系", "部件_描述关系");
+
+            String YYFLWTSHIP = String.format("MATCH (n:`%s`),(m:`%s`) WHERE n.name='%s' AND m.name = '%s' "
+                    + "MERGE (n)-[r:%s{name:'%s'}]->(m)" + "RETURN r", label[16], label[2], row[16], row[2], "原因分类_问题关系", "原因分类_问题关系");
+
+
+            labelCql.add(CPWTFSSHIP);
+            labelCql.add(CPJYFSSHIP);
+            labelCql.add(ZRSHIP);
+            labelCql.add(GYSHIP);
+            labelCql.add(BJWTBXSHIP);
+            labelCql.add(BJCPSHIP);
+            labelCql.add(BJMSSHIP);
+            labelCql.add(BJWTDWSHIP);
+            labelCql.add(YYFLWTSHIP);
+
             /*//读内容
             for(int j=0;j<row.length;j++){
                 nodeCql = String.format("create (n:%s{name:'%s'}) return n", label[j], row[j]);
@@ -597,9 +612,9 @@ public class Neo4jService {
                 //TODO 关系语句的构建，需要确定表单格式，没办法写成动态传入参数，这里需要写死列数和行数
             }*/
         }
-        List<String> res=delRepeat(labelCql);
+        List<String> res = delRepeat(labelCql);
         //执行cql
-        for(String s:res){
+        for (String s : res) {
             neo4jUtil.excuteCypherSql(s);
         }
         return true;
@@ -613,11 +628,11 @@ public class Neo4jService {
                 listNew.add(str);
             }
         }
-        return listNew ;
+        return listNew;
     }
 
     //获取当前节点的所有关系类型
-    public List<String> getShipByNode(String cql){
+    public List<String> getShipByNode(String cql) {
         List<String> res = new ArrayList<>();
         StatementResult result = neo4jUtil.excuteCypherSql(cql);
         if (result.hasNext()) {
@@ -629,10 +644,127 @@ public class Neo4jService {
                     String ss = pair.value().asRelationship().type();
                     res.add(ss);
                 }
-
             }
         }
         List<String> resultList = delRepeat(res);
-       return resultList;
+        return resultList;
+    }
+
+    public boolean importDataByRes(){
+        MultipartFile files = null;
+        FlieToMultipartFile flieToMultipartFile = new FlieToMultipartFile();
+        try {
+            File file = resource.getFile();
+            files= flieToMultipartFile.getMultipartFile(file);
+            return importData(files);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("导入信息失败");
+            return false;
+        }
+    }
+
+    public boolean importDataByYQJ(MultipartFile file){
+        //创建实体的cql语句
+        List<String> labelCql = new ArrayList<>();
+        String[] label = null;
+        String shipCql = null;
+        Boolean bool = ExcelResolve.checkFile(file);
+        if (!bool) {
+            return false;
+        }
+        HashMap<String, ArrayList<String[]>> hashMap = null;
+        try {
+            hashMap = ExcelResolve.analysisFile(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        ArrayList<String[]> arrayList = hashMap.get("OK");
+        if (arrayList == null) {
+            Set<String> strings = hashMap.keySet();
+            String next = strings.iterator().next();
+            return false;
+        }
+        //读list，eg.[aaa,bbb,ccc,ddd]
+        for (int i = 0; i < arrayList.size(); i++) {
+            String[] row = arrayList.get(i);
+            if (i == 0) {
+                label = arrayList.get(i);
+                continue;
+            }
+            if (i == 1) {
+                continue;
+            }
+            String yuanqijianCql = String.format("merge (n:`元器件`{name:'%s',%s:'%s',%s:'%s',%s:'%s',%s:'%s',%s:'%s',%s:'%s',%s:'%s',%s:'%s',%s:'%s'}) return n",
+                    row[7], label[6], row[6], label[8], row[8], label[9], row[9], label[13], row[13], label[16], row[16], label[17], row[17], label[18], row[18]
+                    , label[19], row[19], label[22], row[22]);
+//            String guilingbaogaoCql = String.format("create (n:`%s`{name:'%s'}) return n", label[1], row[1]);
+//            String wentibujianCql = String.format("create (n:`%s`{name:'%s'}) return n", label[2], row[2]);
+            String shiyandanweiCql = String.format("merge (n:`试验单位`{name:'%s'}) return n", row[14]);
+//            String xinghaomingchengCql = String.format("create (n:`%s`{name:'%s',XINGHAODAIHAO:'%s'}) return n", label[5], row[5], row[4]);
+//            String xitongzhuanyeCql = String.format("create (n:`%s`{name:'%s'}) return n", label[6], row[6]);
+            String shengchanchangjiaCql = String.format("merge (n:`生产厂家`{name:'%s',%s:'%s'}) return n",  row[10], label[11], row[11]);
+            String weituodanweiCql = String.format("merge (n:`委托单位`{name:'%s',%s:'%s'}) return n", row[2], label[20], row[20]);
+//            String yuanyinfenleiCql = String.format("merge (n:`%s`{name:'%s',`YUANYINFENLEI(YIJI)`:'%s',`YUANYINFENLEI(ERJI)`:'%s'}) return n", label[16], row[16], row[16], row[17]);
+//            String zerendanweiCql = String.format("merge (n:`%s`{name:'%s',NEIBUZERENDANWEI:'%s',WAIBUZERENDANWEI:'%s'}) return n", label[19], row[18], row[18], row[19]);
+            labelCql.add(yuanqijianCql);
+//            labelCql.add(guilingbaogaoCql);
+//            labelCql.add(wentibujianCql);
+            labelCql.add(shiyandanweiCql);
+//            labelCql.add(xinghaomingchengCql);
+//            labelCql.add(xitongzhuanyeCql);
+            labelCql.add(shengchanchangjiaCql);
+            labelCql.add(weituodanweiCql);
+//            labelCql.add(yuanyinfenleiCql);
+//            labelCql.add(zerendanweiCql);
+
+            String CPWTFSSHIP = String.format("MATCH (n:`%s`),(m:`%s`) WHERE n.name='%s' AND m.name = '%s' "
+                    + "MERGE (n)-[r:%s{name:'%s'}]->(m)" + "RETURN r", label[2], label[10], row[2], row[10], "委托_生产关系", "委托_生产关系");
+            String CPJYFSSHIP = String.format("MATCH (n:`%s`),(m:`%s`) WHERE n.name='%s' AND m.name = '%s' "
+                    + "MERGE (n)-[r:%s{name:'%s'}]->(m)" + "RETURN r", label[2], label[14], row[2], row[14], "委托_试验关系", "委托_试验关系");
+            String ZRSHIP = String.format("MATCH (n),(m) WHERE n.name='%s' AND m.name = '%s' "
+                    + "MERGE (n)-[r:%s{name:'%s'}]->(m)" + "RETURN r", row[10], row[7], "生产_元器件关系", "生产_元器件关系");
+            String GYSHIP = String.format("MATCH (n),(m) WHERE n.name='%s' AND m.name = '%s' "
+                    + "MERGE (n)-[r:%s{name:'%s'}]->(m)" + "RETURN r", row[14], row[7], "测试_元器件关系", "测试_元器件关系");
+//            String BJWTBXSHIP = String.format("MATCH (n:`%s`),(m:`%s`) WHERE n.name='%s' AND m.name = '%s' "
+//                    + "MERGE (n)-[r:%s{name:'%s'}]->(m)" + "RETURN r", label[3], label[2], row[3], row[2], "部件_问题表象关系", "部件_问题表象关系");
+//
+//            String BJCPSHIP = String.format("MATCH (n:`%s`),(m:`%s`) WHERE n.name='%s' AND m.name = '%s' "
+//                    + "MERGE (n)-[r:%s{name:'%s'}]->(m)" + "RETURN r", label[3], label[5], row[3], row[5], "部件_产品关系", "部件_产品关系");
+//            String BJWTDWSHIP = String.format("MATCH (n:`%s`),(m:`%s`) WHERE n.name='%s' AND m.name = '%s' "
+//                    + "MERGE (n)-[r:%s{name:'%s'}]->(m)" + "RETURN r", label[9], label[2], row[9], row[2], "部件_问题定位关系", "部件_问题定位关系");
+//            String BJMSSHIP = String.format("MATCH (n:`%s`),(m:`%s`) WHERE n.name='%s' AND m.name = '%s' "
+//                    + "MERGE (n)-[r:%s{name:'%s'}]->(m)" + "RETURN r", label[3], label[4], row[3], row[4], "部件_描述关系", "部件_描述关系");
+//
+//            String YYFLWTSHIP = String.format("MATCH (n:`%s`),(m:`%s`) WHERE n.name='%s' AND m.name = '%s' "
+//                    + "MERGE (n)-[r:%s{name:'%s'}]->(m)" + "RETURN r", label[16], label[2], row[16], row[2], "原因分类_问题关系", "原因分类_问题关系");
+
+
+            labelCql.add(CPWTFSSHIP);
+            labelCql.add(CPJYFSSHIP);
+            labelCql.add(ZRSHIP);
+            labelCql.add(GYSHIP);
+//            labelCql.add(BJWTBXSHIP);
+//            labelCql.add(BJCPSHIP);
+//            labelCql.add(BJMSSHIP);
+//            labelCql.add(BJWTDWSHIP);
+//            labelCql.add(YYFLWTSHIP);
+
+            /*//读内容
+            for(int j=0;j<row.length;j++){
+                nodeCql = String.format("create (n:%s{name:'%s'}) return n", label[j], row[j]);
+                labelCql.add(nodeCql);
+                nodeCql=null;
+                String xtxhzcgx = String.format("MATCH (n:`%s`),(m:`%s`) WHERE n.name='%s' AND m.name = '%s' "
+                        + "CREATE (n)-[r:%s{name:'%s'}]->(m)" + "RETURN r", label[6],label[5], row[6], row[5],"系统_型号组成关系","系统_型号组成关系");
+                //TODO 关系语句的构建，需要确定表单格式，没办法写成动态传入参数，这里需要写死列数和行数
+            }*/
+        }
+        List<String> res = delRepeat(labelCql);
+        //执行cql
+        for (String s : res) {
+            neo4jUtil.excuteCypherSql(s);
+        }
+        return true;
     }
 }

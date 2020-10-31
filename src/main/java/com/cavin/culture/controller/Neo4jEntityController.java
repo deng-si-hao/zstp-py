@@ -34,16 +34,15 @@ public class Neo4jEntityController {
     private WebMvcConfig config;
 
 
-
     /**
-    * 获取自己创建的label
-    * */
-    public JsonMessage getLabelList(HttpServletRequest request){
+     * 获取自己创建的label
+     */
+    public JsonMessage getLabelList(HttpServletRequest request) {
         JsonMessage result = new JsonMessage();
-        HashMap<String,Object> res = new HashMap<>();
+        HashMap<String, Object> res = new HashMap<>();
         try {//todo
             List<Map<String, Object>> labelList = neo4jService.getLabelList("");
-            res.put("lableList",labelList);
+            res.put("lableList", labelList);
             result.setCode(200);
             result.setData(res);
         } catch (Exception e) {
@@ -55,9 +54,9 @@ public class Neo4jEntityController {
     }
 
     /**
-    * 创建一个空的label
-    * 默认一个空白node，无关系
-    * */
+     * 创建一个空的label
+     * 默认一个空白node，无关系
+     */
     @RequestMapping(value = "/createlabel")
     public JsonMessage createLabel(String domain) {
         JsonMessage result = new JsonMessage();
@@ -89,18 +88,16 @@ public class Neo4jEntityController {
     }
 
     /**
-    * 在已存在的label中添加node
-     *
-     *
-    * */
+     * 在已存在的label中添加node
+     */
     @RequestMapping("/addnode")
-    public JsonMessage addNode(Neo4jEntity entity, HttpServletRequest request){
-       JsonMessage result = new JsonMessage();
+    public JsonMessage addNode(Neo4jEntity entity, HttpServletRequest request) {
+        JsonMessage result = new JsonMessage();
         HashMap<String, Object> graphNode = new HashMap<String, Object>();
         try {
             String domain = request.getParameter("label");
-            graphNode=neo4jService.createNode(domain, entity);
-            if (graphNode!=null&&graphNode.size() > 0) {
+            graphNode = neo4jService.createNode(domain, entity);
+            if (graphNode != null && graphNode.size() > 0) {
                 result.setCode(200);
                 result.setData(graphNode);
             }
@@ -113,20 +110,20 @@ public class Neo4jEntityController {
     }
 
     /**
-    * 修改node名称
-    * @Param label
+     * 修改node名称
+     *
+     * @Param label
      * @Param nodeName
      * @Param nodeId
-     *
-    * */
+     */
     @RequestMapping("/updatenodename")
-    public JsonMessage updateNodeName(String label,String nodeName,String nodeId){
+    public JsonMessage updateNodeName(String label, String nodeName, String nodeId) {
         JsonMessage result = new JsonMessage();
-        HashMap<String,Object> resultList =  new HashMap<>();
+        HashMap<String, Object> resultList = new HashMap<>();
         try {
-            if(StringUtils.isNotEmpty(label)){
-                resultList = neo4jService.updatenodename(label,nodeId,nodeName);
-                if(resultList.size()>0){
+            if (StringUtils.isNotEmpty(label)) {
+                resultList = neo4jService.updatenodename(label, nodeId, nodeName);
+                if (resultList.size() > 0) {
                     result.setCode(200);
                     result.setData(resultList);
                 }
@@ -140,11 +137,10 @@ public class Neo4jEntityController {
     }
 
     /**
-    * 创建单个关系
-    *
-    * */
+     * 创建单个关系
+     */
     @RequestMapping("/createLink")
-    public JsonMessage createLink(String label,long sourceId,long targetId,String shipName){
+    public JsonMessage createLink(String label, long sourceId, long targetId, String shipName) {
         JsonMessage result = new JsonMessage();
         try {
             HashMap<String, Object> cypherResult = neo4jService.createlink(label, sourceId, targetId, shipName);
@@ -157,15 +153,15 @@ public class Neo4jEntityController {
         }
         return result;
     }
+
     /**
-    * 修改关系名称
-    *
-    * */
+     * 修改关系名称
+     */
     @RequestMapping("/updateLink")
-    public JsonMessage updateLink(String label,String newname,long shipid){
+    public JsonMessage updateLink(String label, String newname, long shipid) {
         JsonMessage result = new JsonMessage();
         try {
-            HashMap<String,Object> cypherRes = neo4jService.updateLink(label,shipid,newname);
+            HashMap<String, Object> cypherRes = neo4jService.updateLink(label, shipid, newname);
             result.setData(cypherRes);
             result.setCode(200);
         } catch (Exception e) {
@@ -177,14 +173,13 @@ public class Neo4jEntityController {
     }
 
     /**
-    * 删除关系
-    *
-    * */
+     * 删除关系
+     */
     @RequestMapping("/delLink")
-    public JsonMessage delLink(String label,long shipid){
+    public JsonMessage delLink(String label, long shipid) {
         JsonMessage result = new JsonMessage();
         try {
-            neo4jService.deleteLink(label,shipid);
+            neo4jService.deleteLink(label, shipid);
             result.setCode(200);
         } catch (Exception e) {
             e.printStackTrace();
@@ -195,14 +190,13 @@ public class Neo4jEntityController {
     }
 
     /**
-    * 删除node
-    *
-    * */
+     * 删除node
+     */
     @RequestMapping("/delNode")
-    public JsonMessage delNode(String label,long nodeid){
+    public JsonMessage delNode(String label, long nodeid) {
         JsonMessage result = new JsonMessage();
         try {
-            neo4jService.deletenode(label,nodeid);
+            neo4jService.deletenode(label, nodeid);
             result.setCode(200);
         } catch (Exception e) {
             e.printStackTrace();
@@ -212,12 +206,12 @@ public class Neo4jEntityController {
         return result;
 
     }
+
     /**
-    * 删除label
-    *
-    * */
+     * 删除label
+     */
     @RequestMapping("/delLabel")
-    public JsonMessage delLabel(String label,long labelid){
+    public JsonMessage delLabel(String label, long labelid) {
         //前端显示label的数据来源于mysql
         JsonMessage result = new JsonMessage();
         try {
@@ -232,15 +226,16 @@ public class Neo4jEntityController {
         return result;
 
     }
+
     /**
-    * 批量创建node
-    * */
+     * 批量创建node
+     */
     @RequestMapping("/batchAddNode")
-    public JsonMessage batchAddNode(String label, String sourcename, String relation, String[] targetnames){
+    public JsonMessage batchAddNode(String label, String sourcename, String relation, String[] targetnames) {
         JsonMessage result = new JsonMessage();
         HashMap<String, Object> res = new HashMap<String, Object>();
         try {
-            res =  neo4jService.batchAddNode(label,sourcename,relation,targetnames);
+            res = neo4jService.batchAddNode(label, sourcename, relation, targetnames);
             result.setCode(200);
             result.setData(res);
         } catch (Exception e) {
@@ -250,15 +245,16 @@ public class Neo4jEntityController {
         }
         return result;
     }
+
     /**
-    * 批量创建下级接节点
-    * */
+     * 批量创建下级接节点
+     */
     @RequestMapping("/batchLowNode")
-    public JsonMessage batchLowNode(String label, String sourceid, String[] targetnames, String relation){
+    public JsonMessage batchLowNode(String label, String sourceid, String[] targetnames, String relation) {
         JsonMessage result = new JsonMessage();
         HashMap<String, Object> res = new HashMap<String, Object>();
         try {
-            res =  neo4jService.batchLowNode(label,sourceid,targetnames,relation);
+            res = neo4jService.batchLowNode(label, sourceid, targetnames, relation);
             result.setCode(200);
             result.setData(res);
         } catch (Exception e) {
@@ -268,16 +264,17 @@ public class Neo4jEntityController {
         }
         return result;
     }
+
     /**
-    * 批量创建同级节点
-    * */
+     * 批量创建同级节点
+     */
     @RequestMapping("/batchSameNode")
-    public JsonMessage batchSameNode(String label, Integer entitytype, String[] sourcenames){
+    public JsonMessage batchSameNode(String label, Integer entitytype, String[] sourcenames) {
         JsonMessage result = new JsonMessage();
-       HashMap<String, Object> rss = new HashMap<>();
+        HashMap<String, Object> rss = new HashMap<>();
         try {
-            List<HashMap<String, Object>> res =  neo4jService.batchSameNode(label,entitytype,sourcenames);
-            rss.put("result",res);
+            List<HashMap<String, Object>> res = neo4jService.batchSameNode(label, entitytype, sourcenames);
+            rss.put("result", res);
             result.setData(rss);
             result.setCode(200);
         } catch (Exception e) {
@@ -289,13 +286,12 @@ public class Neo4jEntityController {
     }
 
     /**
-    * CSV文件导入
-    *
-    * */
+     * CSV文件导入
+     */
     @ResponseBody
     @RequestMapping(value = "/importgraph")
     public JsonMessage importgraph(@RequestParam(value = "file", required = true) MultipartFile file,
-                                  HttpServletRequest request, HttpServletResponse response) throws Exception {
+                                   HttpServletRequest request, HttpServletResponse response) throws Exception {
         JsonMessage res = new JsonMessage();
         if (file == null) {
             res.setCode(500);
@@ -321,9 +317,9 @@ public class Neo4jEntityController {
             }
             String savePath = config.getLocation();
             String filename = "tc" + System.currentTimeMillis() + ".csv";
-            CSVUtil.createCsvFile(list, savePath,filename);
-            String serverUrl=request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
-            String csvUrl = "http://"+serverUrl+ "/download/" + filename;
+            CSVUtil.createCsvFile(list, savePath, filename);
+            String serverUrl = request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
+            String csvUrl = "http://" + serverUrl + "/download/" + filename;
             //String csvUrl = "https://neo4j.com/docs/cypher-manual/3.5/csv/artists.csv";
             neo4jService.batchInsertByCSV(label, csvUrl, 0);
             return JsonMessage.success();
@@ -335,9 +331,8 @@ public class Neo4jEntityController {
     }
 
     /**
-    * 导出csv文件
-    *
-    * */
+     * 导出csv文件
+     */
     @RequestMapping(value = "/exportgraph")
     public JsonMessage exportgraph(HttpServletRequest request, HttpServletResponse response) throws Exception {
         JsonMessage res = new JsonMessage();
@@ -360,7 +355,7 @@ public class Neo4jEntityController {
             e.printStackTrace();
         }
         CsvWriter csvWriter = new CsvWriter(fileUrl, ',', Charset.forName("UTF-8"));
-        String[] header = { "source", "target", "relation" };
+        String[] header = {"source", "target", "relation"};
         csvWriter.writeRecord(header);
         for (HashMap<String, Object> hashMap : list) {
             int colSize = hashMap.size();
@@ -375,38 +370,37 @@ public class Neo4jEntityController {
             }
         }
         csvWriter.close();
-        String serverUrl=request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
+        String serverUrl = request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
         String csvUrl = serverUrl + "/kg/download/" + fileName;
         res.setCode(200);
         res.setMessage("success!");
-        res.addData("csvurl",csvUrl);
+        res.addData("csvurl", csvUrl);
         return res;
 
     }
 
 
     /**
-    * 传入一个图，即nodeList和edgeList
-    *
-    * */
-    public void addGraph(List<Map<String,Object>> nodeList,List<Map<String,Object>> edgeList){
+     * 传入一个图，即nodeList和edgeList
+     */
+    public void addGraph(List<Map<String, Object>> nodeList, List<Map<String, Object>> edgeList) {
         //TODO 处理node
-        for(Map map:nodeList){
+        for (Map map : nodeList) {
             String nodeId = (String) map.get("id");
             String label = (String) map.get("label");
             String name = (String) map.get("name");
         }
 
         //TODO 处理edge
-        for(Map map:edgeList){
-            String sourceType= (String) map.get("sourceLabel");
+        for (Map map : edgeList) {
+            String sourceType = (String) map.get("sourceLabel");
             String source = (String) map.get("source");
-            String targetType= (String) map.get("targetLabel");
+            String targetType = (String) map.get("targetLabel");
             String target = (String) map.get("target");
             String type = (String) map.get("type");
-            String relationRight="match (from:"+sourceType+"{name:\"" +source+ "\"}),(to:"+targetType
-                    +"{name:\""+target+"\"})  merge (from)-[r:"+type+"{name:\""+source+
-                    "\",name:\""+target+"\"}]->(to)";
+            String relationRight = "match (from:" + sourceType + "{name:\"" + source + "\"}),(to:" + targetType
+                    + "{name:\"" + target + "\"})  merge (from)-[r:" + type + "{name:\"" + source +
+                    "\",name:\"" + target + "\"}]->(to)";
 
         }
 

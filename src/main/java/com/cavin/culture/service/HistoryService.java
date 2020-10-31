@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
+
 @Service
 public class HistoryService {
     @Resource
@@ -27,11 +28,11 @@ public class HistoryService {
         return historyDao.deleteHistoryById(historyId);
     }
 
-    public List<String> getInputSuggestion(String queryString,String userName) {
+    public List<String> getInputSuggestion(String queryString, String userName) {
         List<String> list = new ArrayList<>();
         List<History> histories = historyDao.getInputSuggestion(userName);
         for (History h : histories) {
-           list.add(h.getHistorySubject());
+            list.add(h.getHistorySubject());
         }
         return list;
     }

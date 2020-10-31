@@ -40,30 +40,33 @@ public class ExcelResolve {
         String filename = file.getOriginalFilename();
         InputStream inputStream = file.getInputStream();
         //根据后缀名是否excel文件
-        if(filename.endsWith("xls")){
+        if (filename.endsWith("xls")) {
             //2003
             workbook = new HSSFWorkbook(inputStream);
-        }else if(filename.endsWith("xlsx")){
+        } else if (filename.endsWith("xlsx")) {
             //2007
             workbook = new XSSFWorkbook(inputStream);
         }
 
         //创建对象，把每一行作为一个String数组，所以数组存到集合中
         ArrayList<String[]> arrayList = new ArrayList<>();
-        if(workbook != null){
+        if (workbook != null) {
             //循环sheet,现在是单sheet
-            for(int sheetNum = 0;sheetNum < workbook.getNumberOfSheets();sheetNum++){
+            for (int sheetNum = 0; sheetNum < workbook.getNumberOfSheets(); sheetNum++) {
+                if(sheetNum==1){
+                    break;
+                }
                 //获取第一个sheet
                 Sheet sheet = workbook.getSheetAt(sheetNum);
-                if(sheet == null){
-                    hashMap.put("文件sheet为空!",arrayList);
+                if (sheet == null) {
+                    hashMap.put("文件sheet为空!", arrayList);
                     return hashMap;
                 }
                 //获取当前sheet开始行和结束行
                 int firstRowNum = sheet.getFirstRowNum();
                 int lastRowNum = sheet.getLastRowNum();
                 //循环开始，除了前两行
-                for(int rowNum = firstRowNum+1;rowNum <= lastRowNum;rowNum++){
+                for (int rowNum = firstRowNum; rowNum <=500; rowNum++) {
                     //获取当前行
                     Row row = sheet.getRow(rowNum);
                     //获取当前行的开始列和结束列
@@ -74,13 +77,13 @@ public class ExcelResolve {
                     int lastCellNum2 = row.getPhysicalNumberOfCells();
                     String[] strings = new String[lastCellNum2];
                     //循环当前行
-                    for(int cellNum = firstCellNum;cellNum < lastCellNum;cellNum++){
+                    for (int cellNum = firstCellNum; cellNum < lastCellNum; cellNum++) {
                         Cell cell = row.getCell(cellNum);
-                        if( cell == null || "".equals(cell) || cell.getCellType()== Cell.CELL_TYPE_BLANK ){
-                            hashMap.put("第"+(rowNum+1)+"行,第"+(cellNum+1)+"列为空",arrayList);
+                        if (cell == null || "".equals(cell) || cell.getCellType() == Cell.CELL_TYPE_BLANK) {
+                            hashMap.put("第" + (rowNum + 1) + "行,第" + (cellNum + 1) + "列为空", arrayList);
                             return hashMap;
                         }
-                        String  cellValue = "";
+                        String cellValue = "";
                         cellValue = getCellValue(cell);
                         strings[cellNum] = cellValue;
                     }
@@ -90,18 +93,18 @@ public class ExcelResolve {
             }
         }
         inputStream.close();
-        hashMap.put("OK",arrayList);
+        hashMap.put("OK", arrayList);
         return hashMap;
     }
 
     //把每一个cell转换为string
-    public static String getCellValue(Cell cell){
+    public static String getCellValue(Cell cell) {
         String cellValue = "";
-        if(cell == null){
+        if (cell == null) {
             return cellValue;
         }
         //把数字转换成string，防止12.0这种情况
-        if(cell.getCellType() == cell.CELL_TYPE_NUMERIC){
+        if (cell.getCellType() == cell.CELL_TYPE_NUMERIC) {
             cell.setCellType(cell.CELL_TYPE_STRING);
         }
         //判断数据的类型
@@ -148,40 +151,40 @@ public class ExcelResolve {
     }
 
     //检查文件类型
-    public static Boolean checkFile(MultipartFile file){
+    public static Boolean checkFile(MultipartFile file) {
         //检查文件是否为空
         boolean empty = file.isEmpty();
-        if(empty || file == null){
-            return  false;
+        if (empty || file == null) {
+            return false;
         }
         //检查文件是否是excel类型文件
         String filename = file.getOriginalFilename();
-        if(!filename.endsWith("xls") && !filename.endsWith("xlsx")){
+        if (!filename.endsWith("xls") && !filename.endsWith("xlsx")) {
             return false;
         }
         return true;
     }
 
     //转换excel导入之后时间变为数字,月时间
-    public static String getCorrectMonth(int i){
-        calendar.set(1900,0,1);
-        calendar.add(calendar.DATE,i);
+    public static String getCorrectMonth(int i) {
+        calendar.set(1900, 0, 1);
+        calendar.add(calendar.DATE, i);
         Date time = calendar.getTime();
         String s = simpleDateFormat.format(time);
         return s;
     }
 
     //转换excel导入之后时间变为数字,年月日时间
-    public static String getCorrectDay(int i){
-        calendar.set(1900,0,-1,0,0,0);
-        calendar.add(calendar.DATE,i);
+    public static String getCorrectDay(int i) {
+        calendar.set(1900, 0, -1, 0, 0, 0);
+        calendar.add(calendar.DATE, i);
         Date time = calendar.getTime();
         String s = simpleDateFormat3.format(time);
         return s;
     }
 
     //获取当前时间的字符串
-    public static String getNowDate(){
+    public static String getNowDate() {
         Date date = new Date();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String format = simpleDateFormat.format(date);
@@ -199,7 +202,7 @@ public class ExcelResolve {
         //是否为空
         boolean empty = update.isEmpty();
         //传输文件到指定路径中
-        String path = "F://LDJS/boco/uploading/"+originalFilename;
+        String path = "F://LDJS/boco/uploading/" + originalFilename;
         update.transferTo(new File(path));
         //文件类型
         String contentType = update.getContentType();
@@ -207,16 +210,16 @@ public class ExcelResolve {
         inputStream.close();
         //是否存在此路径
         boolean path1 = new File(path).exists();
-        if(path1){
+        if (path1) {
             return "OK";
-        }else{
+        } else {
             return "导入文件失败";
         }
 
     }
 
     //显示时间，把数字转换成时间类型的
-    public static String getExcelDate(Cell cell){
+    public static String getExcelDate(Cell cell) {
         Date dateCellValue = cell.getDateCellValue();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         String format = simpleDateFormat.format(dateCellValue);
@@ -224,72 +227,72 @@ public class ExcelResolve {
     }
 
 
-    public static String getDetailDate(String date){
-        int dayNum = (int)Double.parseDouble(date);
+    public static String getDetailDate(String date) {
+        int dayNum = (int) Double.parseDouble(date);
 
-        String s1 = "0."+ date.split("\\.")[1];
-        String hour = Double.parseDouble(s1)*24 +"";
+        String s1 = "0." + date.split("\\.")[1];
+        String hour = Double.parseDouble(s1) * 24 + "";
         int hourNum = Integer.parseInt(hour.split("\\.")[0]);
 
-        String s2 = "0."+ hour.split("\\.")[1];
-        String minte = Double.parseDouble(s2)*60 +"";
+        String s2 = "0." + hour.split("\\.")[1];
+        String minte = Double.parseDouble(s2) * 60 + "";
         int minteNum = Integer.parseInt(minte.split("\\.")[0]);
 
-        String s3 = "0."+ minte.split("\\.")[1];
-        String second = Double.parseDouble(s3)*60 +"";
+        String s3 = "0." + minte.split("\\.")[1];
+        String second = Double.parseDouble(s3) * 60 + "";
         int secondNum = Integer.parseInt(second.split("\\.")[0]);
-        calendar.set(1900,0,-1,0,0,0);
-        calendar.add(calendar.DATE,dayNum);
-        calendar.add(calendar.HOUR,hourNum);
-        calendar.add(calendar.MINUTE,minteNum);
-        calendar.add(calendar.SECOND,secondNum);
+        calendar.set(1900, 0, -1, 0, 0, 0);
+        calendar.add(calendar.DATE, dayNum);
+        calendar.add(calendar.HOUR, hourNum);
+        calendar.add(calendar.MINUTE, minteNum);
+        calendar.add(calendar.SECOND, secondNum);
         Date time = calendar.getTime();
         String s = simpleDateFormat2.format(time);
         return s;
     }
 
     //检查是否是数字
-    public static Boolean checkWhetherNumber(String str){
+    public static Boolean checkWhetherNumber(String str) {
         try {
             BigDecimal bigDecimal = new BigDecimal(str);
-        }catch (Exception e){
+        } catch (Exception e) {
             return false;
         }
         return true;
     }
 
     //检查是不是时间类型
-    public static Boolean checkWhetherDate(String str){
+    public static Boolean checkWhetherDate(String str) {
         try {
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
             // 设置lenient为false. 否则SimpleDateFormat会比较宽松地验证日期，比如2007/02/29会被接受，并转换成2007/03/01
             simpleDateFormat.setLenient(false);
             simpleDateFormat.parse(str);
-        }catch (Exception e){
+        } catch (Exception e) {
             return false;
         }
         return true;
     }
 
     //检查是不是时间类型
-    public static Boolean checkWhetherDate2(String str){
+    public static Boolean checkWhetherDate2(String str) {
         try {
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd");
             simpleDateFormat.setLenient(false);
             simpleDateFormat.parse(str);
-        }catch (Exception e){
+        } catch (Exception e) {
             return false;
         }
         return true;
     }
 
     //检查是不是月的时间类型
-    public static Boolean checkWhetherMonth(String str){
+    public static Boolean checkWhetherMonth(String str) {
         try {
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月");
             simpleDateFormat.setLenient(false);
             simpleDateFormat.parse(str);
-        }catch (Exception e){
+        } catch (Exception e) {
             return false;
         }
         return true;

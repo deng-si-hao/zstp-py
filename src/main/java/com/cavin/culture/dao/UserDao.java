@@ -17,7 +17,7 @@ public interface UserDao {
     Integer insertUser(User user);
 
     //查询所有人员信息
-    List<User> getAll(Map<String,Object> data);
+    List<User> getAll(Map<String, Object> data);
 
     //查询单个人员信息
     User getUserById(Long id);
@@ -30,7 +30,6 @@ public interface UserDao {
 
     //查询用户总数
     Integer getUserCount();
-
 
 
 }

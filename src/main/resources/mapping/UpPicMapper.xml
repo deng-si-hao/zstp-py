@@ -16,9 +16,11 @@
 
     <sql id="dynamicWhere">
         <where>
-            <if test="userId != null">(',' || user_id || ',') LIKE '%${userId}%' </if>
+            <if test="userId != null">(',' || user_id || ',') LIKE '%${userId}%'</if>
             <if test="picName != null and picName != ''">AND pic_name like #{picName}</if>
-            <if test="startTime != null and startTime != ''">AND  DATE_FORMAT(createDate,'%Y-%m-%d') &gt;= DATE_FORMAT(#{startTime},'%Y-%m-%d')</if>
+            <if test="startTime != null and startTime != ''">AND DATE_FORMAT(createDate,'%Y-%m-%d') &gt;=
+                DATE_FORMAT(#{startTime},'%Y-%m-%d')
+            </if>
             <if test="endTime != null and endTime != ''">AND DATE_FORMAT(createDate,'%Y-%m-%d') &lt;=DATE_FORMAT(#{endTime},'%Y-%m-%d')</if>
 
         </where>
@@ -26,11 +28,13 @@
 
     <insert id="addImage" parameterType="com.cavin.culture.model.Image">
         insert into image (pic_id, user_id, pic_name, pic_url,createBy,createDate)
-            values (#{picId,jdbcType=VARCHAR}, #{userId}, #{picName}, #{picUrl},#{createBy},#{createDate})
+        values (#{picId,jdbcType=VARCHAR}, #{userId}, #{picName}, #{picUrl},#{createBy},#{createDate})
     </insert>
 
     <select id="findById" parameterType="java.util.Map" resultMap="image">
-        select <include refid="columns"/> from image
+        select
+        <include refid="columns"/>
+        from image
         <include refid="dynamicWhere"/>
         limit #{currIndex},#{pageSize}
     </select>
@@ -44,4 +48,9 @@
     <update id="updateUserId">
         update image set user_id = replace(user_id,#{userId},'') where pic_id =#{picId}
     </update>
+
+    <insert id="savePhoto" parameterType="com.cavin.culture.model.Image">
+        insert into image(pic_id, user_id, pic_name, photo,createBy,createDate) values
+        (#{picId,jdbcType=VARCHAR}, #{userId}, #{picName}, #{photo},#{createBy},#{createDate})
+    </insert>
 </mapper>

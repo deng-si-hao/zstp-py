@@ -37,14 +37,14 @@ public class JsonMessage {
         this.data = data;
     }
 
-    public static JsonMessage success(){
+    public static JsonMessage success() {
         JsonMessage message = new JsonMessage();
         message.setCode(200);
         message.setMessage("请求成功！");
         return message;
     }
 
-    public static JsonMessage error(Integer code, String errorMsg){
+    public static JsonMessage error(Integer code, String errorMsg) {
         JsonMessage message = new JsonMessage();
         message.setCode(code);
         message.setMessage(errorMsg);

@@ -5,8 +5,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
-* 角色表，用于给用户添加不同的角色
-* */
+ * 角色表，用于给用户添加不同的角色
+ */
 public class SysRole {
     private Integer roleId;
 
@@ -94,7 +94,6 @@ public class SysRole {
     private Set<SysPermission> permissions = new HashSet<>();
 
     private Set<User> users = new HashSet<>();
-
 
 
     public Set<SysPermission> getPermissions() {

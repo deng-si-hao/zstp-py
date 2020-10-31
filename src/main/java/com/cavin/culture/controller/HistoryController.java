@@ -28,7 +28,7 @@ public class HistoryController {
 
     @RequestMapping(value = "/getHistoriesByType", method = RequestMethod.GET)
     @ResponseBody
-    public JsonMessage getHistoriesByType(@RequestParam(value = "type")String type, HttpServletRequest request) {
+    public JsonMessage getHistoriesByType(@RequestParam(value = "type") String type, HttpServletRequest request) {
         String token = null;
         Cookie[] cookies = request.getCookies();
         for (Cookie cookie : cookies) {
@@ -79,10 +79,11 @@ public class HistoryController {
         Integer deleteNum = historyService.deleteHistoryById(id);
         return JsonMessage.success().addData("deleteNum", deleteNum);
     }
+
     //获取输入建议
     @RequestMapping(value = "/getInputSuggestion", method = RequestMethod.GET)
     @ResponseBody
-    public JsonMessage getInputSuggestion(@RequestParam(value = "queryString")String queryString,HttpServletRequest request) {
+    public JsonMessage getInputSuggestion(@RequestParam(value = "queryString") String queryString, HttpServletRequest request) {
         String token = null;
         Cookie[] cookies = request.getCookies();
         for (Cookie cookie : cookies) {
@@ -97,23 +98,24 @@ public class HistoryController {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        List<String> suggestion = historyService.getInputSuggestion(queryString,username);
+        List<String> suggestion = historyService.getInputSuggestion(queryString, username);
         return JsonMessage.success().addData("suggestion", suggestion);
     }
+
     //搜索
     @RequestMapping(value = "/queryForKnowledge", method = RequestMethod.GET)
     @ResponseBody
-    public JsonMessage queryForKnowledge(@RequestParam(value = "individualName")String individualName,
-                                         @RequestParam(value = "scope")String scope) {
+    public JsonMessage queryForKnowledge(@RequestParam(value = "individualName") String individualName,
+                                         @RequestParam(value = "scope") String scope) {
 //        List<Map<String, String>> nodes = ontInstanceService.getResourceObjectWithCate(individualName);
 //        List<Map<String, String>> queryResults = ontInstanceService.queryForKnowledge(individualName, scope);
         //TODO:测试数据11
-        List<Map<String, String>> nodes = new ArrayList<Map<String,String>>();
+        List<Map<String, String>> nodes = new ArrayList<Map<String, String>>();
         Map map = new HashMap();
-        map.put("name",individualName);
-        map.put("category","历史事件");
+        map.put("name", individualName);
+        map.put("category", "历史事件");
         nodes.add(map);
-        List<Map<String, String>> queryResults =  new ArrayList<Map<String,String>>();
+        List<Map<String, String>> queryResults = new ArrayList<Map<String, String>>();
         return JsonMessage.success().addData("nodes", nodes).addData("queryResults", queryResults);
     }
 }

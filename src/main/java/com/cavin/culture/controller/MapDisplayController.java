@@ -24,7 +24,7 @@ import java.util.*;
 
 @RestController
 @RequestMapping(value = "/MapDisplay")
-@CrossOrigin(origins = "*",allowCredentials="true",allowedHeaders = "",methods = {})
+@CrossOrigin(origins = "*", allowCredentials = "true", allowedHeaders = "", methods = {})
 public class MapDisplayController {
 
     @Autowired
@@ -39,24 +39,24 @@ public class MapDisplayController {
 
     //获取全部实体标签
     @RequestMapping(value = "/getLabel")
-    public List<Object> getAllLabel(){
+    public List<Object> getAllLabel() {
         return neo4jUtil.init();
     }
 
     //获取标签下所有实体
     @RequestMapping(value = "/getEntityByLabel")
-    public List<?> getEntityByLabel(String label){
+    public List<?> getEntityByLabel(String label) {
         return neo4jUtil.nodeByLabel(label);
     }
 
     /**
-    * 获取最短路径（java实现）
-    * */
+     * 获取最短路径（java实现）
+     */
     @RequestMapping("/getShortestPath")
-    public Map<String, Object> getShortPath(String node1Name,String node2Name){
+    public Map<String, Object> getShortPath(String node1Name, String node2Name) {
         HashMap<String, Object> retMap = new HashMap<>();
         //cql语句
-        String cql = "match l=shortestPath(({name:'"+node1Name+"'})-[*]-({name:'"+node2Name+"'})) return l";
+        String cql = "match l=shortestPath(({name:'" + node1Name + "'})-[*]-({name:'" + node2Name + "'})) return l";
         //待返回的值，与cql return后的值顺序对应
 //        List<Map<String ,Object>> nodeList = new ArrayList<>();
 //        Set<Map<String ,Object>> edgeList = new HashSet<>();
@@ -69,10 +69,10 @@ public class MapDisplayController {
 
 
     /**
-    * 子图查询（java）
-    * */
+     * 子图查询（java）
+     */
     @RequestMapping("/subGraph")
-    public Map<String, Object> getSubGraph(HttpServletRequest request,String nodeName){
+    public Map<String, Object> getSubGraph(HttpServletRequest request, String nodeName) {
         String level = null;
         String token = null;
         Map<String, Claim> tokenRes = new HashMap<>();
@@ -93,38 +93,37 @@ public class MapDisplayController {
 //        HashMap<String, Object> ress = new HashMap<>();
         Map<String, Object> retMap = new HashMap<>();
         //cql语句
-        String cql = "match l = (n)-[]-(m) where n.name='"+nodeName+"' return l;";
+        String cql = "match l = (n)-[]-(m) where n.name='" + nodeName + "' return l;";
 //        String cql = "match l=(n)-[]-(m)-[]-(j) where n.name='"+nodeName+"' return l;";
         //待返回的值，与cql return后的值顺序对应
-        List<Map<String ,Object>> nodeList = new ArrayList<>();
-        Set<Map<String ,Object>> edgeList = new HashSet<>();
-        neo4jUtil.RunCypher(nodeName,cql,nodeList,edgeList);
+        List<Map<String, Object>> nodeList = new ArrayList<>();
+        Set<Map<String, Object>> edgeList = new HashSet<>();
+        neo4jUtil.RunCypher(nodeName, cql, nodeList, edgeList);
 //        retMap = neo4jUtil.GetGraphNodeAndShip(cql);
-        retMap.put("nodes",nodeList);
-        retMap.put("links",edgeList);
+        retMap.put("nodes", nodeList);
+        retMap.put("links", edgeList);
         return retMap;
     }
 
     /**
-    * 获取节点的所有关系类型
-    *
-    * */
+     * 获取节点的所有关系类型
+     */
     @RequestMapping("/getShipByNode")
-    public List<String> getShipByNode(String nodeName){
+    public List<String> getShipByNode(String nodeName) {
         List<String> resultList = new ArrayList<>();
-        String cql = String.format("match l = (n)-[r]-() where n.name='%s' return r",nodeName);
+        String cql = String.format("match l = (n)-[r]-() where n.name='%s' return r", nodeName);
         resultList = neo4jService.getShipByNode(cql);
         return resultList;
     }
 
 
     /**
-    * neo4j数据库excl导入
-    * @path 文件路径
-    *
-    * */
+     * neo4j数据库excl导入
+     *前端数据接口导入
+     * @path 文件路径
+     */
     @RequestMapping("/insertData")
-    public JsonMessage importNeo4jData(HttpServletRequest request,MultipartFile file){
+    public JsonMessage importNeo4jData(HttpServletRequest request, MultipartFile file) {
 /*        String token = null;
         String level = null;
         Map<String, Claim> tokenRes = new HashMap<>();
@@ -155,10 +154,10 @@ public class MapDisplayController {
         }else {
             return JsonMessage.error(400,"您的权限不足，请联系管理员");
         }*/
-        if(neo4jService.importData(file)){
+        if (neo4jService.importData(file)) {
             return JsonMessage.success();
-        }else {
-            return JsonMessage.error(500,"导入失败");
+        } else {
+            return JsonMessage.error(500, "导入失败");
         }
 
         /*//获取提交文件名称
@@ -264,9 +263,8 @@ public class MapDisplayController {
     }
 
     /**
-    * 导入自选输出表
-    *
-    * */
+     * 导入自选输出表
+     */
     @RequestMapping("/importData")
     public void importData() throws IOException {
         try {
@@ -276,47 +274,47 @@ public class MapDisplayController {
             e.printStackTrace();
         }
     }
+
+
     /**
-    * 按关系扩展下一个实体
-    *
-    * */
+     * 按关系扩展下一个实体
+     */
     @RequestMapping("/extensionNodes")
-    public Map<String,Object> OpenRelation(String node,String edge){
+    public Map<String, Object> OpenRelation(String node, String edge) {
         Map<String, Object> retMap = new HashMap<>();
         //cql语句
-        String cql = "match l = (n)-[r:"+edge+"]-(m) where n.name='"+node+"'  return l;";
+        String cql = "match l = (n)-[r:" + edge + "]-(m) where n.name='" + node + "'  return l;";
         //待返回的值，与cql return后的值顺序对应
-        List<Map<String ,Object>> nodeList = new ArrayList<>();
-        Set<Map<String ,Object>> edgeList = new HashSet<>();
-        neo4jUtil.RunCypher(node,cql,nodeList,edgeList);
-        retMap.put("nodes",nodeList);
-        retMap.put("links",edgeList);
+        List<Map<String, Object>> nodeList = new ArrayList<>();
+        Set<Map<String, Object>> edgeList = new HashSet<>();
+        neo4jUtil.RunCypher(node, cql, nodeList, edgeList);
+        retMap.put("nodes", nodeList);
+        retMap.put("links", edgeList);
         System.out.println(retMap.toString());
         return retMap;
     }
 
     /**
-    * 导出neo4j数据为csv文件
-    *
-    * */
+     * 导出neo4j数据为csv文件
+     */
     @RequestMapping("/exportData")
-    public void exportData(HttpServletRequest request, HttpServletResponse response){
-        String cypher=null;
+    public void exportData(HttpServletRequest request, HttpServletResponse response) {
+        String cypher = null;
         String source = request.getParameter("source");
         String target = request.getParameter("target");
         String filePath = config.getLocation();
         String fileName = JWTMEUtil.getNewId() + ".csv";
         String fileUrl = filePath + File.separator + fileName;
-        if(source!=null && target == null){
+        if (source != null && target == null) {
             cypher = String.format(
                     "MATCH (n) -[r]-(m) where n.name= '%s' return n.name as source,m.name as target,r.name as relation", source);
-        }else if(source != null && target != null){
+        } else if (source != null && target != null) {
             cypher = String.format(
-                    "MATCH (n) -[r]-(m) where n.name= '%s' and m.name='%s' return n.name as source,m.name as target,r.name as relation", source,target);
-        }else {
+                    "MATCH (n) -[r]-(m) where n.name= '%s' and m.name='%s' return n.name as source,m.name as target,r.name as relation", source, target);
+        } else {
             cypher = "MATCH (n) -[r]-(m) return n.name as source,m.name as target,r.name as relation";
         }
-       List<HashMap<String, Object>> list = neo4jService.GetGraphItem(cypher);
+        List<HashMap<String, Object>> list = neo4jService.GetGraphItem(cypher);
         File file = new File(fileUrl);
         try {
             if (!file.exists()) {
@@ -329,7 +327,7 @@ public class MapDisplayController {
             e.printStackTrace();
         }
         CsvWriter csvWriter = new CsvWriter(fileUrl, ',', Charset.forName("UTF-8"));
-        String[] header = { "source", "target", "relation" };
+        String[] header = {"source", "target", "relation"};
         try {
             csvWriter.writeRecord(header);
         } catch (IOException e) {
@@ -348,41 +346,54 @@ public class MapDisplayController {
             }
         }
         csvWriter.close();
-            if (file.exists()) {
-                //response.setContentType("application/force-download");// 设置强制下载不打开
-                response.addHeader("Content-Disposition", "attachment;fileName=" + fileName);// 设置文件名
-                byte[] buffer = new byte[1024];
-                FileInputStream fis = null;
-                BufferedInputStream bis = null;
-                try {
-                    fis = new FileInputStream(file);
-                    bis = new BufferedInputStream(fis);
-                    OutputStream os = response.getOutputStream();
-                    int i = bis.read(buffer);
-                    while (i != -1) {
-                        os.write(buffer, 0, i);
-                        i = bis.read(buffer);
+        if (file.exists()) {
+            //response.setContentType("application/force-download");// 设置强制下载不打开
+            response.addHeader("Content-Disposition", "attachment;fileName=" + fileName);// 设置文件名
+            byte[] buffer = new byte[1024];
+            FileInputStream fis = null;
+            BufferedInputStream bis = null;
+            try {
+                fis = new FileInputStream(file);
+                bis = new BufferedInputStream(fis);
+                OutputStream os = response.getOutputStream();
+                int i = bis.read(buffer);
+                while (i != -1) {
+                    os.write(buffer, 0, i);
+                    i = bis.read(buffer);
+                }
+                System.out.println("success");
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                if (bis != null) {
+                    try {
+                        bis.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
-                    System.out.println("success");
-                } catch (Exception e) {
-                    e.printStackTrace();
-                } finally {
-                    if (bis != null) {
-                        try {
-                            bis.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    if (fis != null) {
-                        try {
-                            fis.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+                }
+                if (fis != null) {
+                    try {
+                        fis.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
                 }
             }
+        }
     }
 
+    @RequestMapping("/importDataByResource")
+    public JsonMessage importDataByResource(){
+            if(neo4jService.importDataByRes()){
+                return JsonMessage.success();
+            }else {
+                return JsonMessage.error(500,"导入出错");
+            }
+    }
+
+    @RequestMapping("/importByYQJ")
+    public void importDataByYQJ(MultipartFile file){
+        neo4jService.importDataByYQJ(file);
+    }
 }

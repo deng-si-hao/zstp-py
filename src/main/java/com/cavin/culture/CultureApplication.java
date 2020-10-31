@@ -11,7 +11,6 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerA
 import org.springframework.boot.web.servlet.ServletComponentScan;
 
 
-
 @SpringBootApplication
 @ServletComponentScan(basePackages = "com.cavin.culture.controller.*")
 @MapperScan({"com.cavin.culture.dao"})

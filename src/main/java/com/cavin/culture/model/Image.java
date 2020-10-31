@@ -15,6 +15,16 @@ public class Image {
 
     String createDate;
 
+    private byte[] photo;
+
+    public byte[] getPhoto() {
+        return photo;
+    }
+
+    public void setPhoto(byte[] photo) {
+        this.photo = photo;
+    }
+
     public String getCreateBy() {
         return createBy;
     }
@@ -66,12 +76,12 @@ public class Image {
     public Image() {
     }
 
-    public Image(String picName,String userId, String picId, String picUrl,String createBy,String createDate) {
-        this.picName=picName;
+    public Image(String picName, String userId, String picId, String picUrl, String createBy, String createDate) {
+        this.picName = picName;
         this.userId = userId;
         this.picId = picId;
         this.picUrl = picUrl;
-        this.createBy=createBy;
-        this.createDate=createDate;
+        this.createBy = createBy;
+        this.createDate = createDate;
     }
 }

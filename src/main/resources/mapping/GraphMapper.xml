@@ -3,8 +3,8 @@
 <mapper namespace="com.cavin.culture.dao.GraphDao">
 
     <insert id="addGraphData" parameterType="map">
-       INSERT INTO graphlabel(label, node_count,link_count, creater,status) VALUES
-       (#{params.label},#{params.nodeCount},#{params.linkCount},#{params.creater},#{params.status})
+        INSERT INTO graphlabel(label, node_count,link_count, creater,status) VALUES
+        (#{params.label},#{params.nodeCount},#{params.linkCount},#{params.creater},#{params.status})
     </insert>
 
     <select id="getLabelByName" parameterType="String" resultType="String">
@@ -15,9 +15,9 @@
         delete from graphlabel where id = #{id}
     </delete>
 
-    <select id="getLabelList" resultType="map" >
+    <select id="getLabelList" resultType="map">
         SELECT * FROM graphlabel
-        <where >
+        <where>
             status=1
             <if test="creater!='' and creater!=null">
                 and creater = #{creater}

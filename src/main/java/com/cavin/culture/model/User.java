@@ -6,7 +6,7 @@ import java.util.Set;
 
 public class User {
 
-    public static final String commander="1";
+    public static final String commander = "1";
 
     private Long id;
     private String userName;
@@ -30,13 +30,13 @@ public class User {
     }
 
     public User(Long id, String userName, String userPassword, String email, String registerDate, String level, String isDel) {
-        this.id=id;
+        this.id = id;
         this.userName = userName;
         this.userPassword = userPassword;
         this.email = email;
         this.registerDate = registerDate;
-        this.level=level;
-        this.isDel=isDel;
+        this.level = level;
+        this.isDel = isDel;
     }
 
     public Long getId() {

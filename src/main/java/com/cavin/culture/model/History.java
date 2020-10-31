@@ -19,7 +19,7 @@ public class History {
     public History() {
     }
 
-    public History(long historyId, String historySubject, String historyPredicate, String historyObject, String historyScope, String historyType, Date createDate,long userId, String userName) {
+    public History(long historyId, String historySubject, String historyPredicate, String historyObject, String historyScope, String historyType, Date createDate, long userId, String userName) {
         this.historyId = historyId;
         this.historySubject = historySubject;
         this.historyPredicate = historyPredicate;

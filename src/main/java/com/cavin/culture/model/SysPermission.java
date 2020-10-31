@@ -3,8 +3,8 @@ package com.cavin.culture.model;
 import java.util.Date;
 
 /**
-* 权限表，用于给用户分配权限
-* */
+ * 权限表，用于给用户分配权限
+ */
 public class SysPermission {
     private Integer permissionId;
 

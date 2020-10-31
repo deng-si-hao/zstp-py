@@ -43,14 +43,18 @@
     </insert>
 
     <select id="getAll" parameterType="java.util.Map" resultMap="user">
-        select <include refid="columns"/> from user
+        select
+        <include refid="columns"/>
+        from user
         <include refid="dynamicWhere"/>
-            limit #{currIndex},#{pageSize}
+        limit #{currIndex},#{pageSize}
 
     </select>
 
     <select id="getUserById" parameterType="java.lang.Long" resultMap="user">
-        select <include refid="columns"/> from user where id=#{id}
+        select
+        <include refid="columns"/>
+        from user where id=#{id}
     </select>
 
     <update id="updateUserById" parameterType="com.cavin.culture.model.User">

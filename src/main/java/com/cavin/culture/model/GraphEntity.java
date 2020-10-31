@@ -9,11 +9,11 @@ public class GraphEntity {
 
     private String[] relation;//对应数据库关系
 
-    private int matchtype ;
+    private int matchtype;
 
-   // private int pageSize = 10;
+    // private int pageSize = 10;
 
-   // private int pageIndex = 1;
+    // private int pageIndex = 1;
 
 
     public int getDomainid() {

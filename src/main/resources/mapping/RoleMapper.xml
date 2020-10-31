@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.cavin.culture.dao.RoleDao">
-    <resultMap id="BaseResultMap" type="com.cavin.culture.model.SysRole" >
-        <id column="role_id" property="roleId" jdbcType="INTEGER" />
-        <result column="role_name" property="roleName" jdbcType="VARCHAR" />
-        <result column="role_type" property="roleType" jdbcType="INTEGER" />
-        <result column="role_status" property="roleStatus" jdbcType="INTEGER" />
-        <result column="role_remark" property="roleRemark" jdbcType="VARCHAR" />
-        <result column="operator" property="operator" jdbcType="VARCHAR" />
-        <result column="operate_time" property="operateTime" jdbcType="TIMESTAMP" />
+    <resultMap id="BaseResultMap" type="com.cavin.culture.model.SysRole">
+        <id column="role_id" property="roleId" jdbcType="INTEGER"/>
+        <result column="role_name" property="roleName" jdbcType="VARCHAR"/>
+        <result column="role_type" property="roleType" jdbcType="INTEGER"/>
+        <result column="role_status" property="roleStatus" jdbcType="INTEGER"/>
+        <result column="role_remark" property="roleRemark" jdbcType="VARCHAR"/>
+        <result column="operator" property="operator" jdbcType="VARCHAR"/>
+        <result column="operate_time" property="operateTime" jdbcType="TIMESTAMP"/>
     </resultMap>
 
     <select id="countByName" parameterType="map" resultType="int">
@@ -20,13 +20,13 @@
         </if>
     </select>
 
-    <insert id="insert" parameterType="com.cavin.culture.model.SysRole" >
-    insert into sys_role (role_id, role_name, role_type,
-      role_status, role_remark, operator,
-      operate_time)
-    values (#{roleId,jdbcType=INTEGER}, #{roleName,jdbcType=VARCHAR}, #{roleType,jdbcType=INTEGER},
-      #{roleStatus,jdbcType=INTEGER}, #{roleRemark,jdbcType=VARCHAR}, #{operator,jdbcType=VARCHAR},
-      #{operateTime,jdbcType=TIMESTAMP})
+    <insert id="insert" parameterType="com.cavin.culture.model.SysRole">
+        insert into sys_role (role_id, role_name, role_type,
+        role_status, role_remark, operator,
+        operate_time)
+        values (#{roleId,jdbcType=INTEGER}, #{roleName,jdbcType=VARCHAR}, #{roleType,jdbcType=INTEGER},
+        #{roleStatus,jdbcType=INTEGER}, #{roleRemark,jdbcType=VARCHAR}, #{operator,jdbcType=VARCHAR},
+        #{operateTime,jdbcType=TIMESTAMP})
     </insert>
 
 </mapper>

@@ -12,16 +12,16 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
-* CSV文件工具类
-* */
+ * CSV文件工具类
+ */
 public class CSVUtil {
     protected static Logger log = LoggerFactory.getLogger(CSVUtil.class);
 
     public static void createCsvFile(List<List<String>> list, String path, String fileName) {
-        String fileNm=path+fileName;
+        String fileNm = path + fileName;
         log.info("CSVUtil->createFile方法开始. " + fileNm);
-        File dir=new File(path);
-        if(!dir.exists())
+        File dir = new File(path);
+        if (!dir.exists())
             dir.mkdirs();
         CsvWriter csvWriter = new CsvWriter(fileNm, ',', Charset.forName("UTF-8"));
         int rowSize = list.size();
@@ -51,7 +51,7 @@ public class CSVUtil {
             List<List<String>> rowList = new ArrayList<List<String>>();
             try {
                 String charset = "utf-8";
-                BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream(),charset));
+                BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream(), charset));
                 String line = null;
                 while ((line = reader.readLine()) != null) {
                     String[] rowArr = line.split(",");//CSV格式文件为逗号分隔符文件，这里根据逗号切分

@@ -12,18 +12,19 @@ import java.util.*;
 public class JWTMEUtil {
 
     //密钥
-    public static final String key="sjznb";
+    public static final String key = "sjznb";
     //过期时间:秒
     public static final int EXPIRE = 1800;
 
     /**
      * 生成Token
+     *
      * @param userId
      * @param userName
      * @return
      * @throws Exception
      */
-    public static String createToken(String level,long userId, String userName) throws Exception {
+    public static String createToken(String level, long userId, String userName) throws Exception {
         Calendar nowTime = Calendar.getInstance();
         nowTime.add(Calendar.SECOND, EXPIRE);
         Date expireDate = nowTime.getTime();
@@ -36,7 +37,7 @@ public class JWTMEUtil {
                 .withHeader(map)//头
                 .withClaim("userId", userId)
                 .withClaim("userName", userName)
-                .withClaim("level",level)
+                .withClaim("level", level)
                 .withSubject("测试")//
                 .withIssuedAt(new Date())//签名时间
                 .withExpiresAt(expireDate)//过期时间
@@ -46,16 +47,17 @@ public class JWTMEUtil {
 
     /**
      * 验证Token
+     *
      * @param token
      * @return
      * @throws Exception
      */
-    public static Map<String, Claim> verifyToken(String token)throws Exception{
+    public static Map<String, Claim> verifyToken(String token) throws Exception {
         JWTVerifier verifier = JWT.require(Algorithm.HMAC256(key)).build();
         DecodedJWT jwt = null;
         try {
             jwt = verifier.verify(token);
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new RuntimeException("凭证已过期，请重新登录");
         }
         return jwt.getClaims();
@@ -63,10 +65,11 @@ public class JWTMEUtil {
 
     /**
      * 解析Token
+     *
      * @param token
      * @return
      */
-    public static Map<String, Claim> parseToken(String token){
+    public static Map<String, Claim> parseToken(String token) {
         DecodedJWT decodedJWT = JWT.decode(token);
         return decodedJWT.getClaims();
     }
@@ -74,7 +77,8 @@ public class JWTMEUtil {
     /**
      * 生成id
      *
-     * @return*/
+     * @return
+     */
     public static long getNewId() {
         //获取UUID
         String uuid = UUID.randomUUID().toString().replaceAll("-", "").toUpperCase();

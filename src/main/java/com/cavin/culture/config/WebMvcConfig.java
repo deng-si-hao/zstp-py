@@ -31,7 +31,7 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
     }
 
     @Bean
-    public MultipartConfigElement multipartConfigElement(){
+    public MultipartConfigElement multipartConfigElement() {
         MultipartConfigFactory factory = new MultipartConfigFactory();
         //文件最大KB,MB
         factory.setMaxFileSize("10MB");
@@ -54,7 +54,7 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
         this.serverurl = serverurl;
     }
 
-        @Override
+    @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/static/image/**").addResourceLocations("classpath:/static/image/");
         //windows本地文件目录

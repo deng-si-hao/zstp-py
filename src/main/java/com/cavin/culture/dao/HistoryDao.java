@@ -10,7 +10,7 @@ import java.util.List;
 @Repository
 public interface HistoryDao {
 
-    List<History> getHistoriesByNameAndType(@Param("userName")String userName, @Param("historyType") String historyType);
+    List<History> getHistoriesByNameAndType(@Param("userName") String userName, @Param("historyType") String historyType);
 
     Integer insertHistory(History history);
 

@@ -22,6 +22,7 @@ public class CorsConfig {
         corsConfiguration.setAllowCredentials(true);
         return corsConfiguration;
     }
+
     @Bean
     public CorsFilter corsFilter() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

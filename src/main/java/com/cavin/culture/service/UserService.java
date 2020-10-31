@@ -18,8 +18,8 @@ public class UserService {
     @Resource
     private UserDao userDao;
 
-    public static final String del="0";
-    public static final String rank="0";
+    public static final String del = "0";
+    public static final String rank = "0";
 
     public User getUserByName(String userName) {
         return userDao.getUserByName(userName);
@@ -36,10 +36,10 @@ public class UserService {
         String sha256Password = SHAUtil.getSHA256(password);
         user.setUserPassword(sha256Password);
         user.setIsDel(del);
-        if(user.getLevel()==null){
+        if (user.getLevel() == null) {
             user.setLevel(rank);
         }
-        if(user.getRegisterDate()==null){
+        if (user.getRegisterDate() == null) {
             user.setRegisterDate((new Date()).toString());
         }
         Integer insertNum = userDao.insertUser(user);
@@ -48,9 +48,9 @@ public class UserService {
     }
 
 
-    public List<User> getAll(Integer currPage,Integer pageSize) {
+    public List<User> getAll(Integer currPage, Integer pageSize) {
         Map<String, Object> data = new HashMap<>();
-        data.put("currIndex", (currPage-1)*pageSize);
+        data.put("currIndex", (currPage - 1) * pageSize);
         data.put("pageSize", pageSize);
         return userDao.getAll(data);
     }
@@ -73,7 +73,7 @@ public class UserService {
         userDao.delUserById(id);
     }
 
-    public int getUserCount(){
+    public int getUserCount() {
         return userDao.getUserCount();
     }
 

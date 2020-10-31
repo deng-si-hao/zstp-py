@@ -16,11 +16,13 @@
         select * from history where user_name=#{userName} and history_type=#{historyType} order by history_id desc
     </select>
     <insert id="insertHistory" parameterType="com.cavin.culture.model.History">
-        insert into history (history_subject, history_predicate, history_object, history_scope, history_type, create_date, user_name,user_id)
-            values (#{historySubject,jdbcType=VARCHAR}, #{historyPredicate}, #{historyObject}, #{historyScope}, #{historyType}, #{createDate}, #{userName}, #{userId})
+        insert into history (history_subject, history_predicate, history_object, history_scope, history_type,
+        create_date, user_name,user_id)
+        values (#{historySubject,jdbcType=VARCHAR}, #{historyPredicate}, #{historyObject}, #{historyScope},
+        #{historyType}, #{createDate}, #{userName}, #{userId})
     </insert>
     <delete id="deleteHistoryById" parameterType="java.lang.Long">
-       delete from history where history_id=#{historyId}
+        delete from history where history_id=#{historyId}
     </delete>
     <select id="getInputSuggestion" resultMap="history">
         select * from history where user_name=#{userName} order by history_id desc
